@@ -1,9 +1,7 @@
 {
-  "name": "coreui-vue",
-  "version": "1.0.0-alpha.6",
-  "description": "Open Source Admin Template",
-  "author": "Łukasz Holeczek <lukasz@holeczek.pl>",
-  "private": true,
+  "name": "vproject-vue",
+  "version": "0.0.1",
+  "description": "V project by Vue",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
