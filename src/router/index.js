@@ -14,7 +14,9 @@ Vue.use(Router)
 export default new Router({
   mode: 'hash', // Demo is living in GitHub.io, so required!
   linkActiveClass: 'open active',
-  scrollBehavior: () => ({ y: 0 }),
+  scrollBehavior: function(){
+    return { y: 0 }
+  },
   routes: [
     {
       path: '/',

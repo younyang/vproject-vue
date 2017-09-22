@@ -1,7 +1,9 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
+'use strict'
+
+const path = require('path')
+const utils = require('./utils')
+const config = require('../config')
+const vueLoaderConfig = require('./vue-loader.conf')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -9,7 +11,12 @@ function resolve (dir) {
 
 module.exports = {
   entry: {
-    app: './src/main.js'
+    app: ['./src/main.js'],
+    vendor: [
+      'babel-polyfill',
+      'vue',
+      'vue-router'
+    ]
   },
   output: {
     path: config.build.assetsRoot,
@@ -46,7 +53,8 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test')]
+        include: [resolve('src'), resolve('test')],
+        exclude: /node_modules/
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -71,5 +79,8 @@ module.exports = {
         }
       }
     ]
+  },
+  performance: {
+    hints: false
   }
 }

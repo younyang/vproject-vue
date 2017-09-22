@@ -1,9 +1,9 @@
 {
-  "env": {
-    "node": true,
-    "mocha": true,
-    "development": {
-      "presets": ["stage-2"]
-    }
-  }
+  "presets": [
+    ["env", { "modules": false }],
+    "stage-2"
+  ],
+  "plugins": [
+    "transform-export-extensions"
+  ]
 }
