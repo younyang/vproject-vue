@@ -1,0 +1,21 @@
+/**
+ * V Project UI
+ * @from core UI customizing
+ */
+// Override Boostrap variables
+@import "bootstrap-variables";
+
+// Import Bootstrap source files
+@import "bootstrap/bootstrap";
+
+// Import vendors styles
+@import "vendors/vendors";
+
+// Override core variables
+@import "core-variables";
+
+// Import core styles
+@import "core/core";
+
+// Custom styles
+@import "custom";

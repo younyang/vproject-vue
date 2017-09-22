@@ -1,0 +1,90 @@
+// V Project Custom Style
+
+/**
+ * Header
+ */
+.app-header.navbar {
+  .navbar-brand {
+    text-align: center;
+    background-image: none;
+    line-height: 2.4rem
+  }
+}
+
+
+/**
+ * Table
+ */
+@each $color, $value in $theme-colors {
+  @include text-emphasis-variant('.table-text-#{$color}', $value);
+}
+
+
+
+/*
+.table {
+  tfoot th {
+    border-top: (2 * $table-border-width) solid $table-border-color;
+    border-bottom: (1 * $table-border-width) solid $table-border-color;
+  }
+}
+*/
+
+
+/**
+ * Card
+ */
+.card-title {
+  margin-bottom: 0;
+  line-height: 2rem;
+}
+.card {
+  .btn-sm,
+  .btn-outline-secondary,
+  .btn-group-sm > .btn {
+    margin-bottom: -1em;
+
+    &:focus,
+    &.focus {
+      box-shadow: none;
+    }
+    &:active,
+    &.active {
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.card-block {
+  .table {
+    margin-bottom: 0;
+    th, td {
+      padding: 0.5em;
+      font-size: .8rem;
+    }
+  }
+}
+
+
+/**
+ * Modal
+ */
+.modal-dialog {
+  margin: 80px auto;
+}
+
+
+/**
+ * Board
+ */
+section.board {
+  background: #fff;
+  border: 1px solid $card-border-color;
+
+  .table {
+    margin: 0;
+    border-top: 0;
+  }
+}
+
+
