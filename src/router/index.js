@@ -7,12 +7,13 @@ import Full from '@/containers/Full'
 // Views
 import Dashboard from '@/views/Dashboard'
 import Workflow from '@/views/Workflow'
+import Process from '@/views/Process'
 import Routepath from '@/views/Routepath'
 
 Vue.use(Router)
 
 export default new Router({
-  mode: 'hash', // Demo is living in GitHub.io, so required!
+  mode: 'history', // Demo is living in GitHub.io, so required!
   linkActiveClass: 'open active',
   scrollBehavior: function(){
     return { y: 0 }
@@ -33,6 +34,11 @@ export default new Router({
           path: 'workflow',
           name: 'Workflow',
           component: Workflow
+        },
+        {
+          path: 'process',
+          name: 'Process',
+          component: Process
         },
         {
           path: 'routepath',

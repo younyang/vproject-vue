@@ -15,6 +15,11 @@ export default {
       icon: 'icon-shuffle'
     },
     {
+      name: 'Process(drag&drop)',
+      url: '/process',
+      icon: 'icon-chart'
+    },
+    {
       name: 'Route path',
       url: '/routepath',
       icon: 'icon-share'

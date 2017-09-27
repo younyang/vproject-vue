@@ -1,6 +1,7 @@
 <template>
   <b-table
     striped
+    responsive
     show-empty
     foot-clone
     :fields="fields"

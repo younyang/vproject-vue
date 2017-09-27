@@ -92,7 +92,7 @@
             </div><!--/.col-->
           </div><!--/.row-->
 
-          <b-card no-body class="border-0">
+          <div class="chart-wrapper-edge">
             <b-btn block v-b-toggle.accordion1 variant="outline-primary">Accordion 1</b-btn>
             <b-collapse id="accordion1" visible accordion="my-accordion">
               <div class="d-flex justify-content-around">
@@ -121,7 +121,7 @@
                 Carousel 333
               </p>
             </b-collapse>
-          </b-card>
+          </div>
 
           <div slot="footer">
             <b-button variant="danger" @click="myModal = true">Modal Test</b-button>
@@ -198,5 +198,8 @@ export default {
   font-weight:100;
   font-size: 1.25rem;
   color: inherit;
+}
+.chart-wrapper-edge {
+  margin-top: 1.25rem;
 }
 </style>

@@ -3,6 +3,17 @@
 </template>
 
 <script>
+import Firebase from 'firebase'
+let config = {
+  apiKey: "AIzaSyCL_mPYtC6MW3mwFPtALFZBWBibmMdcHys",
+  authDomain: "vproject-a9e6b.firebaseapp.com",
+  databaseURL: "https://vproject-a9e6b.firebaseio.com",
+  projectId: "vproject-a9e6b",
+  storageBucket: "vproject-a9e6b.appspot.com",
+  messagingSenderId: "375457692548"
+}
+Firebase.initializeApp(config);
+
 export default {
   name: 'app'
 }
