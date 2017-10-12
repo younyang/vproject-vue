@@ -81,9 +81,11 @@ export default {
       const mymap = L.map('map', this.options)
       mymap.setView([36, 127.5], 6.75)
 
+      /*
       L.tileLayer(this.url, {
         attribution: this.attribution
       }).addTo(mymap)
+      */
 
       const geoLayer = L.geoJSON(null, {
         style: this.style,
@@ -118,10 +120,6 @@ export default {
     setMapSeoul (){
       const seoul = L.map('seoul', this.options)
       seoul.setView([37.55, 126.98], 10.75)
-
-      L.tileLayer(this.url, {
-        attribution: this.attribution
-      }).addTo(seoul)
 
       const geoSeoul = L.geoJSON(null, {
         style: this.style,
