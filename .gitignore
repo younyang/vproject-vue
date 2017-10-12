@@ -4,3 +4,7 @@ dist
 npm-debug.log
 db
 .idea/
+.firebaserc
+firebase.json
+shp
+

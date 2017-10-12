@@ -8,6 +8,7 @@ import Full from '@/containers/Full'
 import Dashboard from '@/views/Dashboard'
 import Workflow from '@/views/Workflow'
 import Process from '@/views/Process'
+import Map from '@/views/Map'
 import Routepath from '@/views/Routepath'
 
 Vue.use(Router)
@@ -39,6 +40,11 @@ export default new Router({
           path: 'process',
           name: 'Process',
           component: Process
+        },
+        {
+          path: 'map',
+          name: 'Map',
+          component: Map
         },
         {
           path: 'routepath',
