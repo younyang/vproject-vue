@@ -3,16 +3,45 @@ export default {
     {
       name: 'Dashboard',
       url: '/dashboard',
-      icon: 'icon-speedometer',
-      badge: {
-        variant: 'primary',
-        text: 'NEW'
-      }
+      icon: 'icon-grid'
     },
     {
-      name: 'Workflow',
-      url: '/workflow',
-      icon: 'icon-shuffle'
+      name: 'Service',
+      url: '/service',
+      icon: 'icon-support',
+      children: [
+        {
+          name: 'Service 관리',
+          url: '/service/service'
+        },
+        {
+          name: 'Bucket 관리',
+          url: '/service/bucket'
+        },
+        {
+          name: 'Account 관리',
+          url: '/service/account'
+        }
+      ]
+    },
+    {
+      name: 'Configuration',
+      url: '/configuration',
+      icon: 'icon-puzzle',
+      children: [
+        {
+          name: 'Edge 관리',
+          url: '/configuration/edge'
+        },
+        {
+          name: 'Referrer 관리',
+          url: '/configuration/referrer'
+        },
+        {
+          name: 'Pop 관리',
+          url: '/configuration/pop'
+        }
+      ]
     },
     {
       title: true,
@@ -34,9 +63,9 @@ export default {
       icon: 'icon-map'
     },
     {
-      name: 'Route path',
-      url: '/routepath',
-      icon: 'icon-share'
+      name: 'Grid UI',
+      url: '/gridUI',
+      icon: 'icon-grid'
     }
   ]
 }
