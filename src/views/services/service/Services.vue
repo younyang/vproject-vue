@@ -6,15 +6,20 @@
           class="col-sm-5"
           label="검색어"
           :label-cols="5"
+          :searchable="false"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
-            :options="['All','Option 1', 'Option 2', 'Option 3']"
-            value="All">
-          </b-form-select>
+          <multiselect
+            v-model="searchData.searchCategory"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="['Service Name', 'Account']"
+            placeholder=""
+          ></multiselect>
+
         </b-form-fieldset>
         <b-form-fieldset class="col-sm-7 inline-field">
-          <b-form-input type="text" placeholder="Enter Search text"></b-form-input>
+          <b-form-input type="text" v-model="searchData.searchText" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
       </div>
 
@@ -24,11 +29,15 @@
           label="Service Type"
           :label-cols="5"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
-            :options="['All','Option 1', 'Option 2', 'Option 3']"
-            value="All">
-          </b-form-select>
+          <multiselect
+            v-model="serviceType"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.serviceType"
+            :loading="isLoad.serviceType"
+            label="codeName"
+            placeholder="전체"
+          ></multiselect>
         </b-form-fieldset>
 
         <b-form-fieldset
@@ -36,11 +45,13 @@
           label="CNAME"
           :label-cols="5"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
-            :options="['전체','Option 1', 'Option 2', 'Option 3']"
-            value="Please select">
-          </b-form-select>
+          <multiselect
+            v-model="searchData.cnameUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
         </b-form-fieldset>
       </div>
 
@@ -50,11 +61,13 @@
           label="SSL 인증서"
           :label-cols="5"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
-            :options="['All','Option 1', 'Option 2', 'Option 3']"
-            value="All">
-          </b-form-select>
+          <multiselect
+            v-model="searchData.sslCertUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
         </b-form-fieldset>
 
         <b-form-fieldset
@@ -62,11 +75,13 @@
           label="사용여부"
           :label-cols="5"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
-            :options="['전체','Option 1', 'Option 2', 'Option 3']"
-            value="Please select">
-          </b-form-select>
+          <multiselect
+            v-model="searchData.serviceUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
         </b-form-fieldset>
       </div>
 
@@ -76,11 +91,14 @@
           label="기간"
           :label-cols="5"
           :horizontal="true">
-          <b-form-select
-            :plain="true"
+          <multiselect
+            v-model="searchData.dateCategory"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
             :options="['등록일','수정일']"
-            value="All">
-          </b-form-select>
+            placeholder="전체"
+          ></multiselect>
         </b-form-fieldset>
         <b-form-fieldset class="col-sm-7 form-inline inline-field date-field">
           <b-form-input type="date"></b-form-input> ~
@@ -95,7 +113,7 @@
 
       </div>
       <div slot="footer">
-        <b-button type="submit" size="sm" variant="primary" @click="test"><i class="fa fa-search"></i> Search</b-button>
+        <b-button type="submit" size="sm" variant="primary"><i class="fa fa-search"></i> Search</b-button>
         <b-button type="reset" size="sm" variant="danger"><i class="fa fa-ban"></i> Reset</b-button>
       </div>
     </b-card>
@@ -124,13 +142,15 @@
             :fields="fields"
             @row-clicked="details"
           >
-            <template slot="type" scope="row">{{row.value.join(',')}}</template>
-            <template slot="cname" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="ssl" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="isActive" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <!--template slot="actions" scope="row">
-              <b-btn size="sm" @click.stop="details(row.item,row.index,$event.target)">Details</b-btn>
-            </template-->
+            <template slot="id" scope="row">{{ row.value.slice(0,3) }}...</template>
+            <template slot="serviceTypeCode" scope="row">
+              <span class="badge badge-pill badge-primary" v-for="val in row.value">
+                {{ getTypeCodeName(val) }}
+              </span>
+            </template>
+            <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+            <template slot="sslCertUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+            <template slot="serviceUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
           </b-table>
         </section>
 
@@ -152,17 +172,6 @@
 </template>
 
 <script>
-  /**
-   *
-   * @type {[*]}
-   */
-  const items = [
-    { id: 12345, name: 'btv', type: ['VOD','FILE','IMG'], account:'skb', cname: true, ssl: true, createdate: '2017-10-21 12:33:21', modifydate: '2017-10-25 12:33:21', isActive: true },
-    { id: 12344, name: 'oksusu', type: ['VOD','FILE'], account:'skb', cname: true, ssl: true, createdate: '2017-10-14 12:33:21', modifydate: '2017-10-15 12:33:21', isActive: true },
-    { id: 12343, name: 'test2', type: ['IMG'], account:'skt', cname: false, ssl: false, createdate: '2017-10-12 12:33:21', modifydate: '2017-10-13 12:33:21', isActive: false },
-    { id: 12342, name: 'test1', type: ['VOD'], account:'skt', cname: false, ssl: false, createdate: '2017-10-11 12:33:21', modifydate: '2017-10-12 12:33:21', isActive: true }
-  ]
-
   import db from '@/firebaseInit'
 
   export default {
@@ -174,27 +183,66 @@
       return {
         fields: {
           id: {label: 'ID'},
-          name: {label: 'Service Name', 'class': 'text-left'},
-          type: {label: 'Service Type'},
-          account: {label: 'Account'},
-          cname: {label: 'CNAME'},
-          ssl: {label: 'SSL 인증서'},
-          createdate: {label: '등록일'},
-          modifydate: {label: '수정일'},
-          isActive: {label: '사용여부'}
+          serviceName: {label: 'Service Name', 'class': 'text-left'},
+          serviceTypeCode: {label: 'Service Type'},
+          accountId: {label: 'Account'},
+          cnameUseYn: {label: 'CNAME'},
+          sslCertUseYn: {label: 'SSL 인증서'},
+          createDateTime: {label: '등록일'},
+          modifyDateTime: {label: '수정일'},
+          serviceUseYn: {label: '사용여부'}
         },
-        items: items,
+        items: [],
         currentPage: 1,
         perPage: 10,
-        totalRows: items.length,
+        totalRows: 0,
         pageOptions: [{text: 10, value: 10}, {text: 15, value: 15}, {text: 30, value: 30}],
-        modalDetails: {index: '', data: ''}
+
+        searchData: {
+          searchCategory: 'Service Name',
+          searchText: null,
+          serviceType: null,
+          cnameUseYn: null,
+          sslCertUseYn: null,
+          createDateTime: null,
+          modifyDateTime: null,
+          dateCategory: '등록일'
+        },
+        code: {
+          serviceType: []
+        },
+        isLoad: {
+          serviceType: false
+        }
       }
     },
 
+    computed: {
+      serviceType: {
+        get () {
+          return this.searchData.serviceTypeCode !== null
+            ? this.code.serviceType.find(obj => obj.code === this.searchData.serviceTypeCode)
+            : null;
+        },
+        set (newValue) {
+          this.searchData.serviceTypeCode = newValue !== null
+            ? newValue.code
+            : null;
+        }
+      },
+    },
+
     created (){
-      this.$https.get('/service')
-        .then((res) => { console.log(res)})
+      this.$https.get('/services')
+        .then((res) => {
+          this.items = res.data;
+          this.totalRows = res.data.length;
+        });
+      this.$https.get('/system/commonCode/serviceType')
+        .then((res) => {
+          this.isLoad.serviceType = false;
+          this.code.serviceType = res.data;
+        });
     },
 
     methods: {
@@ -202,18 +250,9 @@
           this.$router.push({ name: 'Service 상세', params: { id: item.id }})
       },
 
-      test (){
-        const ref = db.collection("services");
-        ref.add({
-            serviceName: 'btv'
-          })
-          .then(function(docRef) {
-            console.log('New data was given id: ', docRef.id);
-          })
-          .catch(function(error) {
-            console.error('Error adding data ', error);
-          });
-
+      getTypeCodeName (val){
+        let codeObj = this.code.serviceType.find(obj => obj.code === val);
+        return codeObj ?  codeObj.codeValChar1 : val
       }
     }
   }

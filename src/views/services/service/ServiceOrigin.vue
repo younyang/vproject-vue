@@ -1,8 +1,9 @@
 <template>
   <div class="animated fadeIn">
-    <div class="page-title">
-      <h2>기본정보</h2>
-    </div>
+    <content-header
+      :title="item.serviceName"
+      :name="name">
+    </content-header>
 
     <b-card>
       <b-form-fieldset
@@ -39,7 +40,7 @@
           <b-form-input type="text" placeholder="Service Name"></b-form-input>
           <!-- Attach Right button -->
           <b-input-group-button slot="right" class="ml-2">
-            <b-button>중복확인</b-button>
+            <b-button variant="outline-secondary">중복확인</b-button>
           </b-input-group-button>
         </b-input-group>
       </b-form-fieldset>
@@ -147,15 +148,21 @@
 </template>
 
 <script>
+  import ContentHeader from '@/components/ContentHeader'
   import cSwitch from '@/components/Switch'
   export default {
     name: 'services',
     components: {
+      ContentHeader,
       cSwitch
     },
 
     data (){
       return {
+        name: 'Service 상세',
+        item: {
+          serviceName: 'btv'
+        },
         isCreate: false,
         serviceId: '',
         domainFields: ['Type', 'Domain', 'Hashing type' ]
@@ -173,7 +180,9 @@
       },
 
       editable (editable){
+        this.$router.push({ query: { mode: 'edit' }})
         this.isCreate = editable;
+        console.log(this.$route)
       },
 
       goList (){

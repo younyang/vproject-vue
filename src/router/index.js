@@ -6,7 +6,17 @@ import Full from '@/containers/Full'
 
 // Views
 import Dashboard from '@/views/Dashboard'
-import { Services, ServicesDetail, Bucket, Account } from '@/views/services/'
+import {
+  Services,
+  ServiceCreate,
+  ServiceDetail,
+  ServiceOrigin,
+  ServicePop,
+  ServiceIp,
+  Bucket,
+  Account
+} from '@/views/services/'
+
 import { Edge, Referrer, Pop } from '@/views/configuration/'
 import Process from '@/views/Process'
 import Map from '@/views/Map'
@@ -40,15 +50,45 @@ export default new Router({
             render (c) { return c('router-view') }
           },
           children: [
-            {
-              path: 'service',
+            { path: 'service',
               name: 'Service 관리',
               component: Services
             },
             {
+              path: 'service/create',
+              name: 'Service 등록',
+              component: ServiceCreate
+            },
+            {
               path: 'service/:id',
-              name: 'Service 관리',
-              component: ServicesDetail
+              redirect: '/service/service/:id/default',
+              name: 'Service 상세',
+              hasContentmenu: true,
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                { path: 'default',
+                  name: '기본정보',
+                  props: true,
+                  component: ServiceDetail
+                },
+                { path: 'origin',
+                  name: 'Origin',
+                  props: true,
+                  component: ServiceOrigin
+                },
+                { path: 'pop',
+                  name: 'Pop',
+                  props: true,
+                  component: ServicePop
+                },
+                { path: 'ip',
+                  name: 'IP Restriction',
+                  props: true,
+                  component: ServiceIp
+                }
+              ]
             },
             {
               path: 'bucket',

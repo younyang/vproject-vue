@@ -7,4 +7,5 @@ db
 .firebaserc
 firebase.json
 shp
-
+package-lock.json
+functions
