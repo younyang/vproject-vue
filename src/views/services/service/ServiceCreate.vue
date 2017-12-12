@@ -1,142 +1,148 @@
 <template>
   <div class="animated fadeIn">
-    <b-card>
-      <!-- Account -->
-      <b-form-fieldset
-        label="Account"
-        :label-cols="3"
-        :horizontal="true">
-        <multiselect
-          v-model="accountId"
-          :options="code.account"
-          :showLabels="false"
-          :custom-label="getSelectLabel"
-          :loading="isLoad.account"
-          placeholder="Select account"
-        ></multiselect>
-      </b-form-fieldset>
+    <b-form>
+      <b-card>
+        <!-- Account -->
+        <b-form-fieldset
+          label="Account"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            v-model="accountId"
+            :options="code.account"
+            :showLabels="false"
+            :custom-label="getSelectLabel"
+            :loading="isLoad.account"
+            placeholder="Select account"
+          ></multiselect>
+        </b-form-fieldset>
 
-      <!-- Service Name -->
-      <b-form-fieldset
-        label="Service Name"
-        description="Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
-        :label-cols="3"
-        :horizontal="true">
-        <b-input-group>
-          <b-form-input
-            v-model="item.serviceName"
-            type="text"
-            placeholder="Enter service name">
-          </b-form-input>
-          <b-input-group-button slot="right" class="ml-2">
-            <b-button variant="outline-secondary">중복확인</b-button>
-          </b-input-group-button>
-        </b-input-group>
-      </b-form-fieldset>
+        <!-- Service Name -->
+        <b-form-fieldset
+          label="Service Name"
+          description="Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
+          :label-cols="3"
+          :horizontal="true">
+          <b-input-group>
+            <b-form-input
+              v-model="item.serviceName"
+              type="text"
+              placeholder="Enter service name">
+            </b-form-input>
+            <b-input-group-button slot="right" class="ml-2">
+              <b-button variant="outline-secondary">중복확인</b-button>
+            </b-input-group-button>
+          </b-input-group>
+        </b-form-fieldset>
 
-      <!-- Service Type -->
-      <b-form-fieldset
-        label="Service Type"
-        :label-cols="3"
-        :horizontal="true">
+        <!-- Service Type -->
+        <b-form-fieldset
+          label="Service Type"
+          :label-cols="3"
+          :horizontal="true">
 
-        <multiselect
-          v-model="serviceTypeCode"
-          :multiple="true"
-          :showLabels="false"
-          :options="code.serviceType"
-          :custom-label="getSelectLabel"
-          :loading="isLoad.serviceType"
-          placeholder="Select service type"
-        ></multiselect>
-      </b-form-fieldset>
+          <multiselect
+            v-model="serviceTypeCode"
+            :multiple="true"
+            :showLabels="false"
+            :options="code.serviceType"
+            :custom-label="getSelectLabel"
+            :loading="isLoad.serviceType"
+            track-by="code"
+            @select="onSelectType"
+            @remove="onRemoveType"
+            placeholder="Select service type"
+          ></multiselect>
+        </b-form-fieldset>
 
-      <!-- Domain -->
-      <b-form-fieldset
-        label="Domain"
-        :label-cols="3"
-        :horizontal="true">
-        <ul class="icons-list">
-          <li v-for="(domain, index) in item.serviceDomainList">
-            <i class="bg-primary">{{ getCodeVal(domain.serviceTypeCode) }}</i>
-            <div class="desc">
-              <small>Domain</small>
-              <div class="title">
-                <multiselect
-                  label="domainProtocolCode"
-                  v-model="domain.domainProtocolCode"
-                  class="inline sm protocol"
-                  :showLabels="false"
-                  :options="code.domainProtocol"
-                  :custom-label="getSelectLabel"
-                  :loading="isLoad.domainProtocol"
-                  placeholder="://"
-                ></multiselect>
-                {{ getCodeVal(domain.serviceTypeCode) | lowercase }}.{{ item.serviceName }}.vessels.com
+        <!-- Domain -->
+        <b-form-fieldset
+          label="Domain"
+          :label-cols="3"
+          :horizontal="true">
+          <ul class="icons-list">
+            <li v-for="(domain, index) in serviceDomainList">
+              <i class="bg-primary" v-b-tooltip.hover :title="domain.serviceCodeName">{{ domain.serviceCodeVal }}</i>
+              <div class="desc">
+                <small>Domain</small>
+                <div class="title">
+                  <multiselect
+                    label="domainProtocolCode"
+                    v-model="domain.domainProtocolCode"
+                    class="inline sm protocol"
+                    :showLabels="false"
+                    :allow-empty="true"
+                    :options="code.domainProtocol"
+                    :custom-label="getSelectLabel"
+                    :loading="isLoad.domainProtocol"
+                    placeholder="://"
+                  ></multiselect>
+                  {{ domain.serviceCodeVal | lowercase }}.{{ item.serviceName }}.vessels.com
+                </div>
               </div>
-            </div>
-            <div class="value">
-              <div class="small text-muted">Hashing Type</div>
-              <multiselect
-                v-model="domain.domainHashingTypeCode"
-                class="inline sm"
-                style="width: 120px"
-                :showLabels="false"
-                :options="code.domainHashing"
-                :custom-label="getSelectLabel"
-                :loading="isLoad.domainHashing"
-                placeholder="Select"
-              ></multiselect>
-            </div>
-          </li>
-        </ul>
+              <div class="value">
+                <div class="small text-muted">Hashing Type</div>
+                <multiselect
+                  v-model="domain.domainHashingTypeCode"
+                  class="inline sm"
+                  style="width: 120px"
+                  :showLabels="false"
+                  :allow-empty="true"
+                  :options="code.domainHashing"
+                  :custom-label="getSelectLabel"
+                  :loading="isLoad.domainHashing"
+                  placeholder="Select"
+                ></multiselect>
+              </div>
+            </li>
+          </ul>
+        </b-form-fieldset>
 
-      </b-form-fieldset>
+        <!-- CNAME -->
+        <b-form-fieldset
+          label="CNAME 사용여부"
+          :label-cols="3"
+          :horizontal="true">
+          <c-switch
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            v-model="item.cnameUseYn"
+            :pill="true" />
+        </b-form-fieldset>
 
-      <!-- CNAME -->
-      <b-form-fieldset
-        label="CNAME 사용여부"
-        :label-cols="3"
-        :horizontal="true">
-        <c-switch
-          type="icon"
-          variant="primary"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
-          :pill="true"
-          :checked="item.cnameUseYn"/>
-      </b-form-fieldset>
+        <!-- SSL 인증서 -->
+        <b-form-fieldset
+          label="SSL 인증서"
+          :label-cols="3"
+          :horizontal="true">
+          <c-switch
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            v-model="item.sslCertUseYn"
+            :pill="true" />
+        </b-form-fieldset>
 
-      <!-- SSL 인증서 -->
-      <b-form-fieldset
-        label="SSL 인증서"
-        :label-cols="3"
-        :horizontal="true">
-        <c-switch
-          type="icon"
-          variant="primary"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
-          :pill="true"
-          :checked="item.sslCertUseYn"/>
-      </b-form-fieldset>
+        <!-- 사용여부 -->
+        <b-form-fieldset
+          label="사용여부"
+          :label-cols="3"
+          :horizontal="true">
+          <c-switch
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            v-model="item.serviceUseYn"
+            :pill="true" />
+        </b-form-fieldset>
 
-      <!-- 사용여부 -->
-      <b-form-fieldset
-        label="사용여부"
-        :label-cols="3"
-        :horizontal="true">
-        <c-switch
-          type="icon"
-          variant="primary"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
-          :pill="true"
-          :checked="item.serviceUseYn"/>
-      </b-form-fieldset>
-
-      <div slot="footer" class="form-btn">
-        <b-button type="submit" size="sm" variant="primary" @click="save"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="reset" size="sm" variant="danger" :to="{ name: 'Service 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
-      </div>
-    </b-card>
+        <div slot="footer" class="form-btn">
+          <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
+        </div>
+      </b-card>
+    </b-form>
   </div>
 </template>
 
@@ -171,17 +177,20 @@
           this.item.serviceTypeCode = newValue.length > 0
             ? newValue.map(obj => obj.code)
             : [];
-          this.item.serviceDomainList = newValue.length > 0
-            ? newValue.map(({ code }) => {
-                const findObj = this.item.serviceDomainList.find(obj => obj.serviceTypeCode === code);
-                return findObj !== undefined ? findObj : {
-                  serviceTypeCode: code,
-                  domainProtocolCode: null,
-                  domainHashingTypeCode: null
-                }
-              })
-            : [];
         }
+      },
+      serviceDomainList (){
+        return this.item.serviceDomainList.length > 0
+          ? this.item.serviceDomainList.map(obj => {
+            const serviceCode = this.getCodeObj(obj.serviceTypeCode);
+            return Object.assign({}, obj, {
+              domainProtocolCode: this.code.domainProtocol.find(({code}) => code === obj.domainProtocolCode),
+              domainHashingTypeCode: this.code.domainHashing.find(({code}) => code === obj.domainHashingTypeCode),
+              serviceCodeVal: serviceCode.codeValChar1,
+              serviceCodeName: serviceCode.codeName
+            })
+          })
+          : [];
       }
     },
 
@@ -193,11 +202,11 @@
           serviceTypeCode: [],
           serviceDomainList: [],
           cnameUseYn: false,
-          cnameDomainName: null,
+          cnameDomainName: '',
           sslCertUseYn: false,
-          sslCert: "",
-          sslCertKey: "",
-          sslCertExpireDate: "",
+          sslCert: '',
+          sslCertKey: '',
+          sslCertExpireDate: '',
           serviceUseYn: false
         },
         code: {
@@ -239,8 +248,8 @@
     },
 
     methods: {
-      save (){
-        this.item.serviceDomainList = this.item.serviceDomainList.map(obj => {
+      onSubmit (){
+        this.item.serviceDomainList = this.serviceDomainList.map(obj => {
           return {
             serviceTypeCode: obj.serviceTypeCode,
             domainProtocolCode: obj.domainProtocolCode !== null ? obj.domainProtocolCode.code : null,
@@ -248,7 +257,7 @@
           }
         });
 
-        this.$https.post('/services', this.data)
+        this.$https.post('/services', this.item)
           .then((res) => {
             this.$router.push({ name: 'Service 상세', params: { id: res.data }})
           })
@@ -257,9 +266,8 @@
           });
       },
 
-      getCodeVal (code){
-        let findObj = this.code.serviceType.find(obj => obj.code === code) || {}
-        return findObj['codeValChar1'] || null;
+      getCodeObj (code){
+        return this.code.serviceType.find(obj => obj.code === code) || {};
       },
 
       getSelectLabel (option){
@@ -278,6 +286,23 @@
           label = option.codeName
         }
         return label
+      },
+
+      onSelectType (item){
+        const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
+        if (!isContain){
+          this.item.serviceDomainList.push({
+            serviceTypeCode: item.code,
+            domainProtocolCode: this.code.domainProtocol[0].code,
+            domainHashingTypeCode: this.code.domainHashing[0].code
+          });
+        }
+      },
+
+      onRemoveType (item){
+        this.item.serviceDomainList = this.item.serviceDomainList.filter(({serviceTypeCode}) => {
+          return serviceTypeCode !== item.code
+        });
       }
     }
   }

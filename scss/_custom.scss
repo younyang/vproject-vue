@@ -40,7 +40,16 @@
     float: right;
   }
 }
-
+.collapse-title {
+  margin-bottom: 10px;
+  .btn {
+    text-align: left;
+    border-radius: 0;
+    i {
+      float: right;
+    }
+  }
+}
 
 /**
  * Table
@@ -60,6 +69,13 @@
 }
 */
 
+/**
+ * Button
+ */
+.btn.only-icon {
+  font-size: 1rem;
+}
+
 
 /**
  * Card
@@ -74,6 +90,8 @@
   line-height: 2rem;
 }
 .card-footer {
+  background: #fff;
+  border-top-color: #ddd;
   .form-btn {
     text-align: right;
   }
@@ -116,9 +134,17 @@
   text-align: center;
 }
 
-.form-group {
+.card-body {
   .form-group {
-    margin-bottom: 0
+    &:last-child,
+    .form-group {
+      margin-bottom: 0;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 5px;
+      margin: 8px 10px 0 0;
+    }
   }
 }
 
@@ -141,6 +167,20 @@
   }
 }
 
+.form-in-group {
+  label {
+    background: #f1f1f1;
+  }
+  .form-group {
+    margin: 5px 0;
+    [type=date] {
+      width: 50%;
+    }
+  }
+}
+
+
+
 @media (min-width: 576px) {
   .inline-field {
     padding-left: 0;
@@ -159,6 +199,43 @@
 /**
  * Multiple Select
  */
+.multiselect__tag {
+  margin-bottom: 3px;
+}
+
+/* View Style */
+.multiselect.multiselect--disabled.view-type {
+  background: none;
+  opacity: 1;
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+
+  .multiselect__select,
+  .multiselect__spinner,
+  .multiselect__tag-icon {
+    display: none;
+  }
+  .multiselect__input {
+    padding: 0;
+    &:disabled {
+      color: #151b1e;
+    }
+    &::placeholder {
+      color: #fff;
+    }
+  }
+  .multiselect__tags {
+    padding-left: 0;
+    padding-right: 0;
+    border: 0;
+  }
+  .multiselect__tag {
+    padding-right: 10px;
+    background: #4dbd74;
+  }
+}
+
 .multiselect.inline {
   display: inline-block;
   width: auto;
@@ -167,6 +244,9 @@
   min-height: 30px;
   &.protocol {
     width: 90px;
+  }
+  &.protocol.view-type {
+    width: 45px;
   }
 
   .multiselect__select {
@@ -226,7 +306,17 @@
     right: 2px;
   }
 }
-
+.icons-list.list-view li {
+  i {
+    margin-top: 3px;
+  }
+  .desc {
+    padding-bottom: 0;
+    small {
+      display: none;
+    }
+  }
+}
 
 /**
  * Modal

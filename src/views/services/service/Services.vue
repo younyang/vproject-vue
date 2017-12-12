@@ -144,7 +144,7 @@
           >
             <template slot="id" scope="row">{{ row.value.slice(0,3) }}...</template>
             <template slot="serviceTypeCode" scope="row">
-              <span class="badge badge-pill badge-primary" v-for="val in row.value">
+              <span class="badge badge-pill badge-success" v-for="val in row.value">
                 {{ getTypeCodeName(val) }}
               </span>
             </template>
