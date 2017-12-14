@@ -77,9 +77,20 @@
 /**
  * Button
  */
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-danger {
+  background: #fff;
+}
 .btn.only-icon {
   font-size: 1rem;
 }
+.page-btn {
+  margin-top: 30px;
+  text-align: right;
+}
+
 
 
 /**
@@ -342,6 +353,7 @@
   text-align: right;
 }
 section.board {
+  clear: both;
   background: #fff;
 
   .table {

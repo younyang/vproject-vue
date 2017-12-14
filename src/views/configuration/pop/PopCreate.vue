@@ -145,7 +145,7 @@
 <script>
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'services',
+    name: 'pops',
     components: {
       cSwitch
     },

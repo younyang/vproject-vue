@@ -208,18 +208,6 @@
             :rows="6">
           </b-form-textarea>
         </b-form-fieldset>
-
-        <div slot="footer" class="form-btn" v-if="isEdit">
-          <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-          <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
-        </div>
-        <div slot="footer" class="form-btn" v-else>
-          <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-          <b-button type="button" size="sm" variant="outline-primary">배포</b-button>
-          <b-button type="button" size="sm" variant="outline-primary">이력관리</b-button>
-          <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
-        </div>
       </b-card>
     </b-collapse>
 
@@ -292,19 +280,50 @@
       </b-card>
     </b-collapse>
 
+    <div class="page-btn" v-if="isEdit">
+      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+    </div>
+    <div class="page-btn" v-else>
+      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
+      <b-button type="button" size="sm" variant="outline-primary">배포</b-button>
+      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
+      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+    </div>
+
     <!-- History Modal -->
-    <b-modal id="serviceModal" size="lg">
-      <template slot="modal-title">
-        {{ items.popName }}
-        <small> > History</small>
-      </template>
+    <b-modal size="lg" title="이력관리" v-model="isModalHistory">
+      <section class="board">
+        <b-table
+          striped
+          bordered
+          hover
+          show-empty
+          :items="history.items"
+          :fields="history.fields"
+        >
+          <template slot="histMgmtId" scope="row">
+            <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
+          </template>
+        </b-table>
+      </section>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="button" size="sm" variant="danger"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
       </div>
     </b-modal>
 
+    <!-- Message Modal -->
+    <b-modal ref="messageModalRef" title="Message" size="sm" class="modal-danger">
+      <div class="d-block text-center">
+        <h5>{{ modalMessage }}</h5>
+      </div>
+      <div slot="modal-footer">
+        <b-button type="button" size="sm" variant="danger" @click="onDeleteData"><i class="fa fa-dot-circle-o"></i> 삭제</b-button>
+        <b-button type="button" size="sm" variant="secondary" @click="hideMessage"><i class="fa fa-ban"></i> 취소</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -312,8 +331,8 @@
   import ContentHeader from '@/components/ContentHeader'
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'service',
-    props: ['id'],
+    name: 'pops',
+    props: ['id', 'histories'],
     components: {
       ContentHeader,
       cSwitch
@@ -342,18 +361,23 @@
           popSigCode: [],
           qualitySolutionTeamCode: []
         },
+        history: {
+          fields: {
+            createId: {label: '등록/수정자', 'class': 'text-left'},
+            histBeginDateTime: {label: '등록/수정일시'},
+            modifyHistReason: {label: '변경이력', 'class': 'text-left'},
+            histMgmtId: {label: '보기'}
+          },
+          items: []
+        },
         isLoad: {
           popCtprvnCode: true,
           popSigCode: true,
           qualitySolutionTeamCode: true
         },
-        isDomainName: false,
-        state: {
-          popHostName: true
-        },
-        hostmessage: '',
         isEdit: false,
         isModalHistory: false,
+        modalMessage: '',
 
         // 배포상태 - 임시
         deploy: {
@@ -394,6 +418,10 @@
     },
 
     created (){
+      // History
+      const historyId = window.location.hash.split('?histories=')[1];
+      const detailUrl = historyId !== undefined ? `/pops/${this.id}/histories/${historyId}` : `/pops/${this.id}`;
+
       // 주소 Code
       this.fetchAddress();
 
@@ -407,7 +435,7 @@
         });
 
       // Detail Data
-      this.$https.get(`/pops/${this.id}`)
+      this.$https.get(detailUrl)
         .then((res) => {
           this.items = res.data.items;
 
@@ -447,6 +475,11 @@
       },
 
       onDelete (){
+        this.modalMessage = '정말 삭제하시겠습니까?';
+        this.showMessage();
+      },
+
+      onDeleteData (){
         this.$https.delete(`/pops/${this.id}`)
           .then((res) => {
             this.$router.push({ name: 'Pop 관리' });
@@ -473,6 +506,25 @@
               this.code.popSigCode = res.data.items;
             }
           });
+      },
+
+      getHistoryLink (rowId){
+        return `#/configuration/pop/${this.id}?histories=${rowId}`
+      },
+
+      showHistory () {
+        this.isModalHistory = !this.isModalHistory;
+        this.$https.get(`/pops/${this.id}/histories`)
+          .then((res) => {
+            this.history.items = res.data.items;
+          });
+      },
+
+      showMessage () {
+        this.$refs.messageModalRef.show()
+      },
+      hideMessage () {
+        this.$refs.messageModalRef.hide()
       }
     }
   }
