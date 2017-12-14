@@ -29,11 +29,11 @@
             :label-cols="5"
             :horizontal="true">
             <multiselect
-              v-model="popQualityTeamCode"
+              v-model="qualitySolutionTeamCode"
               :showLabels="false"
               :searchable="false"
-              :options="code.popQualityTeamCode"
-              :loading="isLoad.popQualityTeamCode"
+              :options="code.qualitySolutionTeamCode"
+              :loading="isLoad.qualitySolutionTeamCode"
               label="codeName"
               placeholder="전체"
             ></multiselect>
@@ -210,7 +210,7 @@
         searchItem: {
           searchType: 'popName',
           searchKeyword: null,
-          qualityTeamCode: null,
+          qualitySolutionTeamCode: null,
           firstAddressCode: null,
           secondAddressCode: null,
           popUseYn: null,
@@ -237,12 +237,12 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          popQualityTeamCode: [],
+          qualitySolutionTeamCode: [],
           firstAddressCode: [],
           secondAddressCode: []
         },
         isLoad: {
-          popQualityTeamCode: false,
+          qualitySolutionTeamCode: false,
           firstAddressCode: false,
           secondAddressCode: false
         }
@@ -266,12 +266,12 @@
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
-      popQualityTeamCode: {
+      qualitySolutionTeamCode: {
         get () {
-          return this.code.popQualityTeamCode.find(obj => obj.code === this.searchItem.qualityTeamCode) || null;
+          return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.searchItem.qualitySolutionTeamCode) || null;
         },
         set (newValue) {
-          this.searchItem.qualityTeamCode = newValue !== null ? newValue.code : null;
+          this.searchItem.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
       firstAddressCode: {
@@ -304,8 +304,8 @@
           q: { groupCode: 'QUALITY_TEAM' }
         })
         .then((res) => {
-          this.isLoad.popQualityTeamCode = false;
-          this.code.popQualityTeamCode = res.data.items;
+          this.isLoad.qualitySolutionTeamCode = false;
+          this.code.qualitySolutionTeamCode = res.data.items;
         });
     },
 
@@ -357,17 +357,16 @@
       },
 
       onSearch (){
-        const popUseYn = {
-          popUseYn: this.searchItem.popUseYn !== null ? (this.searchItem.popUseYn !== '사용') : null
-        };
         this.queryParams = {};
 
         Object.keys(this.searchItem).forEach(key => {
           if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = this.searchItem[key];
+            this.queryParams[key] = (key === 'popUseYn')
+              ? (this.searchItem[key] === '사용')
+              : this.searchItem[key];
           }
         });
-        this.queryParams = {...this.queryParams, ...popUseYn};
+
 
         this.fetchList({ page: 1 });
       },
