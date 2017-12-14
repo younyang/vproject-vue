@@ -4,10 +4,10 @@ const proxyFirebase = {
   target: 'http://localhost:5001/vproject-a9e6b/us-central1/api',
   changeOrigin: true
 };
-const getRealServer = (api) => ({
+const getRealServer = () => ({
   target: 'http://1.255.87.76:8080',
   pathRewrite: {
-    ['^/api/'+api] : '/'+api
+    '^/api/' : '/'
   },
   changeOrigin: true
 });
@@ -39,11 +39,7 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '',
     proxyTable: {
-      '/api/services': proxyFirebase,
-      '/api/account': proxyFirebase,
-
-      '/api/pops': getRealServer('pops'),
-      '/api/system': getRealServer('system'),
+      '/api': getRealServer(),
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README

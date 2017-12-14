@@ -142,10 +142,9 @@
             :fields="fields"
             @row-clicked="details"
           >
-            <template slot="id" scope="row">{{ row.value.slice(0,3) }}...</template>
-            <template slot="serviceTypeCode" scope="row">
+            <template slot="serviceTypeName" scope="row">
               <span class="badge badge-pill badge-success" v-for="val in row.value">
-                {{ getTypeCodeName(val) }}
+                {{ val }}
               </span>
             </template>
             <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
@@ -197,10 +196,10 @@
     data (){
       return {
         fields: {
-          id: {label: 'ID'},
+          serviceId: {label: 'ID'},
           serviceName: {label: 'Service Name', 'class': 'text-left'},
-          serviceTypeCode: {label: 'Service Type'},
-          accountId: {label: 'Account'},
+          serviceTypeName: {label: 'Service Type'},
+          accountName: {label: 'Account'},
           cnameUseYn: {label: 'CNAME'},
           sslCertUseYn: {label: 'SSL 인증서'},
           createDateTime: {label: '등록일'},
@@ -225,7 +224,7 @@
           cnameUseYn: null,
           sslCertUseYn: null,
           serviceUseYn: null,
-          searchDateType: 'createDateTime',
+          searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
@@ -234,14 +233,14 @@
             code: 'serviceName',
             codeName: 'Service Name'
           },{
-            code: 'accountId',
+            code: 'accountName',
             codeName: 'Account'
           }],
           searchDateType: [{
-            code: 'createDateTime',
+            code: 'createDate',
             codeName: '등록일'
           },{
-            code: 'modifyDateTime',
+            code: 'modifyDate',
             codeName: '수정일'
           }],
           serviceTypeCode: []
@@ -283,17 +282,19 @@
       this.fetchList();
 
       this.$https.get('/system/commonCode', {
-        q: { groupCode: 'SERVICE_TYPE' }
-      })
+          q: { groupCode: 'SERVICE_TYPE' }
+        })
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items;
+          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
+            return code.split('_')[2].length === 2
+          });
         });
     },
 
     methods: {
       details (item) {
-          this.$router.push({ name: 'Service 상세', params: { id: item.id }})
+        this.$router.push({ name: 'Service 상세', params: { id: item.serviceId }})
       },
 
       fetchList (params = {}){
@@ -305,19 +306,12 @@
 
         this.$https.get('/services', {...defaultParams, ...params})
           .then((res) => {
+            // Setting Service Type Name
             this.items = res.data.items.map(obj => {
-              // Uniq ServiceTypeCode
-              const serviceTypeCode = obj.serviceTypeCode.map(val => {
-                let code = val.split('_')[2];
-                code = code.length > 2 ? code.slice(0,2) : code;
-
-                return `SERVICE_TYPE_${code}`;
-              });
-              obj.serviceTypeCode = [ ...new Set(serviceTypeCode) ]
-              return obj;
+              obj.serviceTypeName = (obj.serviceTypeName) ? obj.serviceTypeName.split(' ') : [];
+              return obj
             });
-
-            //this.pageInfo = res.data.pageInfo;
+            this.pageInfo = res.data.pageInfo;
           });
       },
 
@@ -335,41 +329,40 @@
       },
 
       onSearch (){
-        const useYn = {
-          cnameUseYn: this.searchItem.cnameUseYn === '사용',
-          sslCertUseYn: this.searchItem.sslCertUseYn === '사용',
-          serviceUseYn: this.searchItem.serviceUseYn === '사용',
-        };
-        this.queryParams = {...this.searchItem, ...useYn};
+        this.queryParams = {};
 
-        //this.fetchList({ page: 1 });
+        // UseYn data convert
+        Object.keys(this.searchItem).forEach(key => {
+          if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
+            this.queryParams[key] = (key === 'cnameUseYn' || key === 'sslCertUseYn' || key === 'serviceUseYn')
+              ? (this.searchItem[key] === '사용')
+              : this.searchItem[key];
+          }
+        });
+
+        this.fetchList({ page: 1 });
       },
 
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'popName';
+            this.searchItem[key] = 'serviceName';
           } else if (key === 'searchDateType') {
-            this.searchItem[key] = 'createDateTime';
+            this.searchItem[key] = 'createDate';
           } else {
             this.searchItem[key] = null;
           }
         });
         this.queryParams = {};
-        //this.fetchList();
+        this.fetchList();
       },
 
       onRowSelect (size){
-        //this.fetchList({ page: 1, size });
+        this.fetchList({ page: 1, size });
       },
 
       onPagination (page){
-        //this.fetchList({ page });
-      },
-
-      getTypeCodeName (val){
-        let codeObj = this.code.serviceTypeCode.find(obj => obj.code === val);
-        return codeObj ?  codeObj.codeValChar1 : val
+        this.fetchList({ page });
       }
     }
   }

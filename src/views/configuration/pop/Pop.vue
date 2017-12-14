@@ -311,7 +311,7 @@
 
     methods: {
       details (item) {
-          this.$router.push({ name: 'Pop 상세', params: { id: item.popId }})
+        this.$router.push({ name: 'Pop 상세', params: { id: item.popId }})
       },
 
       fetchList (params = {}){
@@ -366,7 +366,6 @@
               : this.searchItem[key];
           }
         });
-
 
         this.fetchList({ page: 1 });
       },
