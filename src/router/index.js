@@ -17,7 +17,14 @@ import {
   Account
 } from '@/views/services/'
 
-import { Edge, Referrer, Pop } from '@/views/configuration/'
+import {
+  Edge,
+  Referrer,
+  Pop,
+  PopCreate,
+  PopDetail,
+  PopEdge
+} from '@/views/configuration/'
 import Process from '@/views/Process'
 import Map from '@/views/Map'
 import GridUI from '@/views/GridUI'
@@ -63,13 +70,12 @@ export default new Router({
               path: 'service/:id',
               redirect: '/service/service/:id/default',
               name: 'Service 상세',
-              hasContentmenu: true,
               component: {
                 render (c) { return c('router-view') }
               },
               children: [
                 { path: 'default',
-                  name: '기본정보',
+                  name: 'Service 기본정보',
                   props: true,
                   component: ServiceDetail
                 },
@@ -120,10 +126,34 @@ export default new Router({
               name: 'Referrer 관리',
               component: Referrer
             },
-            {
-              path: 'pop',
+            { path: 'pop',
               name: 'Pop 관리',
               component: Pop
+            },
+            {
+              path: 'pop/create',
+              name: 'Pop 등록',
+              component: PopCreate
+            },
+            {
+              path: 'pop/:id',
+              redirect: '/configuration/pop/:id/default',
+              name: 'Pop 상세',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                { path: 'default',
+                  name: 'Pop 기본정보',
+                  props: true,
+                  component: PopDetail
+                },
+                { path: 'edge',
+                  name: 'L/R, Edge',
+                  props: true,
+                  component: PopEdge
+                }
+              ]
             }
           ]
         },

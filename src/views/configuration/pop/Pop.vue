@@ -25,15 +25,15 @@
         <div class="form-group row">
           <b-form-fieldset
             class="col-sm-5"
-            label="Service Type"
+            label="품솔팀"
             :label-cols="5"
             :horizontal="true">
             <multiselect
-              v-model="serviceTypeCode"
+              v-model="popQualityTeamCode"
               :showLabels="false"
               :searchable="false"
-              :options="code.serviceTypeCode"
-              :loading="isLoad.serviceTypeCode"
+              :options="code.popQualityTeamCode"
+              :loading="isLoad.popQualityTeamCode"
               label="codeName"
               placeholder="전체"
             ></multiselect>
@@ -41,11 +41,11 @@
 
           <b-form-fieldset
             class="col-sm-5"
-            label="CNAME"
+            label="사용여부"
             :label-cols="5"
             :horizontal="true">
             <multiselect
-              v-model="searchItem.cnameUseYn"
+              v-model="searchItem.popUseYn"
               :showLabels="false"
               :searchable="false"
               :options="['사용', '미사용']"
@@ -57,29 +57,33 @@
         <div class="form-group row">
           <b-form-fieldset
             class="col-sm-5"
-            label="SSL 인증서"
+            label="주소"
             :label-cols="5"
             :horizontal="true">
             <multiselect
-              v-model="searchItem.sslCertUseYn"
+              v-model="firstAddressCode"
               :showLabels="false"
               :searchable="false"
-              :options="['사용', '미사용']"
+              :options="code.firstAddressCode"
+              :loading="isLoad.firstAddressCode"
+              @select="onFirstAddress"
+              label="addressCodeName"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
-
           <b-form-fieldset
-            class="col-sm-5"
-            label="사용여부"
-            :label-cols="5"
-            :horizontal="true">
+            v-if="firstAddressCode"
+            class="col-sm-7 form-inline inline-field">
             <multiselect
-              v-model="searchItem.serviceUseYn"
+              v-model="secondAddressCode"
               :showLabels="false"
               :searchable="false"
-              :options="['사용', '미사용']"
+              :options="code.secondAddressCode"
+              :loading="isLoad.secondAddressCode"
+              label="addressCodeName"
               placeholder="전체"
+              class="inline"
+              style="min-width: 130px"
             ></multiselect>
           </b-form-fieldset>
         </div>
@@ -126,7 +130,7 @@
             <i class="icon-cloud-download"></i>
             엑셀 다운로드
           </b-button>
-          <b-button type="button" variant="primary" :to="{ name: 'Service 등록' }">
+          <b-button type="button" variant="primary" :to="{ name: 'Pop 등록' }">
             <i class="icon-pencil"></i>
             등록
           </b-button>
@@ -142,15 +146,7 @@
             :fields="fields"
             @row-clicked="details"
           >
-            <template slot="id" scope="row">{{ row.value.slice(0,3) }}...</template>
-            <template slot="serviceTypeCode" scope="row">
-              <span class="badge badge-pill badge-success" v-for="val in row.value">
-                {{ getTypeCodeName(val) }}
-              </span>
-            </template>
-            <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="sslCertUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="serviceUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+            <template slot="popUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
           </b-table>
         </section>
 
@@ -176,8 +172,6 @@
             class="mt-2"
           ></b-pagination>
         </section>
-
-
       </div>
     </div><!--/.row-->
 
@@ -186,26 +180,21 @@
 </template>
 
 <script>
-  import db from '@/firebaseInit'
   import moment from 'moment'
 
   export default {
-    name: 'services',
-    components: {
-      //  ListContent
-    },
+    name: 'pops',
     data (){
       return {
         fields: {
-          id: {label: 'ID'},
-          serviceName: {label: 'Service Name', 'class': 'text-left'},
-          serviceTypeCode: {label: 'Service Type'},
-          accountId: {label: 'Account'},
-          cnameUseYn: {label: 'CNAME'},
-          sslCertUseYn: {label: 'SSL 인증서'},
+          popId: {label: 'ID'},
+          popName: {label: 'Pop Name', 'class': 'text-left'},
+          popHostName: {label: 'Host Name(Prefix)', 'class': 'text-left'},
+          popAddress: {label: '주소', 'class': 'text-left'},
+          popQualityTeamName: {label: '품솔팀'},
           createDateTime: {label: '등록일'},
           modifyDateTime: {label: '수정일'},
-          serviceUseYn: {label: '사용여부'}
+          popUseYn: {label: '사용여부'}
         },
         items: [],
         pageInfo: {
@@ -219,35 +208,43 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'serviceName',
+          searchType: 'popName',
           searchKeyword: null,
-          serviceTypeCode: null,
-          cnameUseYn: null,
-          sslCertUseYn: null,
-          serviceUseYn: null,
-          searchDateType: 'createDateTime',
+          qualityTeamCode: null,
+          firstAddressCode: null,
+          secondAddressCode: null,
+          popUseYn: null,
+          searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
+
         code: {
           searchType: [{
-            code: 'serviceName',
-            codeName: 'Service Name'
+            code: 'popName',
+            codeName: 'Pop Name'
           },{
-            code: 'accountId',
-            codeName: 'Account'
+            code: 'popHostName',
+            codeName: 'Host Name'
+          },{
+            code: 'popId',
+            codeName: 'ID'
           }],
           searchDateType: [{
-            code: 'createDateTime',
+            code: 'createDate',
             codeName: '등록일'
           },{
-            code: 'modifyDateTime',
+            code: 'modifyDate',
             codeName: '수정일'
           }],
-          serviceTypeCode: []
+          popQualityTeamCode: [],
+          firstAddressCode: [],
+          secondAddressCode: []
         },
         isLoad: {
-          serviceTypeCode: false
+          popQualityTeamCode: false,
+          firstAddressCode: false,
+          secondAddressCode: false
         }
       }
     },
@@ -269,31 +266,52 @@
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
-      serviceTypeCode: {
+      popQualityTeamCode: {
         get () {
-          return this.code.serviceTypeCode.find(obj => obj.code === this.searchItem.serviceTypeCode) || null;
+          return this.code.popQualityTeamCode.find(obj => obj.code === this.searchItem.qualityTeamCode) || null;
         },
         set (newValue) {
-          this.searchItem.serviceTypeCode = newValue !== null ? newValue.code : null;
+          this.searchItem.qualityTeamCode = newValue !== null ? newValue.code : null;
         }
       },
+      firstAddressCode: {
+        get () {
+          return this.code.firstAddressCode.find(obj => obj.addressCode === this.searchItem.firstAddressCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.firstAddressCode = newValue !== null ? newValue.addressCode : null;
+        }
+      },
+      secondAddressCode: {
+        get () {
+          return this.code.secondAddressCode.find(obj => obj.addressCode === this.searchItem.secondAddressCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.secondAddressCode = newValue !== null ? newValue.addressCode : null;
+        }
+      }
     },
 
     created (){
+      // Pop List
       this.fetchList();
 
+      // 주소 Code
+      this.fetchAddress();
+
+      // 품솔팀 Code
       this.$https.get('/system/commonCode', {
-        q: { groupCode: 'SERVICE_TYPE' }
-      })
+          q: { groupCode: 'QUALITY_TEAM' }
+        })
         .then((res) => {
-          this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items;
+          this.isLoad.popQualityTeamCode = false;
+          this.code.popQualityTeamCode = res.data.items;
         });
     },
 
     methods: {
       details (item) {
-          this.$router.push({ name: 'Service 상세', params: { id: item.id }})
+          this.$router.push({ name: 'Pop 상세', params: { id: item.popId }})
       },
 
       fetchList (params = {}){
@@ -303,21 +321,25 @@
           q: this.queryParams
         };
 
-        this.$https.get('/services', {...defaultParams, ...params})
+        this.$https.get('/pops', {...defaultParams, ...params})
           .then((res) => {
-            this.items = res.data.items.map(obj => {
-              // Uniq ServiceTypeCode
-              const serviceTypeCode = obj.serviceTypeCode.map(val => {
-                let code = val.split('_')[2];
-                code = code.length > 2 ? code.slice(0,2) : code;
+            this.items = res.data.items;
+            this.pageInfo = res.data.pageInfo;
+          });
+      },
 
-                return `SERVICE_TYPE_${code}`;
-              });
-              obj.serviceTypeCode = [ ...new Set(serviceTypeCode) ]
-              return obj;
-            });
-
-            //this.pageInfo = res.data.pageInfo;
+      fetchAddress (param =''){
+        this.$https.get('/pops/address', {
+            firstDepth: param
+          })
+          .then((res) => {
+            if (param === ''){
+              this.isLoad.firstAddressCode = false;
+              this.code.firstAddressCode = res.data.items;
+            } else {
+              this.isLoad.secondAddressCode = false;
+              this.code.secondAddressCode = res.data.items;
+            }
           });
       },
 
@@ -335,14 +357,19 @@
       },
 
       onSearch (){
-        const useYn = {
-          cnameUseYn: this.searchItem.cnameUseYn === '사용',
-          sslCertUseYn: this.searchItem.sslCertUseYn === '사용',
-          serviceUseYn: this.searchItem.serviceUseYn === '사용',
+        const popUseYn = {
+          popUseYn: this.searchItem.popUseYn !== null ? (this.searchItem.popUseYn !== '사용') : null
         };
-        this.queryParams = {...this.searchItem, ...useYn};
+        this.queryParams = {};
 
-        //this.fetchList({ page: 1 });
+        Object.keys(this.searchItem).forEach(key => {
+          if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
+            this.queryParams[key] = this.searchItem[key];
+          }
+        });
+        this.queryParams = {...this.queryParams, ...popUseYn};
+
+        this.fetchList({ page: 1 });
       },
 
       onReset (){
@@ -350,26 +377,25 @@
           if (key === 'searchType'){
             this.searchItem[key] = 'popName';
           } else if (key === 'searchDateType') {
-            this.searchItem[key] = 'createDateTime';
+            this.searchItem[key] = 'createDate';
           } else {
             this.searchItem[key] = null;
           }
         });
         this.queryParams = {};
-        //this.fetchList();
+        this.fetchList();
       },
 
       onRowSelect (size){
-        //this.fetchList({ page: 1, size });
+        this.fetchList({ page: 1, size });
       },
 
       onPagination (page){
-        //this.fetchList({ page });
+        this.fetchList({ page });
       },
 
-      getTypeCodeName (val){
-        let codeObj = this.code.serviceTypeCode.find(obj => obj.code === val);
-        return codeObj ?  codeObj.codeValChar1 : val
+      onFirstAddress (obj){
+        this.fetchAddress(obj.addressCode)
       }
     }
   }

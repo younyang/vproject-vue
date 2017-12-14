@@ -7,12 +7,40 @@ import axios from 'axios'
 import router from './router'
 import Multiselect from 'vue-multiselect'
 
+
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
-Vue.prototype.$https = axios;
+
 
 // baseURL settings
-Vue.prototype.$https.defaults.baseURL = '/api';
+axios.defaults.baseURL = '/api';
+axios.defaults.transformResponse = [function (data) {
+  const origin = JSON.parse(data)
+  return {
+    result: origin.result,
+    items: origin.resultData ? origin.resultData.data : [],
+    pageInfo: origin.resultData ? origin.resultData.pageInfo : {},
+    error: origin.error
+  };
+}];
+
+Vue.prototype.$https = {
+  get (url = '', params = {}){
+    return axios.get(url, {
+      params: params
+    })
+  },
+  post (url = '', data = {}){
+    return axios.post(url, data)
+  },
+  put (url = '', data = {}){
+    return axios.put(url, data)
+  },
+  delete (url = ''){
+    return axios.post(url)
+  }
+};
+
 
 
 Vue.filter('capitalize', function (value) {

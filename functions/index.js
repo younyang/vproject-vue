@@ -11,16 +11,21 @@ const api = express();
 
 const getDocs = doc => {
   let data = doc.data();
-  return Object.assign({}, data, { id: doc.id })
+  return {
+    result: 'Success',
+    resultData: { data: Object.assign({}, data, { id: doc.id }) }
+  };
 };
 
 const getCollection = snapshot => {
   const collection = [];
   snapshot.forEach(doc => {
-    console.log(FieldValue)
-    collection.push(getDocs(doc))
+    collection.push(getDocs(doc).resultData.data)
   });
-  return collection;
+  return {
+    result: 'Success',
+    resultData: { data: collection }
+  };
 };
 
 const getObject = snapshot => {
