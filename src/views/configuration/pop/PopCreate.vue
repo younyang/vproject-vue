@@ -224,6 +224,9 @@
 
     methods: {
       onSubmit (){
+        // History
+        this.items.modifyHistReason = '등록';
+        // POST
         this.$https.post('/pops', this.items)
           .then((res) => {
             this.$router.push({ name: 'Pop 상세', params: { id: res.data.items }})

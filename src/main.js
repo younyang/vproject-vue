@@ -37,7 +37,7 @@ Vue.prototype.$https = {
     return axios.put(url, data)
   },
   delete (url = ''){
-    return axios.post(url)
+    return axios.delete(url)
   }
 };
 

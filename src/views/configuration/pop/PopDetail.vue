@@ -16,19 +16,198 @@
     </div>
     <b-collapse id="formDefault" visible>
       <b-card>
-        <!-- PoP Name -->
+        <!-- PoP Id -->
         <b-form-fieldset
-          label="PoP Name *"
+          v-if="!isEdit"
+          label="PoP ID"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            v-model="items.popName"
+            :value="id"
             type="text"
-            :plaintext="!isEdit"
-            placeholder="Enter PoP name">
-          </b-form-input>
+            plaintext
+          ></b-form-input>
         </b-form-fieldset>
 
+        <!-- PoP Name -->
+        <b-form-fieldset
+          label="PoP Name"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            :value="items.popName"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+        <!-- Host Name -->
+        <b-form-fieldset
+          label="Host Name(Prefix)"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            :value="items.popHostName"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+        <!-- Domain -->
+        <b-form-fieldset
+          label="Domain"
+          :label-cols="3"
+          :horizontal="true">
+          <span class="domain-text">
+            http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+          </span>
+        </b-form-fieldset>
+
+        <!-- 구분
+        <b-form-fieldset
+          label="구분"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
+          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
+        </b-form-fieldset>
+        -->
+
+        <!-- 주소 :: Edit -->
+        <b-form-fieldset
+          v-if="isEdit"
+          label="주소"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            v-model="popCtprvnCode"
+            class="inline"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.popCtprvnCode"
+            :loading="isLoad.popCtprvnCode"
+            :disabled="!isEdit"
+            :class="{'view-type': !isEdit}"
+            label="addressCodeName"
+            style="min-width:130px"
+            placeholder="선택"
+            @input="onFirstAddress"
+          ></multiselect>
+          <multiselect
+            v-if="popCtprvnCode"
+            v-model="popSigCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.popSigCode"
+            :loading="isLoad.popSigCode"
+            label="addressCodeName"
+            placeholder="선택"
+            class="inline"
+            style="min-width: 130px"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <!-- 주소 :: View -->
+        <b-form-fieldset
+          label="주소"
+          :label-cols="3"
+          :horizontal="true"
+          v-else>
+          <b-form-input
+            :value="items.popAddress"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          label="품질솔루션팀"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            v-if="isEdit"
+            v-model="popQualityTeamCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.qualitySolutionTeamCode"
+            :loading="isLoad.qualitySolutionTeamCode"
+            label="codeName"
+            placeholder="선택"
+          ></multiselect>
+          <b-form-input
+            v-else
+            :value="items.popQualityTeamName"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+
+        <!-- Service Name -->
+        <b-form-fieldset
+          v-if="!isEdit"
+          label="Service"
+          :label-cols="3"
+          :horizontal="true">
+          <span class="badge badge-success badge-pill" v-for="name in serviceNames">
+            {{ name }}
+          </span>
+        </b-form-fieldset>
+
+
+        <!-- Bandwidth -->
+        <b-form-fieldset
+          label="Bandwidth"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            v-if="isEdit"
+            v-model="items.bandwidth"
+            type="text"
+            class="w-25"
+          ></b-form-input>
+          <b-form-input
+            v-else
+            :value="items.bandwidth"
+            type="text"
+            class="w-25"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+
+        <!-- 사용여부 -->
+        <b-form-fieldset
+          label="사용여부"
+          :label-cols="3"
+          :horizontal="true">
+          <c-switch
+            v-if="isEdit"
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            :pill="true"
+            v-model="items.popUseYn"
+          ></c-switch>
+          <b-badge
+            v-else
+            pill
+            :variant="items.popUseYn ? 'success' : 'secondary'">
+            {{ items.popUseYn ? '사용' : '미사용' }}
+          </b-badge>
+        </b-form-fieldset>
+
+        <!-- 변경이력 -->
+        <b-form-fieldset
+          v-if="isEdit"
+          label="변경이력"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-textarea
+            v-model="items.modifyHistReason"
+            :rows="6">
+          </b-form-textarea>
+        </b-form-fieldset>
 
         <div slot="footer" class="form-btn" v-if="isEdit">
           <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
@@ -36,6 +215,7 @@
         </div>
         <div slot="footer" class="form-btn" v-else>
           <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
+          <b-button type="button" size="sm" variant="outline-primary">배포</b-button>
           <b-button type="button" size="sm" variant="outline-primary">이력관리</b-button>
           <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
           <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
@@ -97,6 +277,18 @@
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
+        <!-- 배포상태 -->
+        <b-form-fieldset
+          label="배포상태"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            :value="deploy.status ? '성공' : '실패'"
+            style="width:30px"
+            plaintext
+            type="text"></b-form-input>
+          (<a href="#">{{ deploy.count }}</a>)
+        </b-form-fieldset>
       </b-card>
     </b-collapse>
 
@@ -108,8 +300,8 @@
       </template>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="onSubmitService"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="button" size="sm" variant="danger" @click="isModalService=false"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" size="sm" variant="primary"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+        <b-button type="button" size="sm" variant="danger"><i class="fa fa-ban"></i> 취소</b-button>
       </div>
     </b-modal>
 
@@ -131,41 +323,29 @@
       return {
         name: 'Pop 상세',
         items: {
-          popName: "성수",
-          popHostName: "pop1",
-          popDomainName: "b78e23ss",
-          popCtprvnCode: "11",
+          popName: "",
+          popHostName: "",
+          popDomainName: "",
+          popCtprvnCode: "",
           popSigCode: "11230",
-          popAddress: "서울특별시>동대문구",
-          popQualityTeamCode: "QUALITY_TEAM_01",
-          popQualityTeamName: "강남",
-          bandwidth: 50,
+          popAddress: "",
+          popQualityTeamCode: "",
+          popQualityTeamName: "",
+          bandwidth: 0,
           popUseYn: true,
-          serviceNames: "btv,oksusu",
-          lowReferrerList: [{
-            "rowReferrerId": 1,
-            "referrerIp": "1.255.56.67",
-            "referrerHostName": "",
-            "referrerUseYn": true
-          }],
-          edgeList: [{
-            "edgeId": 1,
-            "edgeIp": "1.255.67.89",
-            "edgeHostName": "aeoijlk",
-            "edgeDomainName": "3234dssf",
-            "edgeUseYn": true,
-            "edgeRelayYn": true
-          }]
+          serviceNames: "",
+          lowReferrerList: [],
+          edgeList: []
         },
         code: {
           popCtprvnCode: [],
           popSigCode: [],
-          popQualityTeamCode: []
+          qualitySolutionTeamCode: []
         },
         isLoad: {
           popCtprvnCode: true,
           popSigCode: true,
-          popQualityTeamCode: true
+          qualitySolutionTeamCode: true
         },
         isDomainName: false,
         state: {
@@ -173,15 +353,68 @@
         },
         hostmessage: '',
         isEdit: false,
-        isModalHistory: false
+        isModalHistory: false,
+
+        // 배포상태 - 임시
+        deploy: {
+          status: true,
+          count: 11234
+        }
       }
     },
 
     computed: {
-
+      popCtprvnCode: {
+        get () {
+          return this.code.popCtprvnCode.find(obj => obj.addressCode === this.items.popCtprvnCode) || null;
+        },
+        set (newValue) {
+          this.items.popCtprvnCode = newValue !== null ? newValue.addressCode : null;
+        }
+      },
+      popSigCode: {
+        get () {
+          return this.code.popSigCode.find(obj => obj.addressCode === this.items.popSigCode) || null;
+        },
+        set (newValue) {
+          this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
+        }
+      },
+      popQualityTeamCode: {
+        get () {
+          return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.popQualityTeamCode) || null;
+        },
+        set (newValue) {
+          this.items.popQualityTeamCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      serviceNames (){
+        return this.items.serviceNames !== null ? this.items.serviceNames.split(',') : []
+      }
     },
 
     created (){
+      // 주소 Code
+      this.fetchAddress();
+
+      // 품질솔루션팀 Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'QUALITY_TEAM' }
+        })
+        .then((res) => {
+          this.isLoad.qualitySolutionTeamCode = false;
+          this.code.qualitySolutionTeamCode = res.data.items;
+        });
+
+      // Detail Data
+      this.$https.get(`/pops/${this.id}`)
+        .then((res) => {
+          this.items = res.data.items;
+
+          if (this.items.popCtprvnCode !== ''){
+            this.fetchAddress(this.items.popCtprvnCode);
+          }
+        });
 
     },
 
@@ -195,18 +428,16 @@
       },
 
       onSubmit (){
-        this.item.serviceDomainList = this.serviceDomainList.map(obj => {
-          return {
-            serviceTypeCode: obj.serviceTypeCode,
-            domainProtocolCode: obj.domainProtocolCode !== null ? obj.domainProtocolCode.code : null,
-            domainHashingTypeCode: obj.domainHashingTypeCode !== null ? obj.domainHashingTypeCode.code : null
-          }
-        });
+        const items = {};
+          Object.keys(this.items).forEach(key => {
+              if (key === 'popQualityTeamCode') {
+                items['qualitySolutionTeamCode'] = this.items[key];
+              }else{
+                items[key] = this.items[key];
+              }
+          });
 
-        delete this.item.deploy;
-
-
-        this.$https.put(`/services/${this.id}`, this.item)
+        this.$https.put(`/pops/${this.id}`, items)
           .then((res) => {
             this.$router.go(this.$router.currentRoute);
           })
@@ -215,52 +446,33 @@
           });
       },
 
-      // Service Type Popup Save
-      onSubmitService (){
-        console.log(this.modalService)
-        /*
-        const serviceType = this.serviceType
-        const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
-        if (!isContain){
-          this.item.serviceDomainList.push({
-            serviceTypeCode: item.code,
-            domainProtocolCode: null,
-            domainHashingTypeCode: null
-          });
-        }*/
-
-      },
-
       onDelete (){
-        this.$https.delete(`/services/${this.id}`)
+        this.$https.delete(`/pops/${this.id}`)
           .then((res) => {
-            this.$router.push({ name: 'Service 관리' });
+            this.$router.push({ name: 'Pop 관리' });
           })
           .catch((error) => {
             console.log(error);
           });
       },
 
-      getCodeObj (code){
-        return this.code.serviceType.find(obj => obj.code === code) || {};
+      onFirstAddress (obj){
+        this.fetchAddress(obj.addressCode)
       },
 
-      getSelectLabel (option){
-        let codeType = (option.accountName)
-          ? 'ACCOUNT'
-          : (option.code) ? option.code.split('_')[0] : '';
-        let label = '';
-
-        if (codeType === 'ACCOUNT'){
-          label = `${option.accountName}/${option.companyName}`;
-        } else if (codeType === 'SERVICE'){
-          label = option.codeValChar1 !== option.codeName
-            ? `${option.codeValChar1} > ${option.codeName}`
-            : option.codeName
-        } else {
-          label = option.codeName
-        }
-        return label
+      fetchAddress (param =''){
+        this.$https.get('/pops/address', {
+          firstDepth: param
+        })
+          .then((res) => {
+            if (param === ''){
+              this.isLoad.popCtprvnCode = false;
+              this.code.popCtprvnCode = res.data.items;
+            } else {
+              this.isLoad.popSigCode = false;
+              this.code.popSigCode = res.data.items;
+            }
+          });
       }
     }
   }
