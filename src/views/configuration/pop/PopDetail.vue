@@ -126,7 +126,7 @@
           :horizontal="true">
           <multiselect
             v-if="isEdit"
-            v-model="popQualityTeamCode"
+            v-model="qualitySolutionTeamCode"
             :showLabels="false"
             :searchable="false"
             :options="code.qualitySolutionTeamCode"
@@ -136,7 +136,7 @@
           ></multiselect>
           <b-form-input
             v-else
-            :value="items.popQualityTeamName"
+            :value="items.qualitySolutionTeamCodeName"
             type="text"
             plaintext
           ></b-form-input>
@@ -348,8 +348,8 @@
           popCtprvnCode: "",
           popSigCode: "11230",
           popAddress: "",
-          popQualityTeamCode: "",
-          popQualityTeamName: "",
+          qualitySolutionTeamCode: "",
+          qualitySolutionTeamCodeName: "",
           bandwidth: 0,
           popUseYn: true,
           serviceNames: "",
@@ -404,12 +404,12 @@
           this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
         }
       },
-      popQualityTeamCode: {
+      qualitySolutionTeamCode: {
         get () {
-          return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.popQualityTeamCode) || null;
+          return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.qualitySolutionTeamCode) || null;
         },
         set (newValue) {
-          this.items.popQualityTeamCode = newValue !== null ? newValue.code : null;
+          this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
       serviceNames (){
@@ -456,16 +456,7 @@
       },
 
       onSubmit (){
-        const items = {};
-          Object.keys(this.items).forEach(key => {
-              if (key === 'popQualityTeamCode') {
-                items['qualitySolutionTeamCode'] = this.items[key];
-              }else{
-                items[key] = this.items[key];
-              }
-          });
-
-        this.$https.put(`/pops/${this.id}`, items)
+        this.$https.put(`/pops/${this.id}`, this.items)
           .then((res) => {
             this.$router.go(this.$router.currentRoute);
           })
