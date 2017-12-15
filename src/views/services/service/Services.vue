@@ -308,7 +308,7 @@
           .then((res) => {
             // Setting Service Type Name
             this.items = res.data.items.map(obj => {
-              obj.serviceTypeName = (obj.serviceTypeName) ? obj.serviceTypeName.split(' ') : [];
+              obj.serviceTypeName = (obj.serviceTypeName) ? obj.serviceTypeName.split(',') : [];
               return obj
             });
             this.pageInfo = res.data.pageInfo;

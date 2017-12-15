@@ -4,40 +4,40 @@
       <b-card>
         <!-- Account -->
         <b-form-fieldset
-          label="Account"
+          label="Account *"
           :label-cols="3"
           :horizontal="true">
           <multiselect
             v-model="accountId"
-            :options="code.account"
+            :options="code.accountId"
             :showLabels="false"
             :custom-label="getSelectLabel"
-            :loading="isLoad.account"
+            :loading="isLoad.accountId"
             placeholder="Select account"
           ></multiselect>
         </b-form-fieldset>
 
         <!-- Service Name -->
         <b-form-fieldset
-          label="Service Name"
+          label="Service Name *"
           description="Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
           :label-cols="3"
           :horizontal="true">
           <b-input-group>
             <b-form-input
-              v-model="item.serviceName"
+              v-model="items.serviceName"
               type="text"
               placeholder="Enter service name">
             </b-form-input>
             <b-input-group-button slot="right" class="ml-2">
-              <b-button variant="outline-secondary">중복확인</b-button>
+              <b-button variant="outline-secondary" @click="fetchNameExists">중복확인</b-button>
             </b-input-group-button>
           </b-input-group>
         </b-form-fieldset>
 
         <!-- Service Type -->
         <b-form-fieldset
-          label="Service Type"
+          label="Service Type *"
           :label-cols="3"
           :horizontal="true">
 
@@ -45,9 +45,9 @@
             v-model="serviceTypeCode"
             :multiple="true"
             :showLabels="false"
-            :options="code.serviceType"
+            :options="code.serviceTypeCode"
             :custom-label="getSelectLabel"
-            :loading="isLoad.serviceType"
+            :loading="isLoad.serviceTypeCode"
             track-by="code"
             @select="onSelectType"
             @remove="onRemoveType"
@@ -72,12 +72,12 @@
                     class="inline sm protocol"
                     :showLabels="false"
                     :allow-empty="true"
-                    :options="code.domainProtocol"
+                    :options="code.domainProtocolCode"
                     :custom-label="getSelectLabel"
-                    :loading="isLoad.domainProtocol"
+                    :loading="isLoad.domainProtocolCode"
                     placeholder="://"
                   ></multiselect>
-                  {{ domain.serviceCodeVal | lowercase }}.{{ item.serviceName }}.vessels.com
+                  {{ domain.serviceCodeVal | lowercase }}.{{ items.serviceName }}.vessels.com
                 </div>
               </div>
               <div class="value">
@@ -88,9 +88,9 @@
                   style="width: 120px"
                   :showLabels="false"
                   :allow-empty="true"
-                  :options="code.domainHashing"
+                  :options="code.domainHashingTypeCode"
                   :custom-label="getSelectLabel"
-                  :loading="isLoad.domainHashing"
+                  :loading="isLoad.domainHashingTypeCode"
                   placeholder="Select"
                 ></multiselect>
               </div>
@@ -107,8 +107,9 @@
             type="icon"
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="item.cnameUseYn"
-            :pill="true" />
+            v-model="items.cnameUseYn"
+            :pill="true"
+          ></c-switch>
         </b-form-fieldset>
 
         <!-- SSL 인증서 -->
@@ -120,8 +121,9 @@
             type="icon"
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="item.sslCertUseYn"
-            :pill="true" />
+            v-model="items.sslCertUseYn"
+            :pill="true"
+          ></c-switch>
         </b-form-fieldset>
 
         <!-- 사용여부 -->
@@ -133,8 +135,9 @@
             type="icon"
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="item.serviceUseYn"
-            :pill="true" />
+            v-model="items.serviceUseYn"
+            :pill="true"
+          ></c-switch>
         </b-form-fieldset>
 
         <div slot="footer" class="form-btn">
@@ -143,6 +146,13 @@
         </div>
       </b-card>
     </b-form>
+
+    <b-modal hide-footer title="Message" size="sm" v-model="isModalMessage" :class="state.serviceName ? 'modal-primary' : 'modal-danger'">
+      <div class="d-block text-center">
+        <h5>{{ modalMessage }}</h5>
+      </div>
+      <b-btn class="mt-4" :variant="state.serviceName ? 'outline-primary' : 'outline-danger'" block @click="isModalMessage = false">Close</b-btn>
+    </b-modal>
   </div>
 </template>
 
@@ -154,38 +164,65 @@
       cSwitch
     },
 
+    data (){
+      return {
+        items: {
+          accountId: null,
+          serviceName: "",
+          serviceTypeCode: [],
+          serviceDomainList: [],
+          cnameUseYn: true,
+          sslCertUseYn: true,
+          serviceUseYn: true
+        },
+        code: {
+          accountId: [],
+          serviceTypeCode: [],
+          domainProtocolCode: [],
+          domainHashingTypeCode: []
+        },
+        isLoad: {
+          accountId: true,
+          serviceTypeCode: true,
+          domainProtocolCode: true,
+          domainHashingTypeCode: true
+        },
+        isModalMessage: false,
+        modalMessage: '',
+        state: {
+          serviceName: true
+        }
+      }
+    },
+
     computed: {
       accountId: {
         get () {
-          return this.item.accountId !== null
-            ? this.code.account.find(obj => obj.accountId === this.item.accountId)
-            : null;
+          return this.code.accountId.find(obj => obj.accountId === this.items.accountId) || null;
         },
         set (newValue) {
-          this.item.accountId = newValue !== null
-            ? newValue.accountId
-            : null;
+          this.items.accountId = newValue !== null ? newValue.accountId : null;
         }
       },
       serviceTypeCode: {
         get () {
-          return this.item.serviceTypeCode.length > 0
-            ? this.item.serviceTypeCode.map(val => this.code.serviceType.find(obj => obj.code === val))
+          return this.items.serviceTypeCode.length > 0
+            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.code === val))
             : [];
         },
         set (newValue) {
-          this.item.serviceTypeCode = newValue.length > 0
+          this.items.serviceTypeCode = newValue.length > 0
             ? newValue.map(obj => obj.code)
             : [];
         }
       },
       serviceDomainList (){
-        return this.item.serviceDomainList.length > 0
-          ? this.item.serviceDomainList.map(obj => {
+        return this.items.serviceDomainList.length > 0
+          ? this.items.serviceDomainList.map(obj => {
             const serviceCode = this.getCodeObj(obj.serviceTypeCode);
             return Object.assign({}, obj, {
-              domainProtocolCode: this.code.domainProtocol.find(({code}) => code === obj.domainProtocolCode),
-              domainHashingTypeCode: this.code.domainHashing.find(({code}) => code === obj.domainHashingTypeCode),
+              domainProtocolCode: this.code.domainProtocolCode.find(({code}) => code === obj.domainProtocolCode),
+              domainHashingTypeCode: this.code.domainHashingTypeCode.find(({code}) => code === obj.domainHashingTypeCode),
               serviceCodeVal: serviceCode.codeValChar1,
               serviceCodeName: serviceCode.codeName
             })
@@ -194,62 +231,42 @@
       }
     },
 
-    data (){
-      return {
-        item: {
-          accountId: null,
-          serviceName: '',
-          serviceTypeCode: [],
-          serviceDomainList: [],
-          cnameUseYn: false,
-          cnameDomainName: '',
-          sslCertUseYn: false,
-          sslCert: '',
-          sslCertKey: '',
-          sslCertExpireDate: '',
-          serviceUseYn: false
-        },
-        code: {
-          account: [],
-          serviceType: [],
-          domainProtocol: [],
-          domainHashing: []
-        },
-        isLoad: {
-          account: true,
-          serviceType: true,
-          domainProtocol: true,
-          domainHashing: true
-        }
-      }
-    },
-
     created (){
-      this.$https.get('/account')
+      // Account Code
+      this.$https.get('/services/accounts')
         .then((res) => {
-          this.isLoad.account = false;
-          this.code.account = res.data
+          this.isLoad.accountId = false;
+          this.code.accountId = res.data.items;
       });
-      this.$https.get('/system/commonCode/serviceType')
+      // Service Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'SERVICE_TYPE' }
+        })
         .then((res) => {
-          this.isLoad.serviceType = false;
-          this.code.serviceType = res.data
+          this.isLoad.serviceTypeCode = false;
+          this.code.serviceTypeCode = res.data.items;
         });
-      this.$https.get('/system/commonCode/protocol')
+      // Domain Protocol Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'DOMAIN_PROTOCOL' }
+        })
         .then((res) => {
-          this.isLoad.domainProtocol = false;
-          this.code.domainProtocol = res.data
+          this.isLoad.domainProtocolCode = false;
+          this.code.domainProtocolCode = res.data.items;
         });
-      this.$https.get('/system/commonCode/hashing')
+      // Domain Hahing Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'HASHING_TYPE' }
+        })
         .then((res) => {
-          this.isLoad.domainHashing = false;
-          this.code.domainHashing = res.data
+          this.isLoad.domainHashingTypeCode = false;
+          this.code.domainHashingTypeCode = res.data.items;
         });
     },
 
     methods: {
       onSubmit (){
-        this.item.serviceDomainList = this.serviceDomainList.map(obj => {
+        this.items.serviceDomainList = this.serviceDomainList.map(obj => {
           return {
             serviceTypeCode: obj.serviceTypeCode,
             domainProtocolCode: obj.domainProtocolCode !== null ? obj.domainProtocolCode.code : null,
@@ -257,17 +274,32 @@
           }
         });
 
-        this.$https.post('/services', this.item)
+        this.$https.post('/services', this.items)
           .then((res) => {
-            this.$router.push({ name: 'Service 상세', params: { id: res.data }})
+            this.$router.push({ name: 'Service 상세', params: { id: res.data.items }})
           })
           .catch((error) => {
             console.log(error);
           });
       },
 
+      fetchNameExists (){
+        this.$https.get('/services/name', {
+            serviceName: this.items.serviceName
+          })
+          .then((res) => {
+            const isSuccess = res.data.result === 'Success';
+            this.state.serviceName = isSuccess;
+            this.modalMessage = isSuccess ? '사용하실 수 있습니다.' : 'Service Name 이 중복입니다.';
+            if (!isSuccess){
+              this.items.serviceName = '';
+            }
+            this.isModalMessage = true;
+          });
+      },
+
       getCodeObj (code){
-        return this.code.serviceType.find(obj => obj.code === code) || {};
+        return this.code.serviceTypeCode.find(obj => obj.code === code) || {};
       },
 
       getSelectLabel (option){
@@ -291,16 +323,16 @@
       onSelectType (item){
         const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
         if (!isContain){
-          this.item.serviceDomainList.push({
+          this.items.serviceDomainList.push({
             serviceTypeCode: item.code,
-            domainProtocolCode: this.code.domainProtocol[0].code,
-            domainHashingTypeCode: this.code.domainHashing[0].code
+            domainProtocolCode: this.code.domainProtocolCode[0].code,
+            domainHashingTypeCode: this.code.domainHashingTypeCode[0].code
           });
         }
       },
 
       onRemoveType (item){
-        this.item.serviceDomainList = this.item.serviceDomainList.filter(({serviceTypeCode}) => {
+        this.items.serviceDomainList = this.item.serviceDomainList.filter(({serviceTypeCode}) => {
           return serviceTypeCode !== item.code
         });
       }
