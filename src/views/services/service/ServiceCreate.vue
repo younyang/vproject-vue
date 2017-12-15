@@ -266,6 +266,7 @@
 
     methods: {
       onSubmit (){
+        // Service Domain List
         this.items.serviceDomainList = this.serviceDomainList.map(obj => {
           return {
             serviceTypeCode: obj.serviceTypeCode,
@@ -273,6 +274,8 @@
             domainHashingTypeCode: obj.domainHashingTypeCode !== null ? obj.domainHashingTypeCode.code : null
           }
         });
+        // History
+        this.items.modifyHistReason = '등록';
 
         this.$https.post('/services', this.items)
           .then((res) => {

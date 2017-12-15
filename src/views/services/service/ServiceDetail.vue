@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
     <content-header
-      :title="item.serviceName"
+      :title="items.serviceName"
       :name="name">
     </content-header>
 
@@ -21,47 +21,23 @@
           label="Account"
           :label-cols="3"
           :horizontal="true">
-          <!-- Edit -->
-          <multiselect
-            v-model="accountId"
-            :options="code.account"
-            :showLabels="false"
-            :custom-label="getSelectLabel"
-            :loading="isLoad.account"
-            :disabled="!isEdit"
-            :class="{'view-type': !isEdit}"
-            placeholder="Select account"
-          ></multiselect>
+          <b-form-input
+            :value="items.accountName"
+            type="text"
+            plaintext
+          ></b-form-input>
         </b-form-fieldset>
 
-        <!-- Service Name :: Edit -->
-        <b-form-fieldset
-          v-if="isEdit"
-          label="Service Name"
-          description="Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
-          :label-cols="3"
-          :horizontal="true">
-          <b-input-group>
-            <b-form-input
-              v-model="item.serviceName"
-              type="text"
-              placeholder="Enter service name">
-            </b-form-input>
-            <b-input-group-button slot="right" class="ml-2">
-              <b-button variant="outline-secondary">중복확인</b-button>
-            </b-input-group-button>
-          </b-input-group>
-        </b-form-fieldset>
-        <!-- Service Name :: View -->
+        <!-- Service Name -->
         <b-form-fieldset
           label="Service Name"
-          v-else
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.serviceName"
+            :value="items.serviceName"
             plaintext
-            type="text"></b-form-input>
+            type="text"
+          ></b-form-input>
         </b-form-fieldset>
 
         <!-- Service Type -->
@@ -74,9 +50,9 @@
             v-model="serviceTypeCode"
             :multiple="true"
             :showLabels="false"
-            :options="code.serviceType"
+            :options="code.serviceTypeCode"
             :custom-label="getSelectLabel"
-            :loading="isLoad.serviceType"
+            :loading="isLoad.serviceTypeCode"
             track-by="code"
             :disabled="true"
             :class="{'view-type': !isEdit}"
@@ -96,43 +72,44 @@
           label="Domain"
           :label-cols="3"
           :horizontal="true">
-          <ul class="icons-list" :class="{'list-view': !isEdit }">
+          <ul class="icons-list" :class="{'list-view': !isEdit}">
             <li v-for="(domain, index) in serviceDomainList">
               <i class="bg-primary" v-b-tooltip.hover :title="domain.serviceCodeName">{{ domain.serviceCodeVal }}</i>
               <div class="desc">
                 <small>Domain</small>
                 <div class="title">
                   <multiselect
+                    v-if="isEdit"
                     label="domainProtocolCode"
                     v-model="domain.domainProtocolCode"
                     class="inline sm protocol"
+                    :allowEmpty="true"
                     :showLabels="false"
-                    :allow-empty="true"
-                    :options="code.domainProtocol"
+                    :searchable="false"
+                    :options="code.domainProtocolCode"
                     :custom-label="getSelectLabel"
-                    :loading="isLoad.domainProtocol"
-                    :disabled="!isEdit"
-                    :class="{'view-type': !isEdit}"
+                    :loading="isLoad.domainProtocolCode"
                     placeholder="://"
                   ></multiselect>
-                  {{ domain.serviceCodeVal | lowercase }}.{{ item.serviceName }}.vessels.com
+                  <span v-else>{{ domain.domainProtocolName }}</span>
+                  {{ domain.serviceCodeVal | lowercase }}.{{ items.serviceName }}.vessels.com
                 </div>
               </div>
-              <div class="value" v-if="isEdit">
+              <div class="value">
                 <div class="small text-muted">Hashing Type</div>
                 <multiselect
+                  v-if="isEdit"
                   v-model="domain.domainHashingTypeCode"
                   class="inline sm"
-                  style="width: 120px"
+                  :allowEmpty="true"
                   :showLabels="false"
-                  :allow-empty="true"
-                  :options="code.domainHashing"
+                  :searchable="false"
+                  :options="code.domainHashingTypeCode"
                   :custom-label="getSelectLabel"
-                  :loading="isLoad.domainHashing"
-                  :disabled="!isEdit"
-                  :class="{'view-type': !isEdit}"
+                  :loading="isLoad.domainHashingTypeCode"
                   placeholder="Select"
                 ></multiselect>
+                <span v-else>{{ domain.domainHashingTypeName }}</span>
               </div>
             </li>
           </ul>
@@ -148,31 +125,34 @@
             type="icon"
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="item.cnameUseYn"
-            :pill="true" />
+            v-model="items.cnameUseYn"
+            :pill="true"
+          ></c-switch>
           <b-badge
             v-else
             pill
-            :variant="item.cnameUseYn ? 'success' : 'secondary'">
-            {{ item.cnameUseYn ? '사용' : '미사용' }}
+            :variant="items.cnameUseYn ? 'success' : 'secondary'">
+            {{ items.cnameUseYn ? '사용' : '미사용' }}
           </b-badge>
         </b-form-fieldset>
 
         <!-- CNAME Domain -->
         <b-form-fieldset
-          v-if="item.cnameUseYn"
+          v-if="items.cnameUseYn"
           label="CNAME 도메인"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
             v-if="isEdit"
-            v-model="item.cnameDomainName"
-            type="text"></b-form-input>
+            v-model="items.cnameDomainName"
+            type="text"
+          ></b-form-input>
           <b-form-input
             v-else
-            :value="item.cnameDomainName"
+            :value="items.cnameDomainName"
             plaintext
-            type="text"></b-form-input>
+            type="text"
+          ></b-form-input>
         </b-form-fieldset>
 
         <!-- SSL 인증서 -->
@@ -185,19 +165,20 @@
             type="icon"
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="item.sslCertUseYn"
-            :pill="true" />
+            v-model="items.sslCertUseYn"
+            :pill="true"
+          ></c-switch>
           <b-badge
             v-else
             pill
-            :variant="item.sslCertUseYn ? 'success' : 'secondary'">
-            {{ item.sslCertUseYn ? '사용' : '미사용' }}
+            :variant="items.sslCertUseYn ? 'success' : 'secondary'">
+            {{ items.sslCertUseYn ? '사용' : '미사용' }}
           </b-badge>
         </b-form-fieldset>
 
         <!-- SSL 인증서 정보 입력-->
         <b-form-fieldset
-          v-if="item.sslCertUseYn"
+          v-if="items.sslCertUseYn"
           label="SSL 인증서"
           :label-cols="3"
           :horizontal="true">
@@ -209,26 +190,26 @@
               :label-cols="2"
               :horizontal="true">
               <b-form-textarea
-                v-model="item.sslCert"
+                v-model="items.sslCert"
                 :plaintext="!isEdit"
                 :no-resize="!isEdit"
                 :disabled="!isEdit"
                 :rows="2"
-                placeholder="Cert">
-              </b-form-textarea>
+                placeholder="Cert"
+              ></b-form-textarea>
             </b-form-fieldset>
             <b-form-fieldset
               label="Key"
               :label-cols="2"
               :horizontal="true">
               <b-form-textarea
-                v-model="item.sslCertKey"
+                v-model="items.sslCertKey"
                 :plaintext="!isEdit"
                 :no-resize="!isEdit"
                 :disabled="!isEdit"
                 :rows="2"
-                placeholder="Key">
-              </b-form-textarea>
+                placeholder="Key"
+              ></b-form-textarea>
             </b-form-fieldset>
             <b-form-fieldset
               label="만료일"
@@ -237,11 +218,10 @@
               <b-form-input
                 type="date"
                 :plaintext="!isEdit"
-                v-model="item.sslCertExpireDate">
-              </b-form-input>
+                v-model="items.sslCertExpireDate"
+              ></b-form-input>
             </b-form-fieldset>
           </div>
-
         </b-form-fieldset>
 
         <!-- 사용여부 -->
@@ -251,8 +231,8 @@
           :horizontal="true">
           <b-badge
             pill
-            :variant="item.serviceUseYn ? 'success' : 'secondary'">
-            {{ item.serviceUseYn ? '사용' : '미사용' }}
+            :variant="items.serviceUseYn ? 'success' : 'secondary'">
+            {{ items.serviceUseYn ? '사용' : '미사용' }}
           </b-badge>
           <b-button
             v-if="!isEdit"
@@ -269,11 +249,11 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.deploy.status ? '성공' : '실패'"
+            :value="deploy.status ? '성공' : '실패'"
             style="width:30px"
             plaintext
             type="text"></b-form-input>
-          (<a href="#">{{ item.deploy.count }}</a>)
+          (<a href="#">{{ deploy.count }}</a>)
         </b-form-fieldset>
 
         <!-- 변경이력 -->
@@ -283,9 +263,9 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-textarea
-            v-model="item.modifyHistReason"
-            :rows="6">
-          </b-form-textarea>
+            v-model="items.modifyHistReason"
+            :rows="6"
+          ></b-form-textarea>
         </b-form-fieldset>
 
         <div slot="footer" class="form-btn" v-if="isEdit">
@@ -294,7 +274,7 @@
         </div>
         <div slot="footer" class="form-btn" v-else>
           <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-          <b-button type="button" size="sm" variant="outline-primary">이력관리</b-button>
+          <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
           <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
           <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
         </div>
@@ -319,7 +299,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.createDateTime"
+            :value="items.createDateTime"
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
@@ -329,29 +309,29 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.createId"
+            :value="items.createId"
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
         <!-- 수정일 -->
         <b-form-fieldset
-          v-if="item.modifyDateTime"
+          v-if="items.modifyDateTime"
           label="수정일"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.modifyDateTime"
+            :value="items.modifyDateTime"
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
         <!-- 수정자 -->
         <b-form-fieldset
-          v-if="item.modifyDateTime"
+          v-if="items.modifyDateTime"
           label="수정자"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="item.modifyId"
+            :value="items.modifyId"
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
@@ -361,7 +341,7 @@
     <!-- Service Type 수정 Modal -->
     <b-modal id="serviceModal" size="lg" v-model="isModalService">
       <template slot="modal-title">
-        {{ item.serviceName }}
+        {{ items.serviceName }}
         <small> > Service Type</small>
       </template>
 
@@ -376,7 +356,7 @@
             :value="serviceTypeCode"
             :multiple="true"
             :showLabels="false"
-            :options="code.serviceType"
+            :options="code.serviceTypeCode"
             :custom-label="getSelectLabel"
             :loading="isLoad.serviceType"
             track-by="code"
@@ -386,7 +366,7 @@
           label="이력관리"
           :label-cols="2"
           :horizontal="true">
-          <b-form-textarea :rows="6" v-model="item.modifyHistReason"></b-form-textarea>
+          <b-form-textarea :rows="6" v-model="items.modifyHistReason"></b-form-textarea>
         </b-form-fieldset>
       </div>
 
@@ -396,6 +376,38 @@
       </div>
     </b-modal>
 
+    <!-- History Modal -->
+    <b-modal size="lg" title="이력관리" v-model="isModalHistory">
+      <section class="board">
+        <b-table
+          striped
+          bordered
+          hover
+          show-empty
+          :items="history.items"
+          :fields="history.fields"
+        >
+          <template slot="histMgmtId" scope="row">
+            <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
+          </template>
+        </b-table>
+      </section>
+
+      <div slot="modal-footer">
+        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+      </div>
+    </b-modal>
+
+    <!-- Message Modal -->
+    <b-modal title="Message" size="sm" v-model="isModalMessage" class="modal-danger">
+      <div class="d-block text-center">
+        <h5>{{ modalMessage }}</h5>
+      </div>
+      <div slot="modal-footer">
+        <b-button type="button" size="sm" variant="danger" @click="onDeleteData"><i class="fa fa-dot-circle-o"></i> 삭제</b-button>
+        <b-button type="button" size="sm" variant="secondary" @click="isModalMessage = false"><i class="fa fa-ban"></i> 취소</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -410,38 +422,99 @@
       cSwitch
     },
 
-    computed: {
-      accountId: {
-        get () {
-          return this.item.accountId !== null
-            ? this.code.account.find(obj => obj.accountId === this.item.accountId)
-            : null;
+    data (){
+      return {
+        name: 'Service 상세',
+        items: {
+          serviceName: "",
+          accountId: null,
+          accountName: "",
+          companyName: "",
+          serviceTypeCode: [],
+          serviceDomainList: [],
+          cnameUseYn: true,
+          cnameDomainName: "",
+          sslCertUseYn: true,
+          sslCert: "",
+          sslCertKey: "",
+          sslCertExpireDate: "",
+          serviceUseYn: true,
+          createDateTime: "",
+          createId: "",
+          modifyDateTime: "",
+          modifyId: ""
         },
-        set (newValue) {
-          this.item.accountId = newValue !== null
-            ? newValue.accountId
-            : null;
+        code: {
+          serviceTypeCode: [],
+          domainProtocolCode: [],
+          domainHashingTypeCode: []
+        },
+        history: {
+          fields: {
+            createId: {label: '등록/수정자', 'class': 'text-left'},
+            histBeginDateTime: {label: '등록/수정일시'},
+            modifyHistReason: {label: '변경이력', 'class': 'text-left'},
+            histMgmtId: {label: '보기'}
+          },
+          items: []
+        },
+        isLoad: {
+          serviceTypeCode: true,
+          domainProtocolCode: true,
+          domainHashingTypeCode: true
+        },
+        isEdit: false,
+        isModalService: false,
+        isModalUse: false,
+        isModalMessage: false,
+        modalService: {
+          serviceTypeCode: [],
+          history: ''
+        },
+        modalUseYn: {
+          serviceUseYn: false,
+          history: ''
+        },
+        history: {
+          fields: {
+            createId: {label: '등록/수정자', 'class': 'text-left'},
+            histBeginDateTime: {label: '등록/수정일시'},
+            modifyHistReason: {label: '변경이력', 'class': 'text-left'},
+            histMgmtId: {label: '보기'}
+          },
+          items: []
+        },
+        isModalHistory: false,
+        modalMessage: '',
+
+        // 배포상태 - 임시
+        deploy: {
+          status: true,
+          count: 11234
         }
-      },
+      }
+    },
+
+    computed: {
       serviceTypeCode: {
         get () {
-          return this.item.serviceTypeCode.length > 0
-            ? this.item.serviceTypeCode.map(val => this.code.serviceType.find(obj => obj.code === val))
+          return this.items.serviceTypeCode.length > 0
+            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.code === val))
             : [];
         },
         set (newValue) {
-          this.item.serviceTypeCode = newValue.length > 0
+          this.items.serviceTypeCode = newValue.length > 0
             ? newValue.map(obj => obj.code)
             : [];
         }
       },
       serviceDomainList (){
-        return this.item.serviceDomainList.length > 0
-          ? this.item.serviceDomainList.map(obj => {
+        return this.items.serviceDomainList.length > 0
+          ? this.items.serviceDomainList.map(obj => {
             const serviceCode = this.getCodeObj(obj.serviceTypeCode);
             return Object.assign({}, obj, {
-              domainProtocolCode: this.code.domainProtocol.find(({code}) => code === obj.domainProtocolCode),
-              domainHashingTypeCode: this.code.domainHashing.find(({code}) => code === obj.domainHashingTypeCode),
+              domainProtocolCode: this.code.domainProtocolCode.find(({code}) => code === obj.domainProtocolCode),
+              domainHashingTypeCode: this.code.domainHashingTypeCode.find(({code}) => code === obj.domainHashingTypeCode),
               serviceCodeVal: serviceCode.codeValChar1,
               serviceCodeName: serviceCode.codeName
             })
@@ -450,78 +523,40 @@
       }
     },
 
-    data (){
-      return {
-        name: 'Service 상세',
-        item: {
-          accountId: null,
-          serviceName: '',
-          serviceTypeCode: [],
-          serviceDomainList: [],
-          cnameUseYn: false,
-          cnameDomainName: '',
-          sslCertUseYn: false,
-          sslCert: '',
-          sslCertKey: '',
-          sslCertExpireDate: '',
-          serviceUseYn: false,
-          modifyHistReason: '',
-          deploy: {
-            status: null,
-            count: null
-          }
-        },
-        code: {
-          account: [],
-          serviceType: [],
-          domainProtocol: [],
-          domainHashing: []
-        },
-        isLoad: {
-          account: true,
-          serviceType: true,
-          domainProtocol: true,
-          domainHashing: true
-        },
-        isEdit: false,
-        isModalService: false,
-        isModalUse: false,
-        isModalHistory: false,
-        modalService: {
-          serviceTypeCode: [],
-          history: ''
-        },
-        modalUseYn: {
-          serviceUseYn: false,
-          history: ''
-        }
-      }
-    },
 
     created (){
-      this.$https.get(`/services/${this.id}`)
+      // History
+      const historyId = window.location.hash.split('?histories=')[1];
+      const detailUrl = historyId !== undefined ? `/services/${this.id}/histories/${historyId}` : `/services/${this.id}`;
+
+      // Service Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'SERVICE_TYPE' }
+        })
         .then((res) => {
-          this.item = res.data
+          this.isLoad.serviceTypeCode = false;
+          this.code.serviceTypeCode = res.data.items;
         });
-      this.$https.get('/account')
+      // Domain Protocol Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'DOMAIN_PROTOCOL' }
+        })
         .then((res) => {
-          this.isLoad.account = false;
-          this.code.account = res.data
+          this.isLoad.domainProtocolCode = false;
+          this.code.domainProtocolCode = res.data.items;
         });
-      this.$https.get('/system/commonCode/serviceType')
+      // Domain Hahing Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'HASHING_TYPE' }
+        })
         .then((res) => {
-          this.isLoad.serviceType = false;
-          this.code.serviceType = res.data
+          this.isLoad.domainHashingTypeCode = false;
+          this.code.domainHashingTypeCode = res.data.items;
         });
-      this.$https.get('/system/commonCode/protocol')
+      // Detail Data
+      this.$https.get(detailUrl)
         .then((res) => {
-          this.isLoad.domainProtocol = false;
-          this.code.domainProtocol = res.data
-        });
-      this.$https.get('/system/commonCode/hashing')
-        .then((res) => {
-          this.isLoad.domainHashing = false;
-          this.code.domainHashing = res.data
+          this.items = res.data.items;
         });
     },
 
@@ -535,7 +570,7 @@
       },
 
       onSubmit (){
-        this.item.serviceDomainList = this.serviceDomainList.map(obj => {
+        this.items.serviceDomainList = this.serviceDomainList.map(obj => {
           return {
             serviceTypeCode: obj.serviceTypeCode,
             domainProtocolCode: obj.domainProtocolCode !== null ? obj.domainProtocolCode.code : null,
@@ -543,10 +578,7 @@
           }
         });
 
-        delete this.item.deploy;
-
-
-        this.$https.put(`/services/${this.id}`, this.item)
+        this.$https.put(`/services/${this.id}`, this.items)
           .then((res) => {
             this.$router.go(this.$router.currentRoute);
           })
@@ -572,6 +604,11 @@
       },
 
       onDelete (){
+        this.modalMessage = '정말 삭제하시겠습니까?';
+        this.isModalMessage = true;
+      },
+
+      onDeleteData (){
         this.$https.delete(`/services/${this.id}`)
           .then((res) => {
             this.$router.push({ name: 'Service 관리' });
@@ -581,19 +618,27 @@
           });
       },
 
+      getHistoryLink (rowId){
+        return `#/configuration/pop/${this.id}?histories=${rowId}`
+      },
+
+      showHistory () {
+        this.isModalHistory = !this.isModalHistory;
+        this.$https.get(`/services/${this.id}/histories`)
+          .then((res) => {
+            this.history.items = res.data.items;
+          });
+      },
+
       getCodeObj (code){
-        return this.code.serviceType.find(obj => obj.code === code) || {};
+        return this.code.serviceTypeCode.find(obj => obj.code === code) || {};
       },
 
       getSelectLabel (option){
-        let codeType = (option.accountName)
-          ? 'ACCOUNT'
-          : (option.code) ? option.code.split('_')[0] : '';
+        let codeType = (option.code) ? option.code.split('_')[0] : '';
         let label = '';
 
-        if (codeType === 'ACCOUNT'){
-          label = `${option.accountName}/${option.companyName}`;
-        } else if (codeType === 'SERVICE'){
+        if (codeType === 'SERVICE'){
           label = option.codeValChar1 !== option.codeName
             ? `${option.codeValChar1} > ${option.codeName}`
             : option.codeName
