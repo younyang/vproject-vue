@@ -46,7 +46,7 @@
             :multiple="true"
             :showLabels="false"
             :options="code.serviceTypeCode"
-            :custom-label="getSelectLabel"
+            label="codeName"
             :loading="isLoad.serviceTypeCode"
             track-by="code"
             @select="onSelectType"
@@ -67,13 +67,13 @@
                 <small>Domain</small>
                 <div class="title">
                   <multiselect
-                    label="domainProtocolCode"
+                    label="codeName"
                     v-model="domain.domainProtocolCode"
                     class="inline sm protocol"
+                    :allowEmpty="true"
                     :showLabels="false"
-                    :allow-empty="true"
+                    :searchable="false"
                     :options="code.domainProtocolCode"
-                    :custom-label="getSelectLabel"
                     :loading="isLoad.domainProtocolCode"
                     placeholder="://"
                   ></multiselect>
@@ -84,12 +84,12 @@
                 <div class="small text-muted">Hashing Type</div>
                 <multiselect
                   v-model="domain.domainHashingTypeCode"
+                  label="codeName"
                   class="inline sm"
-                  style="width: 120px"
+                  :allowEmpty="true"
                   :showLabels="false"
-                  :allow-empty="true"
+                  :searchable="false"
                   :options="code.domainHashingTypeCode"
-                  :custom-label="getSelectLabel"
                   :loading="isLoad.domainHashingTypeCode"
                   placeholder="Select"
                 ></multiselect>
@@ -244,7 +244,10 @@
         })
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items;
+          this.code.serviceTypeCode = res.data.items.filter(({code, codeName, codeValChar1}) => {
+            const number = code.split('_')[2];
+            return !(number.length === 4 && codeName === codeValChar1);
+          });
         });
       // Domain Protocol Code
       this.$https.get('/system/commonCode', {
@@ -306,21 +309,7 @@
       },
 
       getSelectLabel (option){
-        let codeType = (option.accountName)
-          ? 'ACCOUNT'
-          : (option.code) ? option.code.split('_')[0] : '';
-        let label = '';
-
-        if (codeType === 'ACCOUNT'){
-          label = `${option.accountName}/${option.companyName}`;
-        } else if (codeType === 'SERVICE'){
-          label = option.codeValChar1 !== option.codeName
-            ? `${option.codeValChar1} > ${option.codeName}`
-            : option.codeName
-        } else {
-          label = option.codeName
-        }
-        return label
+        return `${option.accountName}/${option.companyName}`
       },
 
       onSelectType (item){

@@ -46,18 +46,9 @@
           :label-cols="3"
           :horizontal="true">
 
-          <multiselect
-            v-model="serviceTypeCode"
-            :multiple="true"
-            :showLabels="false"
-            :options="code.serviceTypeCode"
-            :custom-label="getSelectLabel"
-            :loading="isLoad.serviceTypeCode"
-            track-by="code"
-            :disabled="true"
-            :class="{'view-type': !isEdit}"
-            placeholder="Select service type"
-          ></multiselect>
+          <span class="badge badge-success badge-pill" v-for="obj in serviceTypeCode">
+            {{ obj.codeName }}
+          </span>
           <b-button
             v-if="!isEdit"
             class="only-icon"
@@ -80,14 +71,13 @@
                 <div class="title">
                   <multiselect
                     v-if="isEdit"
-                    label="domainProtocolCode"
+                    label="codeName"
                     v-model="domain.domainProtocolCode"
                     class="inline sm protocol"
                     :allowEmpty="true"
                     :showLabels="false"
                     :searchable="false"
                     :options="code.domainProtocolCode"
-                    :custom-label="getSelectLabel"
                     :loading="isLoad.domainProtocolCode"
                     placeholder="://"
                   ></multiselect>
@@ -100,12 +90,12 @@
                 <multiselect
                   v-if="isEdit"
                   v-model="domain.domainHashingTypeCode"
+                  label="codeName"
                   class="inline sm"
                   :allowEmpty="true"
                   :showLabels="false"
                   :searchable="false"
                   :options="code.domainHashingTypeCode"
-                  :custom-label="getSelectLabel"
                   :loading="isLoad.domainHashingTypeCode"
                   placeholder="Select"
                 ></multiselect>
@@ -237,7 +227,9 @@
           <b-button
             v-if="!isEdit"
             class="only-icon"
-            variant="link">
+            variant="link"
+            @click="isModalUseYn = !isModalUseYn"
+          >
             <i class="fa fa-pencil" ></i>
           </b-button>
         </b-form-fieldset>
@@ -267,17 +259,6 @@
             :rows="6"
           ></b-form-textarea>
         </b-form-fieldset>
-
-        <div slot="footer" class="form-btn" v-if="isEdit">
-          <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-          <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
-        </div>
-        <div slot="footer" class="form-btn" v-else>
-          <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-          <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-          <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
-        </div>
       </b-card>
     </b-collapse>
 
@@ -338,41 +319,103 @@
       </b-card>
     </b-collapse>
 
+    <div class="page-btn" v-if="isEdit">
+      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+    </div>
+    <div class="page-btn" v-else>
+      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
+      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
+      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+    </div>
+
     <!-- Service Type 수정 Modal -->
-    <b-modal id="serviceModal" size="lg" v-model="isModalService">
+    <b-modal id="serviceModal" size="lg" v-model="isModalService" @hide="onResetService">
       <template slot="modal-title">
         {{ items.serviceName }}
         <small> > Service Type</small>
       </template>
 
       <div class="form-in-group">
-        <!-- Cert -->
+        <b-form-fieldset
+          label="구분"
+          :label-cols="2"
+          :horizontal="true">
+          <b-form-radio-group
+            :options="[{ text: '추가', value: 'ADD'},{ text: '삭제', value: 'DELETE'}]"
+            :value="serviceItems.command"
+            v-model="serviceItems.command"
+          ></b-form-radio-group>
+        </b-form-fieldset>
         <b-form-fieldset
           label="Service Type"
           :label-cols="2"
           :horizontal="true">
           <multiselect
-            v-model="modalService.serviceTypeCode"
-            :value="serviceTypeCode"
+            v-model="serviceTypeCode"
+            trackBy="code"
+            label="codeName"
+            :showPointer="false"
             :multiple="true"
             :showLabels="false"
             :options="code.serviceTypeCode"
-            :custom-label="getSelectLabel"
-            :loading="isLoad.serviceType"
-            track-by="code"
-          ></multiselect>
+            :loading="isLoad.serviceTypeCode"
+            :closeOnSelect="false"
+            :allowEmpty="true"
+            @select="onSelectType"
+            @remove="onRemoveType"
+            :class="{'addMode': serviceItems.command ==='ADD' }"
+            placeholder="Select service type"
+          >
+          </multiselect>
         </b-form-fieldset>
         <b-form-fieldset
           label="이력관리"
           :label-cols="2"
           :horizontal="true">
-          <b-form-textarea :rows="6" v-model="items.modifyHistReason"></b-form-textarea>
+          <b-form-textarea :rows="6" v-model="serviceItems.modifyHistReason"></b-form-textarea>
         </b-form-fieldset>
       </div>
 
       <div slot="modal-footer">
         <b-button type="button" size="sm" variant="primary" @click="onSubmitService"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="button" size="sm" variant="danger" @click="isModalService=false"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" size="sm" variant="danger" @click="onResetService"><i class="fa fa-ban"></i> 취소</b-button>
+      </div>
+    </b-modal>
+
+
+    <!-- 사용여부 수정 Modal -->
+    <b-modal size="lg" v-model="isModalUseYn" @hide="onResetUseYn">
+      <template slot="modal-title">
+        {{ items.serviceName }}
+        <small> > 사용 여부</small>
+      </template>
+
+      <div class="form-in-group">
+        <b-form-fieldset
+          label="사용 여부"
+          :label-cols="2"
+          :horizontal="true">
+          <c-switch
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            v-model="serviceUseYnItems.serviceUseYn"
+            :pill="true"
+          ></c-switch>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="이력관리"
+          :label-cols="2"
+          :horizontal="true">
+          <b-form-textarea :rows="6" v-model="serviceUseYnItems.modifyHistReason"></b-form-textarea>
+        </b-form-fieldset>
+      </div>
+
+      <div slot="modal-footer">
+        <b-button type="button" size="sm" variant="primary" @click="onSubmitUseYn"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+        <b-button type="button" size="sm" variant="danger" @click="onResetUseYn"><i class="fa fa-ban"></i> 취소</b-button>
       </div>
     </b-modal>
 
@@ -445,6 +488,15 @@
           modifyDateTime: "",
           modifyId: ""
         },
+        serviceItems: {
+          command: "ADD",
+          serviceTypeCode: [],
+          modifyHistReason: "서비스 타입 추가"
+        },
+        serviceUseYnItems: {
+          serviceUseYn: null,
+          modifyHistReason: "서비스 사용 여부 변경"
+        },
         code: {
           serviceTypeCode: [],
           domainProtocolCode: [],
@@ -466,7 +518,8 @@
         },
         isEdit: false,
         isModalService: false,
-        isModalUse: false,
+        isServiceAdd: true,
+        isModalUseYn: false,
         isModalMessage: false,
         modalService: {
           serviceTypeCode: [],
@@ -549,7 +602,8 @@
       this.$https.get(detailUrl)
         .then((res) => {
           this.items = res.data.items;
-          this.originItems = {...this.items};
+          this.originItems = JSON.parse(JSON.stringify(this.items));
+          this.serviceUseYnItems.serviceUseYn = this.items.serviceUseYn;
         });
     },
 
@@ -560,7 +614,7 @@
 
       onView (){
         this.isEdit = false;
-        this.items = {...this.originItems};
+        this.items = JSON.parse(JSON.stringify(this.originItems));
       },
 
       onSubmit (){
@@ -583,18 +637,45 @@
 
       // Service Type Popup Save
       onSubmitService (){
-        console.log(this.modalService)
-        /*
-        const serviceType = this.serviceType
-        const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
-        if (!isContain){
-          this.item.serviceDomainList.push({
-            serviceTypeCode: item.code,
-            domainProtocolCode: null,
-            domainHashingTypeCode: null
-          });
-        }*/
+        this.serviceItems.serviceTypeCode = [...this.items.serviceTypeCode];
 
+        this.$https.put(`/services/${this.id}/types`, this.serviceItems)
+          .then(() => {
+            this.$router.go(this.$router.currentRoute);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+
+      onResetService (){
+        this.isModalService = false;
+        this.items = JSON.parse(JSON.stringify(this.originItems));
+        this.serviceItems = {
+          command: "ADD",
+          serviceTypeCode: [],
+          modifyHistReason: "서비스 타입 추가"
+        }
+      },
+
+      // Service UseYn Popup Save
+      onSubmitUseYn (){
+        this.$https.put(`/services/${this.id}/use`, this.serviceUseYnItems)
+          .then(() => {
+            this.$router.go(this.$router.currentRoute);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+
+      onResetUseYn (){
+        this.isModalUseYn = false;
+        this.items = JSON.parse(JSON.stringify(this.originItems));
+        this.serviceUseYnItems = {
+          serviceUseYn: this.items.serviceUseYn,
+          modifyHistReason: "서비스 사용 여부 변경"
+        }
       },
 
       onDelete (){
@@ -628,18 +709,34 @@
         return this.code.serviceTypeCode.find(obj => obj.code === code) || {};
       },
 
-      getSelectLabel (option){
-        let codeType = (option.code) ? option.code.split('_')[0] : '';
-        let label = '';
-
-        if (codeType === 'SERVICE'){
-          label = option.codeValChar1 !== option.codeName
-            ? `${option.codeValChar1} > ${option.codeName}`
-            : option.codeName
-        } else {
-          label = option.codeName
+      onSelectType (item){
+        const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
+        if (!isContain){
+          this.items.serviceDomainList.push({
+            serviceTypeCode: item.code,
+            domainProtocolCode: this.code.domainProtocolCode[0].code,
+            domainHashingTypeCode: this.code.domainHashingTypeCode[0].code
+          });
         }
-        return label
+      },
+
+      onRemoveType (item){
+        console.log(item)
+        this.$https.get('/services/types', {
+            serviceType: item.code
+          })
+          .then((res) => {
+            const isSuccess = res.data.result === 'Success';
+            if (!isSuccess){
+              this.items.serviceName = '';
+              this.modalMessage = `
+              사용 설정된 PoP이 존재하여 삭제할 수 없습니다.
+              삭제 후, 다시 시도해주세요.
+              `;
+              this.isModalMessage = true;
+              this.items = JSON.parse(JSON.stringify(this.originItems));
+            }
+          });
       }
     }
   }

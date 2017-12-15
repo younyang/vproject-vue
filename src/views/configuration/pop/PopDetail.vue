@@ -439,7 +439,7 @@
       this.$https.get(detailUrl)
         .then((res) => {
           this.items = res.data.items;
-          this.originItems = {...this.items}
+          this.originItems = JSON.parse(JSON.stringify(this.items));
 
           if (this.items.popCtprvnCode !== ''){
             this.fetchAddress(this.items.popCtprvnCode);
@@ -455,7 +455,7 @@
 
       onView (){
         this.isEdit = false;
-        this.items = {...this.originItems}
+        this.items = JSON.parse(JSON.stringify(this.originItems));
       },
 
       onSubmit (){

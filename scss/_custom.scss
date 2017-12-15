@@ -255,6 +255,16 @@
   }
 }
 
+/* Add Mode */
+.multiselect.addMode {
+  .multiselect__tag-icon {
+    display: none;
+  }
+  .multiselect__tag {
+    padding-right: 10px;
+  }
+}
+
 .multiselect.inline {
   display: inline-block;
   width: auto;
@@ -310,7 +320,7 @@
   i {
     font-style: normal;
     font-size: 0.5rem;
-    margin-top: 18px;
+    margin-top: 20px;
     width: 38px !important;
     height: 30px !important;
     line-height: 30px !important;
