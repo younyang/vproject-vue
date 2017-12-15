@@ -425,6 +425,7 @@
     data (){
       return {
         name: 'Service 상세',
+        originItems: {},
         items: {
           serviceName: "",
           accountId: null,
@@ -474,15 +475,6 @@
         modalUseYn: {
           serviceUseYn: false,
           history: ''
-        },
-        history: {
-          fields: {
-            createId: {label: '등록/수정자', 'class': 'text-left'},
-            histBeginDateTime: {label: '등록/수정일시'},
-            modifyHistReason: {label: '변경이력', 'class': 'text-left'},
-            histMgmtId: {label: '보기'}
-          },
-          items: []
         },
         isModalHistory: false,
         modalMessage: '',
@@ -557,6 +549,7 @@
       this.$https.get(detailUrl)
         .then((res) => {
           this.items = res.data.items;
+          this.originItems = {...this.items};
         });
     },
 
@@ -567,6 +560,7 @@
 
       onView (){
         this.isEdit = false;
+        this.items = {...this.originItems};
       },
 
       onSubmit (){
@@ -619,7 +613,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/pop/${this.id}?histories=${rowId}`
+        return `#/service/service/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
