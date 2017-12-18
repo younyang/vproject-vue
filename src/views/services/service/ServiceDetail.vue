@@ -234,20 +234,6 @@
           </b-button>
         </b-form-fieldset>
 
-        <!-- 배포상태 -->
-        <b-form-fieldset
-          v-if="!isEdit"
-          label="배포상태"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="deploy.status ? '성공' : '실패'"
-            style="width:30px"
-            plaintext
-            type="text"></b-form-input>
-          (<a href="#">{{ deploy.count }}</a>)
-        </b-form-fieldset>
-
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
@@ -315,6 +301,19 @@
             :value="items.modifyId"
             plaintext
             type="text"></b-form-input>
+        </b-form-fieldset>
+        <!-- 배포상태 -->
+        <b-form-fieldset
+          v-if="!isEdit"
+          label="배포상태"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            :value="deploy.status ? '성공' : '실패'"
+            style="width:30px"
+            plaintext
+            type="text"></b-form-input>
+          (<a href="#">{{ deploy.count }}</a>)
         </b-form-fieldset>
       </b-card>
     </b-collapse>
@@ -627,7 +626,7 @@
         });
 
         this.$https.put(`/services/${this.id}`, this.items)
-          .then((res) => {
+          .then(() => {
             this.$router.go(this.$router.currentRoute);
           })
           .catch((error) => {
@@ -638,6 +637,7 @@
       // Service Type Popup Save
       onSubmitService (){
         this.serviceItems.serviceTypeCode = [...this.items.serviceTypeCode];
+        console.log(this.serviceItems)
 
         this.$https.put(`/services/${this.id}/types`, this.serviceItems)
           .then(() => {
@@ -722,7 +722,7 @@
 
       onRemoveType (item){
         console.log(item)
-        this.$https.get('/services/types', {
+        this.$https.get(`services/${this.id}/types`, {
             serviceType: item.code
           })
           .then((res) => {
