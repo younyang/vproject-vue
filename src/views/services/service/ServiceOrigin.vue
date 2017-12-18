@@ -357,7 +357,7 @@
                   return originBucketId === obj.originBucketId
                 })
               : null,
-            originSectionCodeName: originSectionCode ? originSectionCode.codeName : ''
+            originSectionCodeName
           }
         });
         this.originItems = JSON.parse(JSON.stringify(this.items))

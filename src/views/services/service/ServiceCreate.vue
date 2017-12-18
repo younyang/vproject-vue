@@ -112,6 +112,18 @@
           ></c-switch>
         </b-form-fieldset>
 
+        <!-- CNAME Domain -->
+        <b-form-fieldset
+          v-if="items.cnameUseYn"
+          label="CNAME 도메인"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            v-model="items.cnameDomainName"
+            type="text"
+          ></b-form-input>
+        </b-form-fieldset>
+
         <!-- SSL 인증서 -->
         <b-form-fieldset
           label="SSL 인증서"
@@ -124,6 +136,47 @@
             v-model="items.sslCertUseYn"
             :pill="true"
           ></c-switch>
+        </b-form-fieldset>
+
+        <!-- SSL 인증서 정보 입력-->
+        <b-form-fieldset
+          v-if="items.sslCertUseYn"
+          label="SSL 인증서"
+          :label-cols="3"
+          :horizontal="true">
+
+          <div class="form-in-group">
+            <!-- Cert -->
+            <b-form-fieldset
+              label="Cert"
+              :label-cols="2"
+              :horizontal="true">
+              <b-form-textarea
+                v-model="items.sslCert"
+                :rows="2"
+                placeholder="Cert"
+              ></b-form-textarea>
+            </b-form-fieldset>
+            <b-form-fieldset
+              label="Key"
+              :label-cols="2"
+              :horizontal="true">
+              <b-form-textarea
+                v-model="items.sslCertKey"
+                :rows="2"
+                placeholder="Key"
+              ></b-form-textarea>
+            </b-form-fieldset>
+            <b-form-fieldset
+              label="만료일"
+              :label-cols="2"
+              :horizontal="true">
+              <b-form-input
+                type="date"
+                v-model="items.sslCertExpireDate"
+              ></b-form-input>
+            </b-form-fieldset>
+          </div>
         </b-form-fieldset>
 
         <!-- 사용여부 -->
@@ -172,7 +225,11 @@
           serviceTypeCode: [],
           serviceDomainList: [],
           cnameUseYn: true,
+          cnameDomainName: "",
           sslCertUseYn: true,
+          sslCert: "",
+          sslCertKey: "",
+          sslCertExpireDate: "",
           serviceUseYn: true
         },
         code: {
