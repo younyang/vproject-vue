@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
     <content-header
-      :title="items.serviceName"
+      :title="serviceName"
       :name="name">
     </content-header>
 
@@ -233,13 +233,14 @@
       return {
         name: 'Service 상세',
         originItems: {},
+        serviceName: '',
         items: {
           originList: [],
           createDateTime: "",
           createId: "",
           modifyDateTime: "",
           modifyId: "",
-          modifyHistReason: "",
+          modifyHistReason: "등록",
           histMgmtId: null,
         },
         code: {
@@ -276,6 +277,13 @@
       // History
       const historyId = window.location.hash.split('?histories=')[1];
       const detailUrl = historyId !== undefined ? `/services/${this.id}/origins/histories/${historyId}` : `/services/${this.id}/origins`;
+
+      // Service Name
+      this.$https.get(`/services/${this.id}`)
+        .then((res) => {
+          this.serviceName = res.data.items.serviceName;
+        });
+
 
       // Origin Service Type List
       this.$https.get(`${detailUrl}/types`)
@@ -315,7 +323,7 @@
 
       onView (){
         this.isEdit = false;
-        this.items = {...this.originItems};
+        this.items = JSON.parse(JSON.stringify(this.originItems))
       },
 
       onLoadCreate (){

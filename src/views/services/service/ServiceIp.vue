@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
     <content-header
-      :title="items.serviceName"
+      :title="serviceName"
       :name="name">
     </content-header>
 
@@ -10,91 +10,96 @@
         variant="secondary"
         v-b-toggle.formDefault
         :block="true">
-        Origin
+        IP Restriction
         <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="formDefault" visible>
-      <b-card v-for="(origin, index) in items.originList" :key="origin.serviceTypeCode">
-        <div slot="header">
-          <i class='fa fa-angle-right'></i> {{ origin.serviceTypeName }}
-        </div>
-
-        <!-- Origin 사용설정 -->
+      <b-card>
+        <!-- 사용여부 -->
         <b-form-fieldset
-          label="Origin 사용 설정 *"
+          label="사용여부"
           :label-cols="3"
           :horizontal="true">
-          <b-form-radio-group
+          <c-switch
             v-if="isEdit"
-            v-model="origin.originSectionCode"
-            :options="code.originSectionCode"
-            :name="origin.serviceTypeCode"
-            value-field="code"
-            text-field="codeName"
-          ></b-form-radio-group>
-          <b-form-input
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            v-model="items.ipRestrictUseYn"
+            :pill="true"
+          ></c-switch>
+          <b-badge
             v-else
-            :value="origin.originSectionCodeName"
-            type="text"
-            plaintext
-          ></b-form-input>
+            pill
+            :variant="items.ipRestrictUseYn ? 'success' : 'secondary'">
+            {{ items.ipRestrictUseYn ? '사용' : '미사용' }}
+          </b-badge>
         </b-form-fieldset>
 
-        <!-- Bucket 선택 -->
+        <!-- 제한 IP(공통) -->
         <b-form-fieldset
-          v-if="origin.originSectionCode === 'ORIGIN_SECTION_01'"
-          label="Bucket 선택 *"
+          v-if="items.ipRestrictUseYn"
+          label="제한 IP(공통)"
           :label-cols="3"
           :horizontal="true">
-          <multiselect
+          <ul class="icons-list list-view">
+            <li v-for="(ip, index) in code.ipRestriction">
+              <i class="bg-primary">{{ ip.ipRestrictGlobalSeq }}</i>
+              <div class="desc">
+                <small>서버 IP 주소</small>
+                <div class="title">
+                  <span>{{ ip.ip }}</span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </b-form-fieldset>
+
+        <!-- 제한 IP(serviceName) -->
+        <b-form-fieldset
+          v-if="items.ipRestrictUseYn"
+          description="※ 공통으로 제한되는 IP 주소는 Policy 메뉴에서 수정할 수 있습니다.<br>
+          ※ 사용여부를 ‘미사용’으로 설정하시더라도 공통으로 설정된 IP주소는 제한됩니다."
+          :label-cols="3"
+          :horizontal="true">
+          <template slot="label">제한 IP(<strong class="text-primary">{{ serviceName }}</strong>)</template>
+          <b-button
+            type="button"
+            size="sm"
+            class="mt-2 mb-2"
             v-if="isEdit"
-            v-model="origin.originBucketId"
-            label="originBucketName"
-            class="inline"
-            style="min-width: 120px;"
-            :id="index"
-            :allowEmpty="true"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.originBucketId"
-            :loading="isLoad.originBucketId"
-            @select="onBucket"
-            placeholder="Select Bucket"
-          ></multiselect>
-          <b-form-input
-            v-else
-            :value="origin.originBucketName"
-            type="text"
-            plaintext
-          ></b-form-input>
-          {{ origin.operatorName }} /
-          {{ origin.operatorTeamName }}
-        </b-form-fieldset>
-
-        <!-- Origin Domain -->
-        <b-form-fieldset
-          v-if="origin.originSectionCode === 'ORIGIN_SECTION_02'"
-          label="Origin Domain *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="origin.originDomainName"
-            type="text"
-            :plaintext="!isEdit"
-          ></b-form-input>
-        </b-form-fieldset>
-        <b-form-fieldset
-          v-if="origin.originSectionCode === 'ORIGIN_SECTION_02'"
-          label="Port *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            style="width: 120px"
-            v-model="origin.originPort"
-            type="text"
-            :plaintext="!isEdit"
-          ></b-form-input>
+            variant="outline-primary"
+            @click="onAddRestrict">
+            <i class="fa fa-plus"></i> 추가
+          </b-button>
+          <ul class="icons-list" :class="{'list-noIcon' : isCreate }">
+            <li v-for="(ip, index) in items.ipRestrictServiceList">
+              <i class="bg-primary" v-if="!isCreate">{{ ip.ipRestrictServiceSeq }}</i>
+              <div class="desc">
+                <small>서버 IP 주소</small>
+                <div class="title">
+                  <b-form-input
+                    v-model="ip.ip"
+                    type="text"
+                    :plaintext="!isEdit"
+                  ></b-form-input>
+                </div>
+              </div>
+              <div class="value" v-if="index > 0">
+                <div class="small text-muted">&nbsp;</div>
+                <b-button
+                  v-if="isEdit"
+                  type="button"
+                  size="sm"
+                  variant="outline-danger"
+                  class="list-del"
+                  @click="onDelRestrict(index)">
+                  <i class="fa fa-trash"></i>
+                </b-button>
+              </div>
+            </li>
+          </ul>
         </b-form-fieldset>
       </b-card>
 
@@ -233,19 +238,18 @@
       return {
         name: 'Service 상세',
         originItems: {},
+        serviceName: '',
         items: {
-          originList: [],
+          ipRestrictUseYn : false,
+          ipRestrictServiceList: [{ ip: '' }],
           createDateTime: "",
           createId: "",
           modifyDateTime: "",
           modifyId: "",
-          modifyHistReason: "",
-          histMgmtId: null,
+          modifyHistReason: "등록"
         },
         code: {
-          serviceTypeList: [],
-          originSectionCode: [],
-          originBucketId: []
+          ipRestriction: []
         },
         history: {
           fields: {
@@ -255,10 +259,6 @@
             histMgmtId: {label: '보기'}
           },
           items: []
-        },
-        isLoad: {
-          originSectionCode: true,
-          originBucketId: true
         },
         isCreate: false,
         isEdit: false,
@@ -275,36 +275,30 @@
     created (){
       // History
       const historyId = window.location.hash.split('?histories=')[1];
-      const detailUrl = historyId !== undefined ? `/services/${this.id}/origins/histories/${historyId}` : `/services/${this.id}/origins`;
+      const detailUrl = historyId !== undefined ? `/services/${this.id}/restriction/histories/${historyId}` : `/services/${this.id}/restriction`;
 
-      // Origin Service Type List
-      this.$https.get(`${detailUrl}/types`)
+      // Service Name
+      this.$https.get(`/services/${this.id}`)
         .then((res) => {
-          this.code.serviceTypeList = res.data.items;
+          this.serviceName = res.data.items.serviceName;
         });
 
-      // Origin Section Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'ORIGIN_SECTION' }
-      })
+
+      // Policy > IP Restriction List
+      this.$https.get('/policy/ipRestriction')
         .then((res) => {
-          this.isLoad.originSectionCode = false;
-          this.code.originSectionCode = res.data.items;
-        });
-      // Bucket List
-      this.$https.get(`${detailUrl}/buckets`)
-        .then((res) => {
-          this.isLoad.originBucketId = false;
-          this.code.originBucketId = res.data.items;
+          this.code.ipRestriction = res.data.items.ipRestrictGlobal;
         });
 
-      // Origin Data
+      // IP Restriction Data
       this.$https.get(detailUrl)
         .then((res) => {
-          this.onLoadDetail(res.data);
+          this.items = res.data.items;
+          this.originItems = JSON.parse(JSON.stringify(this.items))
         })
         .catch((error) => {
-          this.onLoadCreate();
+          this.isCreate = true;
+          this.isEdit = true;
         })
     },
 
@@ -315,68 +309,24 @@
 
       onView (){
         this.isEdit = false;
-        this.items = {...this.originItems};
+        this.items = JSON.parse(JSON.stringify(this.originItems))
       },
 
-      onLoadCreate (){
-        this.isCreate = true;
-        this.isEdit = true;
-        this.items.originList = this.code.serviceTypeList.map(({ serviceTypeCode, serviceTypeName }) => ({
-          serviceTypeCode,
-          serviceTypeName,
-          originSectionCodeName: '',
-          originBucketId: null,
-          originBucketName: '',
-          operatorName: '',
-          operatorTeamName: '',
-          originSectionCode: null,
-          originDomainName: null,
-          originPort: null
-        }))
-      },
-
-      onLoadDetail (data){
-        this.items = {...data.items};
-        this.items.originList = data.items.originList.map(obj => {
-          const originSectionCode = this.code.originSectionCode.find(({code}) => {
-            return code === obj.originSectionCode
-          });
-          const originSectionCodeName = originSectionCode ? originSectionCode.codeName : '';
-          return {
-            ...obj,
-            originBucketId: obj.originBucketId
-              ? this.code.originBucketId.find(({originBucketId}) => {
-                return originBucketId === obj.originBucketId
-              })
-              : null,
-            originSectionCodeName: originSectionCode ? originSectionCode.codeName : ''
-          }
+      onAddRestrict (){
+        this.items.ipRestrictServiceList.push({
+          ip: ''
         });
-        this.originItems = JSON.parse(JSON.stringify(this.items))
+      },
+
+      onDelRestrict (index){
+        this.items.ipRestrictServiceList.splice(index, 1);
       },
 
       onSubmit (){
-        this.items.originList = this.items.originList.map(obj => {
-          const {
-            serviceTypeCode,
-            originSectionCode,
-            originBucketId,
-            originDomainName,
-            originPort
-          } = obj;
-
-          return {
-            serviceTypeCode,
-            originSectionCode,
-            originBucketId: originBucketId ? originBucketId.originBucketId : null,
-            originDomainName,
-            originPort,
-            modifyHistReason: this.items.modifyHistReason
-          }
-        });
-
+        const { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason } = this.items;
+        const items = { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason };
         if (this.isCreate){
-          this.$https.post(`/services/${this.id}/origins`, this.items.originList)
+          this.$https.post(`/services/${this.id}/restriction`, items)
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -384,8 +334,8 @@
               console.log(error);
             });
         } else {
-          this.$https.put(`/services/${this.id}/origins`, this.items.originList)
-            .then((res) => {
+          this.$https.put(`/services/${this.id}/restriction`, items)
+            .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
             .catch((error) => {
@@ -394,35 +344,16 @@
         }
       },
 
-      onBucket ({ operatorName, operatorTeamName }, index){
-        this.items.originList[index].operatorName = operatorName;
-        this.items.originList[index].operatorTeamName = operatorTeamName;
-      },
-
       getHistoryLink (rowId){
-        return `#/service/service/${this.id}/origin?histories=${rowId}`
+        return `#/service/service/${this.id}/ip?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/services/${this.id}/origins/histories`)
+        this.$https.get(`/services/${this.id}/restriction/histories`)
           .then((res) => {
             this.history.items = res.data.items;
           });
-      },
-
-      getSelectLabel (option){
-        let codeType = (option.code) ? option.code.split('_')[0] : '';
-        let label = '';
-
-        if (codeType === 'SERVICE'){
-          label = option.codeValChar1 !== option.codeName
-            ? `${option.codeValChar1} > ${option.codeName}`
-            : option.codeName
-        } else {
-          label = option.codeName
-        }
-        return label
       }
     }
   }

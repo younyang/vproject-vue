@@ -314,16 +314,28 @@
   height: auto;
   margin-top: 10px;
 
+  &:after {
+    clear:both;
+    content: '';
+    display: block;
+  }
   &:first-child {
     margin-top: 0;
   }
-  i {
+  > i {
     font-style: normal;
     font-size: 0.5rem;
     margin-top: 20px;
     width: 38px !important;
     height: 30px !important;
     line-height: 30px !important;
+  }
+  .btn.list-del {
+    padding: 0;
+    i {
+      margin: 0;
+      float: none;
+    }
   }
   .desc {
     height: auto !important;
@@ -340,10 +352,16 @@
     margin-top: 15px;
   }
 }
+.icons-list.list-noIcon {
+  margin-top: 15px;
+  .desc {
+    margin-left: 0;
+  }
+}
 
-/**
- * Modal
- */
+  /**
+   * Modal
+   */
 .modal-dialog {
   margin: 80px auto;
 }
