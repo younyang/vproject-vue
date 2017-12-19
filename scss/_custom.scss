@@ -393,6 +393,27 @@ section.board {
 
 
 /**
- * Leaflet
+ * History Mode
  */
+.history-mode {
+  header,
+  .sidebar,
+  .breadcrumb,
+  .page-btn {
+    display: none;
+  }
+  .main {
+    margin-left: 0 !important;
+  }
+
+  .app-body,
+  .page-title {
+    margin-top: 0 !important;
+
+    .nav-item a,
+    .btn.only-icon {
+      pointer-events: none;
+    }
+  }
+}
 
