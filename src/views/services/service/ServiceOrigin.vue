@@ -278,6 +278,10 @@
       const historyId = window.location.hash.split('?histories=')[1];
       const detailUrl = historyId !== undefined ? `/services/${this.id}/origins/histories/${historyId}` : `/services/${this.id}/origins`;
 
+      if (historyId){
+        document.querySelector('body.app').classList.add('history-mode')
+      }
+
       // Service Name
       this.$https.get(`/services/${this.id}`)
         .then((res) => {

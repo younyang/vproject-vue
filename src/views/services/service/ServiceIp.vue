@@ -277,6 +277,10 @@
       const historyId = window.location.hash.split('?histories=')[1];
       const detailUrl = historyId !== undefined ? `/services/${this.id}/restriction/histories/${historyId}` : `/services/${this.id}/restriction`;
 
+      if (historyId){
+        document.querySelector('body.app').classList.add('history-mode')
+      }
+
       // Service Name
       this.$https.get(`/services/${this.id}`)
         .then((res) => {
