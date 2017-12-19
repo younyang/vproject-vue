@@ -274,7 +274,7 @@
 
     created (){
       // History
-      const historyId = window.location.hash.split('?histories=')[1];
+      const historyId = this.$route.query.histories;
       const detailUrl = historyId !== undefined ? `/services/${this.id}/restriction/histories/${historyId}` : `/services/${this.id}/restriction`;
 
       if (historyId){

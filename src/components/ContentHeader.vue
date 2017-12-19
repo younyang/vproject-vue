@@ -3,8 +3,8 @@
     <h2>{{ title }}</h2>
 
     <b-nav pills v-if="navList.isNav">
-      <b-nav-item v-for="nav in navList.list" :key="nav.path" :to="{ name: nav.name }">
-          {{ nav.name }}
+      <b-nav-item v-for="nav in navList.list" :key="nav.path" :to="nav.path">
+          {{ nav.title }}
       </b-nav-item>
     </b-nav>
   </div>

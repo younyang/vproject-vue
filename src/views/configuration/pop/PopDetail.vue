@@ -420,7 +420,7 @@
 
     created (){
       // History
-      const historyId = window.location.hash.split('?histories=')[1];
+      const historyId = this.$route.query.histories;
       const detailUrl = historyId !== undefined ? `/pops/${this.id}/histories/${historyId}` : `/pops/${this.id}`;
 
       if (historyId){

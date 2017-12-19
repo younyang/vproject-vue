@@ -56,22 +56,22 @@ export default new Router({
               },
               children: [
                 { path: 'default',
-                  name: 'Service 기본정보',
+                  title: '기본정보',
                   props: true,
                   component: lazyLoading('services/service/ServiceDefault')
                 },
                 { path: 'origin',
-                  name: 'Origin',
+                  title: 'Origin',
                   props: true,
                   component: lazyLoading('services/service/ServiceOrigin')
                 },
                 { path: 'pop',
-                  name: 'Pop',
+                  title: 'PoP',
                   props: true,
                   component: lazyLoading('services/service/ServicePop')
                 },
                 { path: 'ip',
-                  name: 'IP Restriction',
+                  title: 'IP Restriction',
                   props: true,
                   component: lazyLoading('services/service/ServiceIp')
                 }
@@ -136,16 +136,53 @@ export default new Router({
               },
               children: [
                 { path: 'default',
-                  name: 'Pop 기본정보',
+                  title: '기본정보',
                   props: true,
                   component: lazyLoading('configuration/pop/PopDetail')
                 },
                 { path: 'edge',
-                  name: 'L/R, Edge',
+                  title: 'L/R, Edge',
                   props: true,
                   component: lazyLoading('configuration/pop/PopEdge')
                 }
               ]
+            }
+          ]
+        },
+        {
+          path: 'policy',
+          redirect: '/policy/onetime-url',
+          name: 'Policy',
+          component: {
+            render (c) {
+              return c('router-view')
+            }
+          },
+          children: [
+            {
+              path: 'onetime-url',
+              name: 'One-Time URL',
+              component: lazyLoading('policy/Onetime')
+            },
+            {
+              path: 'pop-preference',
+              name: 'PoP Preference',
+              component: lazyLoading('policy/PopPreference')
+            },
+            {
+              path: 'gtm-config',
+              name: 'GTM Config',
+              component: lazyLoading('policy/GTMconfig')
+            },
+            {
+              path: 'geo-ip',
+              name: 'GEO IP',
+              component: lazyLoading('policy/GEOip')
+            },
+            {
+              path: 'ip-restriction',
+              name: 'IP Restriction',
+              component: lazyLoading('policy/IPRestriction')
             }
           ]
         },

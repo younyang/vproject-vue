@@ -44,6 +44,33 @@ export default {
       ]
     },
     {
+      name: 'Policy',
+      url: '/policy',
+      icon: 'icon-equalizer',
+      children: [
+        {
+          name: 'One-Time URL',
+          url: '/policy/onetime-url'
+        },
+        {
+          name: 'PoP Preference',
+          url: '/policy/pop-preference'
+        },
+        {
+          name: 'GTM Config',
+          url: '/policy/gtm-config'
+        },
+        {
+          name: 'GEO IP',
+          url: '/policy/geo-ip'
+        },
+        {
+          name: 'IP Restriction',
+          url: '/policy/ip-restriction'
+        }
+      ]
+    },
+    {
       title: true,
       name: 'UI Component Sample',
       class: '',

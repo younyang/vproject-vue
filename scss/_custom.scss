@@ -100,7 +100,14 @@
   .switch {
     margin: 0.4rem 0 -0.4rem 0
   }
+  .card-header {
+    .btn-sm,
+    .btn-group-sm > .btn {
+      margin-bottom: -0.25rem;
+    }
+  }
 }
+
 .card-title {
   margin-bottom: 0;
   line-height: 2rem;
