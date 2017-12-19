@@ -8,7 +8,19 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            :value="items.referrerTypeCode"
+            :value="getItems.referrerTypeCodeName"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+        <!-- IP -->
+        <b-form-fieldset
+          label="IP"
+          :label-cols="3"
+          :horizontal="true">
+          <b-form-input
+            :value="getItems.componentIp"
             type="text"
             plaintext
           ></b-form-input>
@@ -16,101 +28,32 @@
 
         <!-- Host Name -->
         <b-form-fieldset
-          label="Host Name(Prefix) *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-input-group>
-            <b-form-input
-              v-model="items.popHostName"
-              type="text"
-              placeholder="Enter PoP Host name">
-            </b-form-input>
-            <b-input-group-button slot="right" class="ml-2">
-              <b-button variant="outline-secondary" @click="fetchHostExists">중복확인</b-button>
-            </b-input-group-button>
-          </b-input-group>
-        </b-form-fieldset>
-
-        <!-- Domain -->
-        <b-form-fieldset
-          label="Domain *"
-          :label-cols="3"
-          :horizontal="true">
-
-          <b-button variant="outline-secondary" @click="fetchDomain">생성</b-button>
-          <span class="domain-text ml-2" v-if="isDomainName">
-            http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-          </span>
-        </b-form-fieldset>
-
-        <!-- 구분 -->
-        <b-form-fieldset
-          label="구분 *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
-          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
-        </b-form-fieldset>
-
-        <!-- 주소 -->
-        <b-form-fieldset
-          label="주소 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-model="popCtprvnCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popCtprvnCode"
-            :loading="isLoad.popCtprvnCode"
-            @select="onFirstAddress"
-            label="addressCodeName"
-            class="inline"
-            style="min-width:130px"
-            placeholder="선택"
-          ></multiselect>
-
-          <multiselect
-            v-if="popCtprvnCode"
-            v-model="popSigCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popSigCode"
-            :loading="isLoad.popSigCode"
-            label="addressCodeName"
-            placeholder="선택"
-            class="inline"
-            style="min-width: 130px"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="품질솔루션팀 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-model="qualitySolutionTeamCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.qualitySolutionTeamCode"
-            :loading="isLoad.qualitySolutionTeamCode"
-            label="codeName"
-            placeholder="선택"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <!-- Bandwidth -->
-        <b-form-fieldset
-          label="Bandwidth *"
+          label="Host Name"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            v-model="items.bandwidth"
-            type="number"
-            class="w-25"
+            :value="getItems.componentHostName"
+            type="text"
+            plaintext
           ></b-form-input>
         </b-form-fieldset>
 
+        <!-- PoP 선택 -->
+        <b-form-fieldset
+          label="PoP 선택 *"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            v-model="popId"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.popId"
+            :loading="isLoad.popId"
+            label="popName"
+            placeholder="선택"
+          ></multiselect>
+        </b-form-fieldset>
 
         <!-- 사용여부 -->
         <b-form-fieldset
@@ -122,115 +65,66 @@
             variant="success"
             v-bind="{on: '\uf00c', off: '\uf00d'}"
             :pill="true"
-            v-model="items.popUseYn"
+            v-model="items.referrerUseYn"
           ></c-switch>
         </b-form-fieldset>
 
         <div slot="footer" class="form-btn">
           <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
+          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Referrer 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
         </div>
       </b-card>
     </b-form>
-
-    <b-modal ref="messageModalRef" hide-footer title="Message" size="sm" :class="state.popHostName ? 'modal-primary' : 'modal-danger'">
-      <div class="d-block text-center">
-        <h5>{{ hostmessage }}</h5>
-      </div>
-      <b-btn class="mt-4" :variant="state.popHostName ? 'outline-primary' : 'outline-danger'" block @click="hideMessage">Close</b-btn>
-    </b-modal>
   </div>
 </template>
 
 <script>
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'pops',
+    name: 'referrers',
     components: {
       cSwitch
     },
 
     data (){
       return {
-        items: {
-          referrerId : 3,
-          popId : 4,
-          referrerUseYn : false,
-          referrerTypeCode : "COMPONET_TYPE_02",
-
-          popName: "",
-          popHostName: "",
-          popDomainName: "",
-          popCtprvnCode : "",
-          popSigCode : "",
-          qualitySolutionTeamCode : "",
-          referrerYn : false,
-          highReferrerYn : false,
-          bandwidth : 0,
-          popUseYn : true
-        },
+        items: {},
+        getItems: {},
         code: {
-          popCtprvnCode: [],
-          popSigCode: [],
-          qualitySolutionTeamCode: []
+          popId: []
         },
         isLoad: {
-          popCtprvnCode: true,
-          popSigCode: true,
-          qualitySolutionTeamCode: true
-        },
-        isDomainName: false,
-        state: {
-          popHostName: true
-        },
-        hostmessage: ''
+          popId: true
+        }
       }
     },
 
     computed: {
-      popCtprvnCode: {
+      popId: {
         get () {
-          return this.code.popCtprvnCode.find(obj => obj.addressCode === this.items.popCtprvnCode) || null;
+          return this.code.popId.find(obj => obj.popId === this.items.popId) || null;
         },
         set (newValue) {
-          this.items.popCtprvnCode = newValue !== null ? newValue.addressCode : null;
-        }
-      },
-      popSigCode: {
-        get () {
-          return this.code.popSigCode.find(obj => obj.addressCode === this.items.popSigCode) || null;
-        },
-        set (newValue) {
-          this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
-        }
-      },
-      qualitySolutionTeamCode: {
-        get () {
-          return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.qualitySolutionTeamCode) || null;
-        },
-        set (newValue) {
-          this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
+          this.items.popId = newValue !== null ? newValue.popId : null;
         }
       }
     },
 
     created (){
-      if (this.$route.query.type === undefined){
+      if (this.$route.query.q === undefined){
         alert('잘못된 접근입니다')
         this.$router.push({ name: 'Referrer 관리' })
       }
 
-      this.items.referrerTypeCode = this.$route.query.type;
+      const { referrerId, referrerTypeCode } = JSON.parse(this.$route.query.q);
+      this.items = { referrerId, referrerTypeCode, referrerUseYn: true, popId: null };
+      this.getItems = JSON.parse(this.$route.query.q);
 
-      // 주소 Code
-      this.fetchAddress();
-      // 품질솔루션팀 Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'QUALITY_TEAM' }
-        })
+      // PoP List
+      this.$https.get('/pops')
         .then((res) => {
-          this.isLoad.qualitySolutionTeamCode = false;
-          this.code.qualitySolutionTeamCode = res.data.items;
+          this.isLoad.popId = false;
+          this.code.popId = res.data.items;
         });
     },
 
@@ -238,63 +132,19 @@
       onSubmit (){
         // History
         this.items.modifyHistReason = '등록';
+
         // POST
-        this.$https.post('/pops', this.items)
-          .then((res) => {
-            this.$router.push({ name: 'Pop 상세', params: { id: res.data.items }})
+        this.$https.post('/referrers', this.items)
+          .then(() => {
+            this.$router.push({
+              name: 'Referrer 상세',
+              params: { id: this.items.referrerId },
+              query: { referrerTypeCode: this.items.referrerTypeCode }
+            })
           })
           .catch((error) => {
             console.log(error);
           });
-      },
-
-      fetchHostExists (){
-        this.$https.get('/pops/hostName/exists', {
-            hostName: this.items.popHostName
-          })
-          .then((res) => {
-            const isSuccess = res.data.result === 'Success';
-            this.state.popHostName = isSuccess;
-            this.hostmessage = isSuccess ? '사용하실 수 있습니다.' : 'Host Name 이 중복입니다.';
-            if (!isSuccess){
-              this.items.popHostName = '';
-            }
-            this.showMessage();
-          });
-      },
-
-      fetchDomain (){
-        this.$https.get('/pops/domain')
-          .then((res) => {
-            this.isDomainName = true;
-            this.items.popDomainName = res.data.items.domain;
-          });
-      },
-
-      fetchAddress (param =''){
-        this.$https.get('/pops/address', {
-          firstDepth: param
-        })
-          .then((res) => {
-            if (param === ''){
-              this.isLoad.popCtprvnCode = false;
-              this.code.popCtprvnCode = res.data.items;
-            } else {
-              this.isLoad.popSigCode = false;
-              this.code.popSigCode = res.data.items;
-            }
-          });
-      },
-
-      onFirstAddress (obj){
-        this.fetchAddress(obj.addressCode)
-      },
-
-      showMessage () {
-        this.$refs.messageModalRef.show()
-      },
-      hideMessage () {
-        this.$refs.messageModalRef.hide()
       }
     }
   }

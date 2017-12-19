@@ -1,10 +1,5 @@
 <template>
   <div class="animated fadeIn">
-    <content-header
-      :title="items.popName"
-      :name="name">
-    </content-header>
-
     <div class="collapse-title">
       <b-button
         variant="secondary"
@@ -328,19 +323,17 @@
 </template>
 
 <script>
-  import ContentHeader from '@/components/ContentHeader'
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'pops',
-    props: ['id', 'histories'],
+    name: 'referrer',
+    props: ['id'],
     components: {
-      ContentHeader,
       cSwitch
     },
 
     data (){
       return {
-        name: 'Pop 상세',
+        name: 'Referrer 상세',
         originItems: {},
         items: {
           popName: "",

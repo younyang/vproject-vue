@@ -114,8 +114,8 @@ export default new Router({
             },
             {
               path: 'referrer/:id',
-              redirect: '/configuration/referrer/:id',
               name: 'Referrer 상세',
+              props: true,
               component: lazyLoading('configuration/referrer/Detail')
             },
             { path: 'pop',

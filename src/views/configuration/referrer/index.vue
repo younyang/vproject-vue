@@ -188,7 +188,7 @@
   import moment from 'moment'
 
   export default {
-    name: 'pops',
+    name: 'referrers',
     data (){
       return {
         fields: {
@@ -317,11 +317,27 @@
 
     methods: {
       details (item) {
-        this.$router.push({ name: 'Referrer 상세', params: { id: item.referrerId }})
+        this.$router.push({
+          name: 'Referrer 상세',
+          params: { id: item.referrerId },
+          query: { referrerTypeCode: item.referrerTypeCode }
+
+        })
       },
 
       creates (item) {
-        this.$router.push({ name: 'Referrer 등록', query: { type: item.referrerTypeCode }})
+        const {referrerId, referrerTypeCode, referrerTypeCodeName, componentIp, componentHostName } = item;
+        this.$router.push({
+          name: 'Referrer 등록',
+          query: {
+            q: JSON.stringify({
+              referrerId,
+              referrerTypeCode,
+              referrerTypeCodeName,
+              componentIp,
+              componentHostName
+            })
+          }})
       },
 
       fetchList (params = {}){
