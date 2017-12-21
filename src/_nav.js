@@ -50,7 +50,7 @@ export default {
       children: [
         {
           name: 'One-Time URL',
-          url: '/policy/onetime-url'
+          url: '/policy/onetime'
         },
         {
           name: 'PoP Preference',

@@ -6,11 +6,11 @@ import App from './App'
 import axios from 'axios'
 import router from './router'
 import Multiselect from 'vue-multiselect'
-
+import Vuetable from 'vuetable-2'
 
 Vue.component('multiselect', Multiselect);
+Vue.component('vuetable',Vuetable);
 Vue.use(BootstrapVue);
-
 
 // baseURL settings
 axios.defaults.baseURL = '/api';

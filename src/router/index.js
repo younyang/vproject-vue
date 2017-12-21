@@ -160,7 +160,7 @@ export default new Router({
           },
           children: [
             {
-              path: 'onetime-url',
+              path: 'onetime',
               name: 'One-Time URL',
               component: lazyLoading('policy/Onetime')
             },

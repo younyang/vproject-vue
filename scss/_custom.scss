@@ -171,6 +171,10 @@
   }
 }
 
+.form-control.inline {
+  display: inline-block;
+}
+
 .input-group {
   .form-control,
   .input-group-btn:not(:first-child) > .btn,
@@ -395,6 +399,9 @@ section.board {
   }
   td {
     cursor: pointer
+  }
+  label.switch {
+    margin-bottom: 0
   }
 }
 
