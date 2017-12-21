@@ -54,15 +54,15 @@ export default {
         },
         {
           name: 'PoP Preference',
-          url: '/policy/pop-preference'
+          url: '/policy/popPreference'
         },
         {
           name: 'GTM Config',
-          url: '/policy/gtm-config'
+          url: '/policy/gtmConfig'
         },
         {
           name: 'GEO IP',
-          url: '/policy/geo-ip'
+          url: '/policy/geoIp'
         },
         {
           name: 'IP Restriction',

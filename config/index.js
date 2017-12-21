@@ -6,9 +6,6 @@ const proxyFirebase = {
 };
 const getRealServer = () => ({
   target: 'http://1.255.87.76:8080',
-  pathRewrite: {
-    '^/api/' : '/'
-  },
   changeOrigin: true
 });
 

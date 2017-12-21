@@ -151,7 +151,7 @@ export default new Router({
         },
         {
           path: 'policy',
-          redirect: '/policy/onetime-url',
+          redirect: '/policy/onetime',
           name: 'Policy',
           component: {
             render (c) {
@@ -165,17 +165,17 @@ export default new Router({
               component: lazyLoading('policy/Onetime')
             },
             {
-              path: 'pop-preference',
+              path: 'popPreference',
               name: 'PoP Preference',
               component: lazyLoading('policy/PopPreference')
             },
             {
-              path: 'gtm-config',
+              path: 'gtmConfig',
               name: 'GTM Config',
               component: lazyLoading('policy/GTMconfig')
             },
             {
-              path: 'geo-ip',
+              path: 'geoIp',
               name: 'GEO IP',
               component: lazyLoading('policy/GEOip')
             },
