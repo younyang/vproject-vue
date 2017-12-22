@@ -100,7 +100,12 @@ export default new Router({
             {
               path: 'edge',
               name: 'Edge 관리',
-              component: lazyLoading('configuration/Edge')
+              component: lazyLoading('configuration/edge', true)
+            },
+            {
+              path: 'edge/create',
+              name: 'Edge 등록',
+              component: lazyLoading('configuration/edge/Create')
             },
             {
               path: 'referrer',
