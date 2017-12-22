@@ -22,7 +22,7 @@
                 style="width:60px"
                 ></b-form-input> 초
               </span>
-              <span v-else>{{ row.item.expireTime }} 초</span>
+              <span v-else>{{ row.value }} 초</span>
             </template>
 
             <template slot="bypassYn" scope="row">
@@ -37,8 +37,8 @@
               <b-badge
                 v-else
                 pill
-                :variant="row.item.bypassYn ? 'success' : 'secondary'">
-                {{ row.item.bypassYn ? '사용' : '미사용' }}
+                :variant="row.value ? 'success' : 'secondary'">
+                {{ row.value ? '사용' : '미사용' }}
               </b-badge>
             </template>
 
@@ -137,16 +137,16 @@
         Object.keys(originRows).forEach(key => {
             row.item[key] = originRows[key]
         })
+        row.item.isEdit = false;
       },
 
       onSubmit (row) {
         const { popId, expireTime, bypassYn, modifyHistReason } = row.item;
         this.$https.put(`/policy/oneTimeUrl/${popId}`,{ expireTime, bypassYn, modifyHistReason })
-          .then((res) => {
-            const findIndex = this.items.findIndex(({ popId }) => popId === res.data.items.popId);
-            this.items[findIndex] = res.data.items;
-            this.originItems[findIndex] = {...res.data.items}
+          .then(() => {
             row.item.isEdit = false;
+            this.items[row.index] = row.item;
+            this.originItems[row.index] = {...row.item}
           })
           .catch((error) => {
             console.log(error);

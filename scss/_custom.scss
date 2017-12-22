@@ -1,5 +1,11 @@
 // V Project Custom Style
 
+html,
+body {
+  min-width: 800px;
+}
+
+
 /**
  * Header
  */
@@ -266,6 +272,40 @@
   }
 }
 
+/* Pops */
+.multiselect.pops {
+  position: relative;
+  width: 100px;
+
+  .multiselect__content-wrapper {
+    top: 38px;
+    left: 0;
+  }
+
+  .highlight {
+    background: #41b883;
+    color: #fff;
+  }
+  .selected {
+    background: #f3f3f3;
+    color: #35495e;
+    font-weight: 700;
+  }
+  .multiselect__tag {
+    margin-right: 0;
+  }
+
+}
+.multiselect.disSelect {
+  pointer-events: none;
+  cursor: default;
+  .multiselect__tag-icon {
+    pointer-events: all;
+    cursor: pointer;
+  }
+}
+
+
 /* Add Mode */
 .multiselect.addMode {
   .multiselect__tag-icon {
@@ -287,6 +327,9 @@
   }
   &.protocol.view-type {
     width: 45px;
+  }
+  .multiselect__tag {
+    margin-bottom: 0;
   }
 
   .multiselect__select {
@@ -397,7 +440,7 @@ section.board {
     vertical-align: middle;
     text-align: center;
   }
-  td {
+  .table-hover td {
     cursor: pointer
   }
   label.switch {

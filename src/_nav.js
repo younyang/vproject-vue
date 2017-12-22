@@ -66,7 +66,7 @@ export default {
         },
         {
           name: 'IP Restriction',
-          url: '/policy/ip-restriction'
+          url: '/policy/ipRestriction'
         }
       ]
     },

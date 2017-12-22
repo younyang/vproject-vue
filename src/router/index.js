@@ -180,7 +180,7 @@ export default new Router({
               component: lazyLoading('policy/GEOip')
             },
             {
-              path: 'ip-restriction',
+              path: 'ipRestriction',
               name: 'IP Restriction',
               component: lazyLoading('policy/IPRestriction')
             }
