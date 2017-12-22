@@ -275,7 +275,11 @@ body {
 /* Pops */
 .multiselect.pops {
   position: relative;
-  width: 100px;
+  min-width: 110px;
+
+  .multiselect__single {
+    display: none;
+  }
 
   .multiselect__content-wrapper {
     top: 38px;
