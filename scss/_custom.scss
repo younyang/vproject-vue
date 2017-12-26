@@ -104,7 +104,7 @@ body {
  */
 .card {
   .switch {
-    margin: 0.4rem 0 -0.4rem 0
+    margin: 0.4rem 0 0
   }
   .card-header {
     .btn-sm,
@@ -399,10 +399,17 @@ body {
     height: auto !important;
     padding-bottom: 5px;
     padding-right: 135px;
+
+    &.edge {
+      padding-right: 155px;
+    }
   }
   .value {
     top: 0;
     right: 2px;
+    .small {
+      margin-bottom: 2px;
+    }
   }
 }
 .icons-list.list-view li {
@@ -414,6 +421,14 @@ body {
   margin-top: 15px;
   .desc {
     margin-left: 0;
+  }
+}
+.icons-list.edge li {
+  i {
+    margin-top: 0;
+  }
+  .desc {
+    padding-right: 0;
   }
 }
 
@@ -450,6 +465,13 @@ section.board {
   label.switch {
     margin-bottom: 0
   }
+}
+
+
+pre.code {
+  border: 1px solid #ddd;
+  background: #f0f0f0;
+  overflow: auto;
 }
 
 

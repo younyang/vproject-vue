@@ -33,7 +33,6 @@
               :showLabels="false"
               :searchable="false"
               :options="['Edge','Relay']"
-              label="codeName"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -376,10 +375,8 @@
     methods: {
       details (item) {
         this.$router.push({
-          name: 'Referrer 상세',
-          params: { id: item.referrerId },
-          query: { referrerTypeCode: item.referrerTypeCode }
-
+          name: 'Edge 상세',
+          params: { id: item.edgeId }
         })
       },
 

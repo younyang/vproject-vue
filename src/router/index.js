@@ -108,6 +108,31 @@ export default new Router({
               component: lazyLoading('configuration/edge/Create')
             },
             {
+              path: 'edge/:id',
+              redirect: '/configuration/edge/:id/default',
+              name: 'Edge 상세',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                { path: 'default',
+                  title: '기본정보',
+                  props: true,
+                  component: lazyLoading('configuration/edge/EdgeDefault')
+                },
+                { path: 'core',
+                  title: 'Core Config',
+                  props: true,
+                  component: lazyLoading('configuration/edge/EdgeCore')
+                },
+                { path: 'service',
+                  title: 'Service',
+                  props: true,
+                  component: lazyLoading('configuration/edge/EdgeService')
+                }
+              ]
+            },
+            {
               path: 'referrer',
               name: 'Referrer 관리',
               component: lazyLoading('configuration/referrer', true)

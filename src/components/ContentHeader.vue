@@ -1,6 +1,6 @@
 <template>
   <div class="page-title">
-    <h2>{{ title }}</h2>
+    <h2>{{ title }} <small v-if="small !== ''">{{ small }}</small></h2>
 
     <b-nav pills v-if="navList.isNav">
       <b-nav-item v-for="nav in navList.list" :key="nav.path" :to="nav.path">
@@ -18,6 +18,10 @@ export default {
     },
     name: {
       type: String
+    },
+    small: {
+      type: String,
+      default: ''
     }
   },
 

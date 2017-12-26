@@ -642,8 +642,11 @@
 
       // Service Type Popup Save
       onSubmitService (){
-        this.serviceItems.serviceTypeCode = [...this.items.serviceTypeCode];
-        console.log(this.serviceItems)
+        if (this.serviceItems.command === 'ADD'){
+          this.serviceItems.serviceTypeCode = this.items.serviceTypeCode.filter(val => {
+            return this.originItems.serviceTypeCode.indexOf(val) < 0
+          });
+        }
 
         this.$https.put(`/services/${this.id}/types`, this.serviceItems)
           .then(() => {
