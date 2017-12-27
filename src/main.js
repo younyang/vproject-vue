@@ -6,38 +6,53 @@ import App from './App'
 import axios from 'axios'
 import router from './router'
 import Multiselect from 'vue-multiselect'
-import Vuetable from 'vuetable-2'
+import VueHighcharts from 'vue-highcharts'
 
 Vue.component('multiselect', Multiselect);
-Vue.component('vuetable',Vuetable);
 Vue.use(BootstrapVue);
+Vue.use(VueHighcharts);
 
-// baseURL settings
-axios.defaults.baseURL = '/api';
-axios.defaults.transformResponse = [function (data) {
-  const origin = JSON.parse(data)
-  return {
-    result: origin.result,
-    items: origin.resultData ? origin.resultData.data : [],
-    pageInfo: origin.resultData ? origin.resultData.pageInfo : {},
-    error: origin.error
-  };
-}];
+// axios instance
+const ax = axios.create({
+  baseURL: '/api',
+  transformResponse: [function (data) {
+    const origin = JSON.parse(data)
+    return {
+      result: origin.result,
+      items: origin.resultData ? origin.resultData.data : [],
+      pageInfo: origin.resultData ? origin.resultData.pageInfo : {},
+      error: origin.error
+    };
+  }]
+});
+
+// axios chart instance
+const axChart = axios.create({
+  headers: { 'x-vessel-appKey': '0fc75651-8fa5-4d13-a376-69384eacb315'}
+});
+
 
 Vue.prototype.$https = {
   get (url = '', params = {}){
-    return axios.get(url, {
+    return ax.get(url, {
       params: params
     })
   },
   post (url = '', data = {}){
-    return axios.post(url, data)
+    return ax.post(url, data)
   },
   put (url = '', data = {}){
-    return axios.put(url, data)
+    return ax.put(url, data)
   },
   delete (url = ''){
-    return axios.delete(url)
+    return ax.delete(url)
+  },
+
+  // Dashboard
+  getChart (url = '', params = {}){
+    return axChart.get(url, {
+      params: params
+    })
   }
 };
 

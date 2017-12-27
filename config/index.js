@@ -8,6 +8,10 @@ const getRealServer = () => ({
   target: 'http://1.255.87.76:8080',
   changeOrigin: true
 });
+const getChartServer = () => ({
+  target: 'http://1.255.87.65',
+  changeOrigin: true
+});
 
 module.exports = {
   build: {
@@ -37,6 +41,7 @@ module.exports = {
     assetsPublicPath: '',
     proxyTable: {
       '/api': getRealServer(),
+      '/monitoring': getChartServer()
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README
