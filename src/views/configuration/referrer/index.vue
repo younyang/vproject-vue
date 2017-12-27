@@ -35,6 +35,7 @@
               :options="code.referrerTypeCode"
               :loading="isLoad.referrerTypeCode"
               label="codeName"
+              track-by="code"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -51,6 +52,7 @@
               :options="code.popId"
               :loading="isLoad.popId"
               label="popName"
+              track-by="popId"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -213,7 +215,7 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'popName',
+          searchType: 'componentIp',
           searchKeyword: null,
           referrerTypeCode: null,
           popId: null,

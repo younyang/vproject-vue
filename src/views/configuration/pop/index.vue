@@ -35,6 +35,7 @@
               :options="code.qualitySolutionTeamCode"
               :loading="isLoad.qualitySolutionTeamCode"
               label="codeName"
+              track-by="code"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -68,6 +69,7 @@
               :loading="isLoad.firstAddressCode"
               @select="onFirstAddress"
               label="addressCodeName"
+              track-by="addressCode"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -81,6 +83,7 @@
               :options="code.secondAddressCode"
               :loading="isLoad.secondAddressCode"
               label="addressCodeName"
+              track-by="addressCode"
               placeholder="전체"
               class="inline"
               style="min-width: 130px"
