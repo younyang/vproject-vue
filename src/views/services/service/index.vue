@@ -35,6 +35,7 @@
               :options="code.serviceTypeCode"
               :loading="isLoad.serviceTypeCode"
               label="codeName"
+              track-by="code"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -218,7 +219,7 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'serviceName',
+          searchType: 'service',
           searchKeyword: null,
           serviceTypeCode: null,
           cnameUseYn: null,
@@ -230,10 +231,10 @@
         },
         code: {
           searchType: [{
-            code: 'serviceName',
+            code: 'service',
             codeName: 'Service Name'
           },{
-            code: 'accountName',
+            code: 'account',
             codeName: 'Account'
           }],
           searchDateType: [{
@@ -346,7 +347,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'serviceName';
+            this.searchItem[key] = 'service';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
           } else {

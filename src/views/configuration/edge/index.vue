@@ -43,12 +43,13 @@
             :label-cols="5"
             :horizontal="true">
             <multiselect
-              v-model="popId"
+              v-model="serviceTypeCode"
               :showLabels="false"
               :searchable="false"
               :options="code.serviceTypeCode"
               :loading="isLoad.serviceTypeCode"
               label="codeName"
+              track-by="code"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -67,6 +68,7 @@
               :options="code.popId"
               :loading="isLoad.popId"
               label="popName"
+              track-by="popId"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>
@@ -100,6 +102,7 @@
               :options="code.process"
               :loading="isLoad.process"
               label="codeName"
+              track-by="code"
               placeholder="전체"
             ></multiselect>
           </b-form-fieldset>

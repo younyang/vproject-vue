@@ -33,6 +33,19 @@
         <div class="card dash-box">
           <div class="card-header">
             지역별 Data Transfer 현황
+            <div class="card-actions">
+              <b-button size="sm" class="btn-minimize">
+                <i class="fa fa-pencil"></i>
+                <span class="sr-only">Edit</span>
+              </b-button>
+              <b-button size="sm" class="btn-minimize">
+                <i class="fa fa-close"></i>
+                <span class="sr-only">Delete</span>
+              </b-button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="mapBox" class="map-box"></div>
           </div>
         </div>
       </dnd-grid-box>
@@ -113,6 +126,9 @@
     width: 100%;
     height: 100%;
   }
+  .map-box {
+    min-height: 530px;
+  }
 </style>
 
 <script>
@@ -120,6 +136,9 @@
   import { Container, Box } from '@dattn/dnd-grid'
   // minimal css for the components to work properly
   import '@dattn/dnd-grid/dist/index.css'
+  import L from 'leaflet'
+
+  const geojson = require('../../static/geo/ctprvn.json');
 
   export default {
     name: 'dashboard',
@@ -140,7 +159,7 @@
         layout: [
           {
             id: 'edge-box',
-            hidden: false,
+            hidden: true,
             pinned: false,
             position: {
               x: 0,
@@ -154,7 +173,7 @@
             hidden: false,
             pinned: false,
             position: {
-              x: 7.5,
+              x: 0,
               y: 0,
               w: 3.5,
               h: 5
@@ -162,7 +181,7 @@
           },
           {
             id: 'cache-box',
-            hidden: false,
+            hidden: true,
             pinned: false,
             position: {
               x: 0,
@@ -173,7 +192,7 @@
           },
           {
             id: 'service-box',
-            hidden: false,
+            hidden: true,
             pinned: false,
             position: {
               x: 3.75,
@@ -349,8 +368,10 @@
           targetList: ["",""]
         }
       }).then((res) => console.log(res))
+    },
 
-
+    mounted (){
+      this.drawMap();
     },
 
     methods: {
@@ -363,7 +384,57 @@
         chart.setSize(width-30,height-71)
       },
 
-      onUpdateLayout (){
+      drawMap (){
+        const mymap = L.map('mapBox', {
+          zoomControl: false,
+          dragging: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          tap: false,
+          zoomSnap: 0.25,
+          zoomDelta: 0.25,
+          attributionControl: false
+        })
+        mymap.setView([36, 127.5], 6.75);
+
+
+        const geoLayer = L.geoJSON(null, {
+          style: {
+            weight: 2,
+            color: '#ECEFF1',
+            opacity: 1,
+            dashArray: '3',
+            fillColor: '#feb24c',
+            fillOpacity: 0.6
+          },
+          onEachFeature (feature,layer) {
+            layer.on({
+              mouseover (e){
+                let layer = e.target;
+
+                layer.setStyle({
+                  color: '#666',
+                  dashArray: '',
+                  fillOpacity: 1
+                });
+
+                //layer.bindLabel('Test')
+
+                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                  layer.bringToFront();
+                }
+              },
+
+              mouseout (e){
+                geoLayer.resetStyle(e.target);
+              }
+            })
+          }
+        })
+        geoLayer.addData(geojson);
+        mymap.addLayer(geoLayer);
+
       }
     }
   }
