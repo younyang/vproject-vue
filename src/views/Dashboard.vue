@@ -1,5 +1,31 @@
 <template>
   <div class="animated fadeIn">
+    <div class="dashHeader d-flex justify-content-between">
+      <div class="form-inline">
+        <multiselect
+          class="inline"
+          v-model="templateType"
+          :allowEmpty="false"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.templateType"
+        ></multiselect>
+        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="icon-pencil"></i></b-button>
+        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="fa fa-plus"></i></b-button>
+        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="icon-grid"></i></b-button>
+      </div>
+      <div>
+        <c-switch
+          type="text"
+          variant="secondary-outline"
+          on="Light"
+          off="Dark"
+          v-model="theme"
+          :pill="true"
+        ></c-switch>
+      </div>
+    </div>
+
     <dnd-grid-container
       :layout.sync="layout"
       :gridSize="gridSize"
@@ -12,7 +38,7 @@
           <div class="card-header">
             Edge Data Transfer
             <div class="card-actions">
-              <b-button size="sm" class="btn-minimize">
+              <b-button size="sm" class="btn-minimize" @click="onEditWidget('edge')">
                 <i class="fa fa-pencil"></i>
                 <span class="sr-only">Edit</span>
               </b-button>
@@ -23,7 +49,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.edge" ref="edgeChart" style="height: 190px"></highcharts>
+            <highcharts :options="widget.edge.items" ref="edgeChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -56,7 +82,7 @@
           <div class="card-header">
             Cache Status
             <div class="card-actions">
-              <b-button size="sm" class="btn-minimize">
+              <b-button size="sm" class="btn-minimize" @click="onEditWidget('cache')">
                 <i class="fa fa-pencil"></i>
                 <span class="sr-only">Edit</span>
               </b-button>
@@ -67,7 +93,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.cache" ref="cacheChart" style="height: 190px"></highcharts>
+            <highcharts :options="widget.cache.items" ref="cacheChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -78,7 +104,7 @@
           <div class="card-header">
             Service Type 별 Request
             <div class="card-actions">
-              <b-button size="sm" class="btn-minimize">
+              <b-button size="sm" class="btn-minimize" @click="onEditWidget('service')">
                 <i class="fa fa-pencil"></i>
                 <span class="sr-only">Edit</span>
               </b-button>
@@ -89,7 +115,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.service" ref="serviceChart" style="height: 190px"></highcharts>
+            <highcharts :options="widget.service.items" ref="serviceChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -100,7 +126,7 @@
           <div class="card-header">
             Request Count
             <div class="card-actions">
-              <b-button size="sm" class="btn-minimize">
+              <b-button size="sm" class="btn-minimize" @click="onEditWidget('request')">
                 <i class="fa fa-pencil"></i>
                 <span class="sr-only">Edit</span>
               </b-button>
@@ -111,54 +137,124 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.request" ref="requestChart" style="height: 190px"></highcharts>
+            <highcharts :options="widget.request.items" ref="requestChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
-
-
     </dnd-grid-container>
+
+    <!-- Widget 수정 Modal -->
+    <b-modal id="widgetModal" size="lg" v-model="isModalWidget">
+      <template slot="modal-title">
+        Widget
+      </template>
+
+      <div class="form-in-group">
+        <b-form-fieldset
+          label="Widget"
+          :label-cols="2"
+          :horizontal="true">
+          <multiselect
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.widgetType"
+          ></multiselect>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="Title"
+          :label-cols="2"
+          :horizontal="true">
+          <b-form-input
+            type="text"
+          ></b-form-input>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="Service"
+          :label-cols="2"
+          :horizontal="true">
+          <multiselect
+            v-model="serviceIdList"
+            :multiple="true"
+            track-by="serviceId"
+            label="serviceName"
+            :showLabels="false"
+            :options="code.serviceIdList"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="Service Type"
+          :label-cols="2"
+          :horizontal="true">
+          <multiselect
+            v-model="serviceTypeList"
+            label="codeName"
+            track-by="code"
+            :multiple="true"
+            :showLabels="false"
+            :options="code.serviceTypeList"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="Values"
+          :label-cols="2"
+          :horizontal="true">
+          <b-form-radio-group
+            v-model="searchItems.q.metricType"
+            :options="[{ text: 'Sum', value: 'sum'},{ text: 'Avg', value: 'avg'},{ text: 'Peak', value: 'peak'}]"
+            value="sum"
+          ></b-form-radio-group>
+        </b-form-fieldset>
+        <b-form-fieldset
+          label="Unit"
+          :label-cols="2"
+          :horizontal="true">
+
+          <b-form-input
+            v-model="searchItems.q.intervalValue"
+            class="inline"
+            style="width:50px; vertical-align: middle"
+            type="number">
+          </b-form-input>
+          <multiselect
+            v-model="searchItems.q.intervalType"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="['MN', 'H', 'D', 'M', 'Y']"
+            class="inline ml-2"
+            style="width:80px; vertical-align: middle"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          label="Display Type"
+          :label-cols="2"
+          :horizontal="true">
+          <b-form-checkbox-group id="displayType" name="displayType" v-model="searchItems.q.chartType">
+            <b-form-checkbox value="LINE">Line</b-form-checkbox>
+            <b-form-checkbox value="BAR">Bar</b-form-checkbox>
+            <b-form-checkbox value="PIE">Pie</b-form-checkbox>
+            <b-form-checkbox value="AREA">Area</b-form-checkbox>
+            <b-form-checkbox value="MAP">Map</b-form-checkbox>
+          </b-form-checkbox-group>
+        </b-form-fieldset>
+      </div>
+
+      <div slot="modal-footer">
+        <b-button type="button" size="sm" variant="primary" @click="onSubmitWidget"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
+        <b-button type="button" size="sm" variant="danger" @click="isModalWidget = false"><i class="fa fa-ban"></i> 취소</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
-<style>
-  .dash-box {
-    width: 100%;
-    height: 100%;
-  }
-  .leaflet-container {
-    background: #f0f0f0
-  }
-  .map-box {
-    min-height: 534px;
-  }
 
-  .map-box .info {
-    padding: 6px 8px;
-    background: #fff;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-  }
-  .map-box .info h4 {
-    margin: 0 0 5px;
-    color: #777;
-  }
-  .map-box .legend {
-    text-align: left;
-    line-height: 18px;
-    color: #555;
-  }
-  .map-box .legend i {
-    width: 18px;
-    height: 18px;
-    float: left;
-    margin-right: 8px;
-    opacity: 0.7;
-  }
-</style>
 
 <script>
+  import cSwitch from '@/components/Switch'
   // import Container and Box components
   import { Container, Box } from '@dattn/dnd-grid'
   // minimal css for the components to work properly
@@ -176,15 +272,154 @@
               '#FEB24C';
   };
 
+  const chartOption = {
+    title: false,
+    xAxis: { category: []},
+    yAxis:{ title :false },
+    plotOptions:{
+      areaspline: { fillOpacity: 0.5},
+      pie: {
+        allowPointSelect:true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled:true,
+          format: "<b>{point.name}</b><br>{point.percentage:.1f} %",
+          distance:-10,
+          filter: {
+            property: "percentage",
+            operator: ">",
+            value:9
+          }
+        }
+      }
+    },
+    series: []
+  };
+
   export default {
     name: 'dashboard',
     components: {
       DndGridContainer: Container,
-      DndGridBox: Box
+      DndGridBox: Box,
+      cSwitch
     },
 
     data () {
       return {
+        theme: true,
+        templateType: 'Template 1',
+        isModalWidget: false,
+        code: {
+          templateType: ['Template 1','Template 2'],
+          widgetType: ['데이터 전송량'],
+          serviceIdList: [],
+          serviceTypeList: []
+        },
+        searchItems: {
+          fromDate: '2017-12-20T00:00',
+          toDate: '2017-12-20T23:59',
+          q: {
+            serviceIdList:['ALL'],
+            serviceTypeList: ['ALL'],
+            typeField: '',
+            metricType: 'sum',
+            dataType: 'httpTraffic',
+            intervalType: 'H',
+            intervalValue: '1',
+            targetType: 'TOTAL_EDGE',
+            chartType: 'AREA',
+            peakYn: false,
+            mainMode: 'TIME',
+            subMode: '',
+            targetList: ["",""]
+          }
+        },
+        widget: {
+          edge: {
+            items: {},
+            searchItems: {
+              fromDate: '2017-12-20T12:00',
+              toDate: '2017-12-20T21:00',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                typeField: '',
+                metricType: 'sum',
+                dataType: 'httpTraffic',
+                intervalType: 'H',
+                intervalValue: '1',
+                targetType: 'TOTAL_EDGE',
+                chartType: 'AREA',
+                peakYn: false,
+                mainMode: 'TIME',
+                subMode: '',
+                targetList: ["",""]
+              }
+            }
+          },
+          cache: {
+            items: {},
+            searchItems: {
+              fromDate: '2017-12-26T00:00',
+              toDate: '2017-12-26T23:59',
+              q: {
+                serviceIdList:["ALL"],
+                serviceTypeList:["ALL"],
+                typeField : "cacheStatus",
+                metricType : "sum",
+                dataType : "hits",
+                targetType : "TOTAL_EDGE",
+                chartType : "PIE",
+                peakYn : false,
+                mainMode : "TYPE"
+              }
+            }
+          },
+          service: {
+            items: {},
+            searchItems: {
+              fromDate: '2017-12-20T12:00',
+              toDate: '2017-12-20T21:00',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                typeField: '',
+                metricType: 'sum',
+                dataType: 'httpTraffic',
+                intervalType: 'H',
+                intervalValue: '1',
+                targetType: 'TOTAL_EDGE',
+                chartType: 'BAR',
+                peakYn: false,
+                mainMode: 'TIME',
+                subMode: '',
+                targetList: ["",""]
+              }
+            }
+          },
+          request: {
+            items: {},
+            searchItems: {
+              fromDate: '2017-12-20T12:00',
+              toDate: '2017-12-20T21:00',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                typeField: '',
+                metricType: 'sum',
+                dataType: 'httpTraffic',
+                intervalType: 'H',
+                intervalValue: '1',
+                targetType: 'TOTAL_EDGE',
+                chartType: 'BAR',
+                peakYn: false,
+                mainMode: 'TIME',
+                subMode: '',
+                targetList: ["",""]
+              }
+            }
+          }
+        },
         gridSize: {
           w: 100,
           h: 100
@@ -201,7 +436,7 @@
               x: 0,
               y: 0,
               w: 7,
-              h: 2.75
+              h: 3
             }
           },
           {
@@ -212,7 +447,7 @@
               x: 7,
               y: 0,
               w: 4,
-              h: 5.5
+              h: 6
             }
           },
           {
@@ -221,9 +456,9 @@
             pinned: false,
             position: {
               x: 0,
-              y: 2.75,
-              w: 3.5,
-              h: 2.75
+              y: 3,
+              w: 3,
+              h: 3
             }
           },
           {
@@ -231,10 +466,10 @@
             hidden: false,
             pinned: false,
             position: {
-              x: 3.5,
-              y: 2.75,
-              w: 3.5,
-              h: 2.75
+              x: 3,
+              y: 3,
+              w: 4,
+              h: 3
             }
           },
           {
@@ -243,9 +478,9 @@
             pinned: false,
             position: {
               x: 0,
-              y: 5.5,
+              y: 6,
               w: 11,
-              h: 2.5
+              h: 3
             }
           }
         ],
@@ -315,9 +550,7 @@
               colorByPoint: true,
               data: [{
                 name: 'Hit',
-                y: 70,
-                sliced: true,
-                selected: true
+                y: 70
               }, {
                 name: 'Expire',
                 y: 15
@@ -348,6 +581,9 @@
           },
           request: {
             title: false,
+            chart: {
+              type: 'line'
+            },
             xAxis: {
               categories: ['16:05', '16:10', '16:15', '16:20', '16:25', '16:30',
                 '16:35', '16:40'
@@ -377,33 +613,36 @@
       }
     },
     computed: {
-      layoutWithoutSettings () {
-        return this.layout.filter((box) => {
-          return box.id !== 'settings'
-        })
+      serviceIdList: {
+        get () {
+          return this.searchItems.q.serviceIdList[0] !== 'ALL'
+            ? this.searchItems.q.serviceIdList.map(val => this.code.serviceIdList.find(obj => obj.serviceId === val))
+            : [];
+        },
+        set (newValue) {
+          this.searchItems.q.serviceIdList = newValue.length > 0
+            ? newValue.map(obj => obj.serviceId)
+            : ['ALL'];
+        }
+      },
+      serviceTypeList: {
+        get () {
+          return this.searchItems.q.serviceTypeList[0] !== 'ALL'
+            ? this.searchItems.q.serviceTypeList.map(val => this.code.serviceTypeList.find(obj => obj.code === val))
+            : [];
+        },
+        set (newValue) {
+          this.searchItems.q.serviceTypeList = newValue.length > 0
+            ? newValue.map(obj => obj.code)
+            : ['ALL'];
+        }
       }
     },
 
     created () {
-      this.$https.getChart('/monitoring/v1.0/statistics/chart', {
-        fromDate: '2017-12-20T00:00',
-        toDate: '2017-12-20T23:59',
-        q: {
-          serviceIdList: ['ALL'],
-          serviceTypeList: ['ALL'],
-          typeField: '',
-          metricType: 'sum',
-          dataType: 'httpTraffic',
-          intervalType: 'H',
-          intervalValue: '1',
-          targetType: 'TOTAL_EDGE',
-          chartType: 'BAR',
-          peakYn: false,
-          mainMode: 'TIME',
-          subMode: '',
-          targetList: ["",""]
-        }
-      }).then((res) => console.log(res))
+      Object.keys(this.widget).forEach(key => {
+        this.fetchData(key);
+      })
     },
 
     mounted (){
@@ -411,6 +650,50 @@
     },
 
     methods: {
+      fetchData (key){
+        const widget = this.widget[key];
+        this.$https.getChart('/monitoring/v1.0/statistics/chart', widget.searchItems)
+          .then((res) => {
+            this.drawChart(key, res.data);
+          })
+      },
+
+      drawChart (key, data){
+        const widget = this.widget[key];
+        const $chart = this.$refs[`${key}Chart`].chart;
+        let chartType = widget.searchItems.q.chartType === 'BAR' ? 'column' :
+          widget.searchItems.q.chartType === 'LINE' ? 'line' :
+          widget.searchItems.q.chartType === 'PIE' ? 'pie' :
+          widget.searchItems.q.chartType === 'AREA' ? 'areaspline' :
+            'map';
+
+        if (chartType !== 'map'){
+          widget.items = {
+            ...chartOption,
+            chart: (chartType === 'pie') ?
+              { type: chartType, margin: [0, 0, 0, 0] } :
+              { type: chartType },
+            legend: (chartType !== 'pie') ?
+              {
+                layout: 'horizontal',
+                align: 'left',
+                verticalAlign: 'bottom',
+                borderWidth: 0
+              } : false,
+            series: (chartType !== 'pie') ?
+              data.series :
+              data.series.map(obj => ({
+                ...obj,
+                y: obj.value
+              })),
+            xAxis:  { categories: data.xaxis }
+          };
+
+          $chart.update(widget.items);
+          $chart.redraw();
+        }
+      },
+
       onResizeBox (ref) {
         const chart = this.$refs[ref].chart;
         const placeholder = document.querySelector('.placeholder.dnd-grid-box');
@@ -530,10 +813,72 @@
 
 
       },
-      onClickMap (e){
-        console.log(e.target)
+
+      onEditWidget (key) {
+        this.isModalWidget = true;
+        this.$https.get('/services')
+          .then(res => {
+            this.code.serviceIdList = res.data.items;
+          })
+        this.$https.get('/system/commonCode', {
+            q: { groupCode: 'SERVICE_TYPE' }
+          })
+          .then((res) => {
+            this.code.serviceTypeList = res.data.items.filter(({code, codeName, codeValChar1}) => {
+              const number = code.split('_')[2];
+              return !(number.length === 4 && codeName === codeValChar1);
+            });
+          });
+        this.searchItems = this.widget[key].searchItems;
+      },
+
+      onSubmitWidget (){
+
       }
     }
   }
 </script>
 
+<style>
+  .dash-box {
+    width: 100%;
+    height: 100%;
+  }
+  .leaflet-container {
+    background: #f0f0f0
+  }
+  .map-box {
+    min-height: 587px;
+  }
+
+  .map-box .info {
+    padding: 6px 8px;
+    background: #fff;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+  }
+  .map-box .info h4 {
+    margin: 0 0 5px;
+    color: #777;
+  }
+  .map-box .legend {
+    text-align: left;
+    line-height: 18px;
+    color: #555;
+  }
+  .map-box .legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+  }
+
+
+  .dashHeader {
+    position: relative;
+    z-index: 100;
+    margin-bottom: 15px;
+  }
+</style>
