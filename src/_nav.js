@@ -71,6 +71,17 @@ export default {
       ]
     },
     {
+      name: 'Workflow',
+      url: '/workflow',
+      icon: 'icon-share',
+      children: [
+        {
+          name: 'Service Processing 관리',
+          url: '/workflow/service'
+        }
+      ]
+    },
+    {
       title: true,
       name: 'UI Component Sample',
       class: '',

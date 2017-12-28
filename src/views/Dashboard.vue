@@ -49,7 +49,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="widget.edge.items" ref="edgeChart" style="height: 245px"></highcharts>
+            <highcharts :options="chart.edge" ref="edgeChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -93,7 +93,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="widget.cache.items" ref="cacheChart" style="height: 245px"></highcharts>
+            <highcharts :options="chart.cache" ref="cacheChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -115,7 +115,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="widget.service.items" ref="serviceChart" style="height: 245px"></highcharts>
+            <highcharts :options="chart.service" ref="serviceChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -137,7 +137,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="widget.request.items" ref="requestChart" style="height: 245px"></highcharts>
+            <highcharts :options="chart.request" ref="requestChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -641,7 +641,7 @@
 
     created () {
       Object.keys(this.widget).forEach(key => {
-        this.fetchData(key);
+        //this.fetchData(key);
       })
     },
 

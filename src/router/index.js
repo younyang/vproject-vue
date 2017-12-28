@@ -217,6 +217,29 @@ export default new Router({
           ]
         },
         {
+          path: 'workflow',
+          redirect: '/workflow/service',
+          name: 'Workflow',
+          component: {
+            render (c) {
+              return c('router-view')
+            }
+          },
+          children: [
+            {
+              path: 'service',
+              name: 'Service Processing 관리',
+              component: lazyLoading('workflow/service', true)
+            },
+            {
+              path: 'service/:id',
+              name: 'Service Processing 상세',
+              props: true,
+              component: lazyLoading('workflow/service/Detail')
+            }
+          ]
+        },
+        {
           path: 'process',
           name: 'Process',
           component: Process
