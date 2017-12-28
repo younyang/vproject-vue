@@ -18,6 +18,9 @@ export default {
 
   @import "~vue-multiselect/dist/vue-multiselect.min.css";
 
+  @import "~leaflet/dist/leaflet.css";
+
   // Import Main styles for this application
   @import "./scss/style";
+
 </style>

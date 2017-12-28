@@ -29,7 +29,7 @@
       </dnd-grid-box>
 
       <!-- 지역별 data -->
-      <dnd-grid-box boxId="map-box" dragSelector=".card-header">
+      <dnd-grid-box boxId="map-box" ref="mapContainer" dragSelector=".card-header">
         <div class="card dash-box">
           <div class="card-header">
             지역별 Data Transfer 현황
@@ -44,7 +44,7 @@
               </b-button>
             </div>
           </div>
-          <div class="card-body">
+          <div class="card-body" style="padding: 0">
             <div id="mapBox" class="map-box"></div>
           </div>
         </div>
@@ -126,8 +126,35 @@
     width: 100%;
     height: 100%;
   }
+  .leaflet-container {
+    background: #f0f0f0
+  }
   .map-box {
-    min-height: 530px;
+    min-height: 534px;
+  }
+
+  .map-box .info {
+    padding: 6px 8px;
+    background: #fff;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+  }
+  .map-box .info h4 {
+    margin: 0 0 5px;
+    color: #777;
+  }
+  .map-box .legend {
+    text-align: left;
+    line-height: 18px;
+    color: #555;
+  }
+  .map-box .legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
   }
 </style>
 
@@ -139,6 +166,15 @@
   import L from 'leaflet'
 
   const geojson = require('../../static/geo/ctprvn.json');
+
+  const getMapColor = (d) => {
+    return d > 100 ? '#800026' :
+      d > 80  ? '#BD0026' :
+      d > 60  ? '#E31A1C' :
+      d > 40  ? '#FC4E2A' :
+      d > 20   ? '#FD8D3C' :
+              '#FEB24C';
+  };
 
   export default {
     name: 'dashboard',
@@ -159,13 +195,13 @@
         layout: [
           {
             id: 'edge-box',
-            hidden: true,
+            hidden: false,
             pinned: false,
             position: {
               x: 0,
               y: 0,
-              w: 7.5,
-              h: 2.5
+              w: 7,
+              h: 2.75
             }
           },
           {
@@ -173,32 +209,32 @@
             hidden: false,
             pinned: false,
             position: {
-              x: 0,
+              x: 7,
               y: 0,
-              w: 3.5,
-              h: 5
+              w: 4,
+              h: 5.5
             }
           },
           {
             id: 'cache-box',
-            hidden: true,
+            hidden: false,
             pinned: false,
             position: {
               x: 0,
-              y: 2.5,
-              w: 3.75,
-              h: 2.5
+              y: 2.75,
+              w: 3.5,
+              h: 2.75
             }
           },
           {
             id: 'service-box',
-            hidden: true,
+            hidden: false,
             pinned: false,
             position: {
-              x: 3.75,
-              y: 2.5,
-              w: 3.75,
-              h: 2.5
+              x: 3.5,
+              y: 2.75,
+              w: 3.5,
+              h: 2.75
             }
           },
           {
@@ -207,7 +243,7 @@
             pinned: false,
             position: {
               x: 0,
-              y: 5,
+              y: 5.5,
               w: 11,
               h: 2.5
             }
@@ -385,6 +421,21 @@
       },
 
       drawMap (){
+        this.$refs.mapContainer.$resizeHandle.remove()
+        geojson.features = geojson.features.map(obj => {
+          return {
+            ...obj,
+            properties: {
+              ...obj.properties,
+              dataValue: {
+                edge: 50,
+                request: Math.abs(Math.floor(Math.random() * (0 - 110) + 0)),
+                transfer: 15
+              }
+            }
+          }
+        })
+
         const mymap = L.map('mapBox', {
           zoomControl: false,
           dragging: false,
@@ -396,45 +447,91 @@
           zoomDelta: 0.25,
           attributionControl: false
         })
-        mymap.setView([36, 127.5], 6.75);
+        mymap.setView([35.9, 128.3], 6.75);
 
+        const info = L.control({position: 'bottomright'});
+        info.onAdd = function(map) {
+          this._div = L.DomUtil.create('div', 'info');
+          this.update();
+          return this._div;
+        };
 
-        const geoLayer = L.geoJSON(null, {
-          style: {
-            weight: 2,
-            color: '#ECEFF1',
-            opacity: 1,
-            dashArray: '3',
-            fillColor: '#feb24c',
-            fillOpacity: 0.6
+        info.update = function(props) {
+          const propsDom = props
+            ? `<b>${props.CTP_KOR_NM}</b><br />
+               <span>Edge: ${props.dataValue.edge}</span><br />
+               <span>Request: ${props.dataValue.request}</span><br />
+               <span>Data Transfer: ${props.dataValue.transfer}%</span>`
+            : '';
+          this._div.innerHTML = propsDom;
+        };
+
+        const geoLayer = L.geoJSON(geojson, {
+          style (feature) {
+            return {
+              fillColor: getMapColor(feature.properties.dataValue.request),
+              weight: 2,
+              opacity: 1,
+              color: '#fff',
+              dashArray: '3',
+              fillOpacity: 0.7
+            }
           },
-          onEachFeature (feature,layer) {
+          onEachFeature (feature, layer) {
             layer.on({
               mouseover (e){
                 let layer = e.target;
 
                 layer.setStyle({
-                  color: '#666',
+                  color: '#fff',
                   dashArray: '',
                   fillOpacity: 1
-                });
-
-                //layer.bindLabel('Test')
+                })
 
                 if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
                   layer.bringToFront();
                 }
+                info.update(layer.feature.properties);
               },
 
               mouseout (e){
                 geoLayer.resetStyle(e.target);
+                info.update();
               }
             })
           }
-        })
-        geoLayer.addData(geojson);
-        mymap.addLayer(geoLayer);
+        });
 
+        const legend = L.control();
+
+        legend.onAdd = function (map) {
+
+          let div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 20, 40, 60, 80, 100],
+            labels = [],
+            from, to;
+
+          for (let i = 0; i < grades.length; i++) {
+            from = grades[i];
+            to = grades[i + 1];
+
+            labels.push(
+              '<i style="background:' + getMapColor(from + 1) + '"></i> ' +
+              from + (to ? '&ndash;' + to : '+'));
+          }
+
+          div.innerHTML = labels.join('<br>');
+          return div;
+        };
+
+        geoLayer.addTo(mymap);
+        info.addTo(mymap);
+        legend.addTo(mymap);
+
+
+      },
+      onClickMap (e){
+        console.log(e.target)
       }
     }
   }

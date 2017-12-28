@@ -8,6 +8,7 @@ import router from './router'
 import Multiselect from 'vue-multiselect'
 import VueHighcharts from 'vue-highcharts'
 
+
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
 Vue.use(VueHighcharts);

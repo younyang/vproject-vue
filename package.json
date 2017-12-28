@@ -24,6 +24,7 @@
     "simple-line-icons": "^2.4.1",
     "vue": "2.4.2",
     "vue-chartjs": "2.8.2",
+    "vue-choropleth": "0.0.4",
     "vue-cleave": "^1.2.2",
     "vue-highcharts": "0.0.10",
     "vue-multiselect": "^2.0.8",
