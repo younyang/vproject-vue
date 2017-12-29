@@ -236,6 +236,11 @@ export default new Router({
               name: 'Service Processing 상세',
               props: true,
               component: lazyLoading('workflow/service/Detail')
+            },
+            {
+              path: 'domain',
+              name: 'Domain Processing 관리',
+              component: lazyLoading('workflow/domain', true)
             }
           ]
         },

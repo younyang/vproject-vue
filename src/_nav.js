@@ -78,6 +78,10 @@ export default {
         {
           name: 'Service Processing 관리',
           url: '/workflow/service'
+        },
+        {
+          name: 'Domain Processing 관리',
+          url: '/workflow/domain'
         }
       ]
     },
