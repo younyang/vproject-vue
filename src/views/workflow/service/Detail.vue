@@ -96,17 +96,84 @@
       </b-button>
     </div>
     <b-collapse id="detail" visible>
-      <pre>{{ detailItems }}</pre>
+      <b-card>
+        <div class="d-flex justify-content-center">
+          <div class="processBox state" v-for="(item, index) in items.processTaskList">
+            <h5>{{ item.interlockTargetCodeName }}</h5>
+            <span>{{ item.interlockSuccessQty }}</span> /
+            <span>{{ item.interlockTotalQty }}</span>
+          </div>
+        </div>
+      </b-card>
+
+
+      <b-card
+        v-for="(item, index) in items.processTaskList"
+        :key="item.taskId"
+      >
+        <div slot="header">
+          <i class='fa fa-angle-right'></i> {{ item.interlockTargetCodeName }}
+          <div class="card-actions">
+            <b-button size="sm" class="btn-minimize">
+              <i class="fa fa-pencil"></i>
+              <span class="sr-only">재실행</span>
+            </b-button>
+          </div>
+        </div>
+
+        <div v-if="item.interlockTargetCode === 'INTERLOCK_TARGET_01'">
+          DNS
+        </div>
+
+        <div v-if="item.interlockTargetCode === 'INTERLOCK_TARGET_02'">
+          <div class="timeInfo">
+            <span>시작: {{ item.taskBeginDatetime }}</span>
+            <span class="ml-2">종료: {{ item.taskEndDatetime }}</span>
+          </div>
+          <div class="searchInfo">
+            <b-form-fieldset
+              label="상태"
+              :label-cols="1"
+              :horizontal="true">
+              <multiselect
+                :id="`taskSelect_${item.taskId}`"
+                :showLabels="false"
+                :searchable="false"
+                :options="code.taskStateCode"
+                :loading="isLoad.taskStateCode"
+                class="inline sm"
+                label="codeName"
+                track-by="code"
+                placeholder="전체"
+                @input="onChangeStatus"
+              ></multiselect>
+            </b-form-fieldset>
+          </div>
+
+          <div class="statusBoxWrap d-flex flex-wrap">
+            <div
+              class="statusBox"
+              :class="statusClass(active.taskActivityStateCode)"
+              v-for="(active, i) in activeItems[item.taskId]"
+            >
+              <h6>{{ active.popName }}</h6>
+              <span>{{ active.transactionId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="item.interlockTargetCode === 'INTERLOCK_TARGET_03'">
+          Low Referrer
+        </div>
+
+        <div v-if="item.interlockTargetCode === 'INTERLOCK_TARGET_04'">
+          Edge
+        </div>
+      </b-card>
     </b-collapse>
 
-    <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
-    </div>
-    <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Referrer 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+    <div class="page-btn">
+      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service Processing 관리' }"><i class="fa fa-list"></i> 목록</b-button>
     </div>
   </div>
 </template>
@@ -125,14 +192,24 @@
         name: 'Service Processing 상세',
         originItems: {},
         items: {
-          processId : null,
-          taskIds : null,
-          processSectionCodeName : null,
-          processStateCodeName : null,
+          processId: null,
+          taskIds: null,
+          processSectionCodeName: null,
+          processStateCodeName: null,
           processBeginDatetime: null,
-          processEndDatetime: null
+          processEndDatetime: null,
+          processTaskList: [{
+            interlockTargetCode: "",
+            interlockTargetCodeName: "",
+          }]
         },
-        detailItems: {},
+        activeItems: {},
+        code: {
+          taskStateCode: []
+        },
+        isLoad: {
+          taskStateCode: false
+        },
         isEdit: false
       }
     },
@@ -141,59 +218,75 @@
     },
 
     created (){
+      // State Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'TASK_STATE' }
+        })
+        .then((res) => {
+          this.isLoad.taskStateCode = false;
+          this.code.taskStateCode = res.data.items;
+        });
+
       // Detail Data
       this.$https.get(`/serviceprocess/${this.id}`)
         .then((res) => {
           this.items = { ...this.items, ...res.data.items };
+          this.items.processTaskList = this.items.processTaskList.map(obj => ({
+            ...obj,
+            taskStateCode: this.code.taskStateCode.find(({ code }) => code === obj.taskStateCode) || null
+          }));
           this.originItems = JSON.parse(JSON.stringify(this.items));
 
-          this.fetchDetail();
+          const taskIds = this.items.taskIds.split(',');
+          taskIds.forEach(tid => { this.fetchActivity(tid) });
         });
     },
 
     methods: {
-      fetchDetail (){
-        this.$https.get(`/serviceprocess/${this.id}/tasks/${this.items.taskIds}/activities`)
+      fetchActivity (taskId, params = {}){
+        this.$https.get(`/serviceprocess/${this.id}/tasks/${taskId}/activities`, params)
           .then((res) => {
-            this.detailItems = { ...res.data.items };
+            const activeList = res.data.items.taskActivityList !== null ? res.data.items.taskActivityList : [];
+
+            this.activeItems = Object.assign({}, this.activeItems, { [taskId] : activeList });
           });
       },
 
-      onEdit (){
-        this.isEdit = true;
+      onChangeStatus (obj, id){
+        const taskId = id.split('taskSelect_')[1];
+        const codeObj = obj !== null ? { taskActivityStateCode: `TASK_ACTIVE_STATE_${obj.code.split('_')[2]}` } : {};
+        this.fetchActivity(taskId, codeObj);
       },
 
-      onView (){
-        this.isEdit = false;
-        this.items = JSON.parse(JSON.stringify(this.originItems));
-      },
-
-      onSubmit (){
-        const { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason } = this.items;
-
-        this.$https.put(`/referrers/${this.id}`, { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason })
-          .then(() => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      },
-
-      onDelete (){
-        this.modalMessage = '정말 삭제하시겠습니까?';
-        this.isModalMessage = true;
-      },
-
-      onDeleteData (){
-        this.$https.delete(`/referrers/${this.id}?referrerTypeCode=${this.referrerTypeCode}`)
-          .then(() => {
-            this.$router.push({ name: 'Referrer 관리' });
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      statusClass (code) {
+        return code === 'TASK_ACTIVE_STATE_01' ? 'bg-secondary'
+          : code === 'TASK_ACTIVE_STATE_02' ? 'bg-primary'
+          : code === 'TASK_ACTIVE_STATE_03' ? 'bg-success'
+          : 'bg-danger';
       }
     }
   }
 </script>
+
+<style>
+  .timeInfo {
+
+  }
+  .statusBoxWrap {
+    margin: 0 -10px;
+  }
+  .statusBox {
+    margin: 10px;
+    border: 1px solid #000;
+    padding: 15px;
+    text-align: center;
+  }
+  .processBox {
+    margin: 10px;
+    border: 1px solid #000;
+    padding: 15px;
+    text-align: center;
+    min-width: 100px;
+    background: #f7b900;
+  }
+</style>

@@ -165,7 +165,7 @@
   import moment from 'moment'
 
   export default {
-    name: 'referrers',
+    name: 'serviceProcessing',
     data (){
       return {
         fields: {
@@ -293,8 +293,8 @@
         });
       // State Code
       this.$https.get('/system/commonCode', {
-        q: { groupCode: 'PROCESS_STATE' }
-      })
+          q: { groupCode: 'PROCESS_STATE' }
+        })
         .then((res) => {
           this.isLoad.processStateCode = false;
           this.code.processStateCode = res.data.items;
