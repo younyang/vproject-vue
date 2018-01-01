@@ -1,185 +1,169 @@
 <template>
   <div class="animated fadeIn">
-    <b-form @reset="onReset">
-      <b-card class="search">
-        <div class="form-group row">
-          <b-form-fieldset
-            class="col-sm-5"
-            label="검색어"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="searchType"
-              label="codeName"
-              :allowEmpty="false"
-              :showLabels="false"
-              :searchable="false"
-              :options="code.searchType"
-            ></multiselect>
-          </b-form-fieldset>
-          <b-form-fieldset class="col-sm-7 inline-field">
-            <b-form-input type="text" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
-          </b-form-fieldset>
-        </div>
+    <b-form class="searchBox" @reset="onReset">
+      <div class="form-group">
+        <b-form-fieldset
+          label="검색어"
+          style="width:60%"
+          class="inline"
+          :horizontal="true">
+          <multiselect
+            v-model="searchType"
+            label="codeName"
+            class="noEmpty"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.searchType"
+          ></multiselect>
+          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
+        </b-form-fieldset>
 
-        <div class="form-group row">
-          <b-form-fieldset
-            class="col-sm-5"
-            label="Service Type"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="serviceTypeCode"
-              :showLabels="false"
-              :searchable="false"
-              :options="code.serviceTypeCode"
-              :loading="isLoad.serviceTypeCode"
-              label="codeName"
-              track-by="code"
-              placeholder="전체"
-            ></multiselect>
-          </b-form-fieldset>
+        <b-form-fieldset
+          label="Service Type"
+          class="label-lg"
+          :horizontal="true">
+          <multiselect
+            v-model="serviceTypeCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.serviceTypeCode"
+            :loading="isLoad.serviceTypeCode"
+            label="codeName"
+            track-by="code"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+      </div>
 
-          <b-form-fieldset
-            class="col-sm-5"
-            label="CNAME"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="searchItem.cnameUseYn"
-              :showLabels="false"
-              :searchable="false"
-              :options="['사용', '미사용']"
-              placeholder="전체"
-            ></multiselect>
-          </b-form-fieldset>
-        </div>
+      <div class="form-group">
+        <b-form-fieldset
+          label="CNAME"
+          style="width:60%"
+          :horizontal="true">
+          <multiselect
+            v-model="searchItem.cnameUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
 
-        <div class="form-group row">
-          <b-form-fieldset
-            class="col-sm-5"
-            label="SSL 인증서"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="searchItem.sslCertUseYn"
-              :showLabels="false"
-              :searchable="false"
-              :options="['사용', '미사용']"
-              placeholder="전체"
-            ></multiselect>
-          </b-form-fieldset>
+        <b-form-fieldset
+          label="SSL 인증서"
+          class="label-lg"
+          :horizontal="true">
+          <multiselect
+            v-model="searchItem.sslCertUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+      </div>
 
-          <b-form-fieldset
-            class="col-sm-5"
-            label="사용여부"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="searchItem.serviceUseYn"
-              :showLabels="false"
-              :searchable="false"
-              :options="['사용', '미사용']"
-              placeholder="전체"
-            ></multiselect>
-          </b-form-fieldset>
-        </div>
+      <div class="form-group">
+        <b-form-fieldset
+          label="사용여부"
+          style="width:60%"
+          :horizontal="true">
+          <multiselect
+            v-model="searchItem.serviceUseYn"
+            :showLabels="false"
+            :searchable="false"
+            :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+      </div>
 
-        <div class="form-group row">
-          <b-form-fieldset
-            class="col-sm-5"
-            label="기간"
-            :label-cols="5"
-            :horizontal="true">
-            <multiselect
-              v-model="searchDateType"
-              label="codeName"
-              :allowEmpty="false"
-              :showLabels="false"
-              :searchable="false"
-              :options="code.searchDateType"
-            ></multiselect>
-          </b-form-fieldset>
-          <b-form-fieldset class="col-sm-7 form-inline inline-field date-field">
-            <b-form-input type="date" v-model="searchItem.searchDateFrom"></b-form-input> ~
-            <b-form-input type="date" v-model="searchItem.searchDateTo"></b-form-input>
+      <div class="form-group">
+        <b-form-fieldset
+          label="기간"
+          class="inline"
+          style="width:100%"
+          :horizontal="true">
+          <multiselect
+            v-model="searchDateType"
+            label="codeName"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.searchDateType"
+          ></multiselect>
 
-            <b-button-group size="sm">
-              <b-button variant="outline-primary" @click="onCalendar('today')">오늘</b-button>
-              <b-button variant="outline-primary" @click="onCalendar(7, 'days')">7일</b-button>
-              <b-button variant="outline-primary" @click="onCalendar(1, 'month')">1개월</b-button>
-              <b-button variant="outline-primary" @click="onCalendar(3, 'month')">3개월</b-button>
-              <b-button variant="outline-primary" @click="onCalendar('reset')">전체</b-button>
-            </b-button-group>
-          </b-form-fieldset>
-        </div>
-        <div slot="footer">
-          <b-button type="button" size="sm" variant="primary" @click="onSearch"><i class="fa fa-search"></i> Search</b-button>
-          <b-button type="reset" size="sm" variant="danger"><i class="fa fa-ban"></i> Reset</b-button>
-        </div>
-      </b-card>
+          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input> ~
+          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateTo"></b-form-input>
+
+          <b-button class="btn-day" @click="onCalendar('today')">오늘</b-button>
+          <b-button class="btn-day" @click="onCalendar(7, 'days')">7일</b-button>
+          <b-button class="btn-day" @click="onCalendar(1, 'month')">1개월</b-button>
+          <b-button class="btn-day" @click="onCalendar(3, 'month')">3개월</b-button>
+          <b-button class="btn-day" @click="onCalendar('reset')">전체</b-button>
+        </b-form-fieldset>
+      </div>
+      <div class="search-btn">
+        <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
+        <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+      </div>
     </b-form>
 
-    <div class="row">
-      <div class="col">
-        <section class="board-btn">
-          <b-button type="button" variant="success">
-            <i class="icon-cloud-download"></i>
-            엑셀 다운로드
-          </b-button>
-          <b-button type="button" variant="primary" :to="{ name: 'Service 등록' }">
-            <i class="icon-pencil"></i>
-            등록
-          </b-button>
-        </section>
 
-        <section class="board">
-          <b-table
-            striped
-            bordered
-            hover
-            show-empty
-            :items="items"
-            :fields="fields"
-            @row-clicked="details"
-          >
-            <template slot="serviceTypeName" scope="row">
-              <span class="badge badge-pill badge-success" v-for="val in row.value">
-                {{ val }}
-              </span>
-            </template>
-            <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="sslCertUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-            <template slot="serviceUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-          </b-table>
-        </section>
+    <section class="board-btn">
+      <b-button type="button" variant="primary">
+        엑셀 다운로드
+      </b-button>
+      <b-button type="button" variant="primary" :to="{ name: 'Service 등록' }">
+        등록
+      </b-button>
+    </section>
 
-        <section class="board-article d-flex justify-content-between">
-          <b-form inline>
-            <multiselect
-              :value="pageInfo.size"
-              :allowEmpty="false"
-              :showLabels="false"
-              :searchable="false"
-              :options="pageOptions"
-              @input="onRowSelect"
-              class="inline sm"
-            ></multiselect>
-            <label class="ml-sm-2">Row Per Page</label>
-          </b-form>
+    <section class="board">
+      <b-table
+        striped
+        bordered
+        hover
+        show-empty
+        :items="items"
+        :fields="fields"
+        @row-clicked="details"
+      >
+        <template slot="serviceTypeName" scope="row">
+          <span class="badge badge-pill badge-success" v-for="val in row.value">
+            {{ val }}
+          </span>
+        </template>
+        <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="sslCertUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="serviceUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+      </b-table>
+    </section>
 
-          <b-pagination
-            :value="pageInfo.page"
-            :total-rows="pageInfo.totalCount"
-            :per-page="pageInfo.size"
-            @input="onPagination"
-            class="mt-2"
-          ></b-pagination>
-        </section>
+    <section class="board-article d-flex justify-content-between">
+      <b-form inline>
+        <multiselect
+          :value="pageInfo.size"
+          :allowEmpty="false"
+          :showLabels="false"
+          :searchable="false"
+          :options="pageOptions"
+          @input="onRowSelect"
+          class="inline sm"
+        ></multiselect>
+        <label class="ml-sm-2">Row Per Page</label>
+      </b-form>
 
+      <b-pagination
+        :value="pageInfo.page"
+        :total-rows="pageInfo.totalCount"
+        :per-page="pageInfo.size"
+        @input="onPagination"
+        class="mt-2"
+      ></b-pagination>
+    </section>
 
-      </div>
-    </div><!--/.row-->
 
 
   </div>

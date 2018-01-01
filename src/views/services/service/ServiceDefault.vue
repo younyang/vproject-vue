@@ -5,8 +5,6 @@
       :name="name">
     </content-header>
 
-
-
     <div class="collapse-title">
       <b-button
         variant="secondary"
@@ -321,14 +319,14 @@
     </b-collapse>
 
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
+      <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">목록</b-button>
+      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
 
     <!-- Service Type 수정 Modal -->
@@ -380,8 +378,8 @@
       </div>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="onSubmitService"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="button" size="sm" variant="danger" @click="onResetService"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" variant="primary" @click="onSubmitService">저장</b-button>
+        <b-button type="button" variant="outline-secondary" @click="onResetService">취소</b-button>
       </div>
     </b-modal>
 
@@ -415,8 +413,8 @@
       </div>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="onSubmitUseYn"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-        <b-button type="button" size="sm" variant="danger" @click="onResetUseYn"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" variant="primary" @click="onSubmitUseYn">저장</b-button>
+        <b-button type="button" variant="outline-secondary" @click="onResetUseYn">취소</b-button>
       </div>
     </b-modal>
 
@@ -438,7 +436,7 @@
       </section>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
 
@@ -448,8 +446,8 @@
         <h5>{{ modalMessage }}</h5>
       </div>
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="danger" @click="onDeleteData"><i class="fa fa-dot-circle-o"></i> 삭제</b-button>
-        <b-button type="button" size="sm" variant="secondary" @click="isModalMessage = false"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" variant="primary" @click="onDeleteData">삭제</b-button>
+        <b-button type="button" variant="outline-secondary" @click="isModalMessage = false"><i class="fa fa-ban"></i> 취소</b-button>
       </div>
     </b-modal>
   </div>

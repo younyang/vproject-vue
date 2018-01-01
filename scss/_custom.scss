@@ -1,8 +1,20 @@
 // V Project Custom Style
+$font-color: #4c4c4c;
+$line-color: #e2e2e2;
+$border-color: #d8d8d8;
+$primary-color: #0088cc;
+
 
 html,
-body {
-  min-width: 800px;
+body,
+body > .app {
+  min-width: 995px;
+  background-color: #fff;
+}
+
+* {
+  outline: none !important;
+  box-sizing: border-box;
 }
 
 
@@ -10,24 +22,55 @@ body {
  * Header
  */
 .app-header.navbar {
+  height: 60px;
+  border-bottom: 0;
+  background-color: #1d2127;
   .navbar-brand {
-    text-align: center;
-    background-image: none;
-    line-height: 2.4rem
+    width: 207px;
+    border-right: 1px solid #2f3139;
+    border-bottom: 0;
+    background-color: inherit;
+    background-size: auto auto;
   }
 }
 
+/**
+ * Sidebar
+ */
+.sidebar-fixed .sidebar {
+  width: 207px;
+  .sidebar-nav {
+    width: 207px;
+    height: calc(100vh - 60px);
+  }
+  .nav {
+    width: 207px;
+  }
+}
+
+.sidebar-fixed .main {
+  margin-left: 207px;
+}
+
+/**
+ * Layout
+ */
+.header-fixed .app-body {
+  margin-top: 60px;
+}
 .main > .container-fluid {
-  padding: 0 30px 60px 30px
+  padding: 0 20px 60px 20px
 }
 
 
 /**
- * Title
+ * Title & Breadcrumb
  */
 .page-title {
-  margin-top: -1.5rem;
-  padding: 0.75rem 0;
+  position: relative;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #d8d8d8;
 
   &:after {
     content: '';
@@ -35,17 +78,272 @@ body {
     clear: both;
   }
 
-  h2 {
+  h1 {
     float: left;
     font-size: 1rem;
-    line-height: 2;
-    margin: 0;
+    line-height: 45px;
+    padding: 0 20px;
+    margin: 0 0 -1px 0;
+    color: #2e353e;
+    border-bottom: 1px solid $primary-color;
   }
-
-  .nav {
+  .breadcrumb {
     float: right;
+    padding: 12px 20px 11px 0;
+    margin: 0;
+    border: 0;
+    a {
+      color: #777;
+    }
   }
 }
+
+
+/**
+ * Sub title & Nav Tabs
+ */
+.page-sub-title {
+  padding: 0 20px;
+  margin: -20px -20px 20px -20px;
+  background: #f5f5f5;
+  border-bottom: 1px solid $line-color;
+
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+  h2 {
+    float: left;
+    font-size: inherit;
+    line-height: 40px;
+    height: 40px;
+    margin: 0;
+
+    i {
+      font-size: 12px;
+      font-weight: bold;
+      color: $primary-color;
+      margin-right: 3px;
+    }
+  }
+  .sub-navs {
+    float: right;
+    .nav-link {
+      text-align: center;
+      color: $font-color;
+      padding: 0.6rem 1rem;
+    }
+    .nav-link.active {
+      font-weight: bold;
+      color: #fff;
+      background-color: $primary-color;
+
+      &:after {
+        content: '';
+        display: block;
+        width: 0;
+        margin: 0.25rem auto -0.6rem;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #fff;
+      }
+    }
+  }
+}
+
+
+/**
+ * Button
+ */
+.btn {
+  min-width: 40px;
+  height: 30px;
+  padding: 5px 15px 6px 15px;
+  border-radius: 3px;
+}
+
+.btn:hover,
+.btn:focus,
+.btn:active {
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: $primary-color;
+}
+.btn-outline-secondary {
+  color: #626262;
+  border-color: #ccc;
+}
+
+
+
+/**
+ * Form control
+ */
+.form-control {
+  height: 30px;
+  border-radius: 3px;
+  border-color: $border-color;
+}
+
+
+
+/**
+ * MultiSelect
+ */
+.multiselect {
+  min-height: 30px;
+
+  .multiselect__tags {
+    min-height: 30px;
+    padding: 4px 30px 0 4px;
+    border-radius: 3px;
+    border-color: $border-color;
+  }
+  .multiselect__tag {
+    margin-bottom: 0;
+  }
+  .multiselect__single {
+    margin-bottom: 0;
+  }
+  .multiselect__select {
+    width: 28px;
+    height: 28px;
+    padding: 0 8px;
+  }
+  .multiselect__spinner {
+    width: 38px;
+    height: 28px;
+  }
+  .multiselect__input {
+    margin-bottom: 4px;
+  }
+  .multiselect__element {
+    height: auto;
+  }
+  .multiselect__option {
+    min-height: 28px;
+    padding: 6px 10px;
+  }
+  .multiselect__content-wrapper {
+    border-color: $border-color;
+  }
+  .multiselect__input,
+  .multiselect__single,
+  .multiselect__option {
+    font-size: 0.825rem;
+  }
+
+  &.noEmpty .multiselect__option--highlight {
+    background: #41B886 !important;
+  }
+}
+
+
+
+/**
+ * Search Form Box
+ */
+.searchBox {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 10px 100px 10px 30px;
+  border-radius: 5px;
+  border: 1px solid #cdd8dd;
+  background-color: #f6fafc;
+
+  .form-group {
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+  .form-group:first-child {
+    margin-top: 0;
+  }
+
+  .form-row {
+    margin: 0;
+  }
+  .multiselect,
+  .form-date {
+    width: 130px;
+  }
+
+  .form-row.inline {
+    .form-control.keyword {
+      width: 210px;
+    }
+    .form-control {
+      margin-top: -1px;
+    }
+    .multiselect,
+    .form-control {
+      vertical-align: middle;
+      display: inline-block;
+    }
+  }
+  .form-row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+    flex: none;
+  }
+
+  .col-form-label {
+    min-width: 75px;
+    max-width: 75px;
+    padding-top: calc(0.4rem - 1px * 2);
+    padding-bottom: calc(0.4rem - 1px * 2);
+  }
+  .label-lg .col-form-label {
+    min-width: 105px;
+    max-width: 105px;
+  }
+  .col-sm-3 {
+    min-width: 1%;
+  }
+  .col-sm-9 {
+    width: auto;
+    min-width: 80%;
+  }
+  .label-lg .col-sm-9 {
+    min-width: 1%;
+  }
+
+  .btn-day {
+    width: 40px;
+    height: 20px;
+    padding: 0;
+    font-size: 11px;
+    border-radius: 3px;
+    border: 1px solid $border-color;
+    background: #fff;
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: #fff;
+      background: #00476a;
+    }
+  }
+
+  .search-btn {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -35px;
+    padding: 0 20px;
+
+    .btn {
+      display: block;
+      margin: 5px 0;
+    }
+  }
+}
+
+
+
 .collapse-title {
   margin-bottom: 10px;
   .btn {
@@ -324,48 +622,7 @@ body {
   display: inline-block;
   width: auto;
 }
-.multiselect.sm {
-  min-height: 30px;
-  &.protocol {
-    width: 90px;
-  }
-  &.protocol.view-type {
-    width: 45px;
-  }
-  .multiselect__tag {
-    margin-bottom: 0;
-  }
 
-  .multiselect__select {
-    width: 28px;
-    height: 28px;
-    padding: 0 8px;
-  }
-  .multiselect__tags {
-    min-height: 30px;
-    padding: 4px 30px 0 4px;
-  }
-  .multiselect__spinner {
-    width: 38px;
-    height: 28px;
-  }
-  .multiselect__input {
-    margin-bottom: 4px;
-  }
-  .multiselect__element {
-    height: auto;
-  }
-  .multiselect__option {
-    min-height: 30px;
-    padding: 8px;
-  }
-
-  .multiselect__input,
-  .multiselect__single,
-  .multiselect__option {
-    font-size: 0.825rem;
-  }
-}
 
 
 .icons-list li {

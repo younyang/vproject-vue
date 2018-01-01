@@ -232,15 +232,16 @@
     </b-collapse>
 
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Edge 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
+      <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Edge 관리' }">목록</b-button>
+      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
+
 
     <!-- Service Type 수정 Modal -->
     <b-modal id="serviceModal" size="lg" v-model="isModalService" @hide="onResetService">

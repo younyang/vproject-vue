@@ -10,9 +10,9 @@
           :searchable="false"
           :options="code.templateType"
         ></multiselect>
-        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="icon-pencil"></i></b-button>
-        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="fa fa-plus"></i></b-button>
-        <b-button type="button" size="sm" variant="primary" class="ml-1" @click=""><i class="icon-grid"></i></b-button>
+        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="icon-pencil"></i></b-button>
+        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="fa fa-plus"></i></b-button>
+        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="icon-grid"></i></b-button>
       </div>
       <div>
         <c-switch
@@ -49,7 +49,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.edge" ref="edgeChart" style="height: 245px"></highcharts>
+            <highcharts :options="widget.edge.items" ref="edgeChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -93,7 +93,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.cache" ref="cacheChart" style="height: 245px"></highcharts>
+            <highcharts :options="widget.cache.items" ref="cacheChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -316,30 +316,30 @@
           serviceTypeList: []
         },
         searchItems: {
-          fromDate: '2017-12-20T00:00',
-          toDate: '2017-12-20T23:59',
+          fromDate: '2017-12-18 00:00',
+          toDate: '2017-12-29 23:59',
           q: {
             serviceIdList:['ALL'],
             serviceTypeList: ['ALL'],
             typeField: '',
             metricType: 'sum',
-            dataType: 'httpTraffic',
-            intervalType: 'H',
-            intervalValue: '1',
+            dataType: 'requestCount',
+            intervalType: 'D',
+            intervalValue: 1,
             targetType: 'TOTAL_EDGE',
             chartType: 'AREA',
             peakYn: false,
-            mainMode: 'TIME',
-            subMode: '',
-            targetList: ["",""]
+            mainMode: 'TARGET',
+            subMode: 'TIME',
+            targetList: []
           }
         },
         widget: {
           edge: {
             items: {},
             searchItems: {
-              fromDate: '2017-12-20T12:00',
-              toDate: '2017-12-20T21:00',
+              fromDate: '2017-12-20 12:00',
+              toDate: '2017-12-20 21:00',
               q: {
                 serviceIdList:['ALL'],
                 serviceTypeList: ['ALL'],
@@ -353,69 +353,92 @@
                 peakYn: false,
                 mainMode: 'TIME',
                 subMode: '',
-                targetList: ["",""]
+                targetList: []
               }
             }
           },
           cache: {
             items: {},
             searchItems: {
-              fromDate: '2017-12-26T00:00',
-              toDate: '2017-12-26T23:59',
+              fromDate: '2017-12-26 00:00',
+              toDate: '2017-12-26 23:59',
               q: {
-                serviceIdList:["ALL"],
-                serviceTypeList:["ALL"],
+                serviceIdList: ["ALL"],
+                serviceTypeList: ["ALL"],
                 typeField : "cacheStatus",
                 metricType : "sum",
                 dataType : "hits",
                 targetType : "TOTAL_EDGE",
                 chartType : "PIE",
                 peakYn : false,
-                mainMode : "TYPE"
+                mainMode : "TYPE",
+                targetList: []
               }
             }
           },
           service: {
             items: {},
             searchItems: {
-              fromDate: '2017-12-20T12:00',
-              toDate: '2017-12-20T21:00',
+              fromDate: '2017-12-18 00:00',
+              toDate: '2017-12-29 23:59',
               q: {
                 serviceIdList:['ALL'],
                 serviceTypeList: ['ALL'],
                 typeField: '',
                 metricType: 'sum',
-                dataType: 'httpTraffic',
-                intervalType: 'H',
-                intervalValue: '1',
-                targetType: 'TOTAL_EDGE',
+                dataType: 'requestCount',
+                intervalType: 'D',
+                intervalValue: 1,
+                targetType: 'EDGE',
                 chartType: 'BAR',
                 peakYn: false,
-                mainMode: 'TIME',
-                subMode: '',
-                targetList: ["",""]
+                mainMode: 'TARGET',
+                subMode: 'TIME',
+                targetList: ["Edge-01", "Edge-02", "Edge-03"]
               }
             }
           },
           request: {
             items: {},
             searchItems: {
-              fromDate: '2017-12-20T12:00',
-              toDate: '2017-12-20T21:00',
+              fromDate: '2017-12-18 00:00',
+              toDate: '2017-12-29 23:59',
               q: {
                 serviceIdList:['ALL'],
                 serviceTypeList: ['ALL'],
                 typeField: '',
                 metricType: 'sum',
-                dataType: 'httpTraffic',
-                intervalType: 'H',
-                intervalValue: '1',
+                dataType: 'requestCount',
+                intervalType: 'D',
+                intervalValue: 1,
                 targetType: 'TOTAL_EDGE',
-                chartType: 'BAR',
+                chartType: 'LINE',
                 peakYn: false,
-                mainMode: 'TIME',
+                mainMode: 'TARGET',
+                subMode: 'TIME',
+                targetList: []
+              }
+            }
+          },
+          map: {
+            items: {},
+            searchItems: {
+              fromDate: '2017-12-18 00:00',
+              toDate: '2017-12-29 23:59',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                typeField: '',
+                metricType: 'sum',
+                dataType: 'requestCount',
+                intervalType: 'D',
+                intervalValue: 1,
+                targetType: 'TOTAL_EDGE',
+                chartType: 'MAP',
+                peakYn: false,
+                mainMode: 'TOTAL',
                 subMode: '',
-                targetList: ["",""]
+                targetList: []
               }
             }
           }
@@ -546,8 +569,6 @@
               }
             },
             series: [{
-              name: 'Brands',
-              colorByPoint: true,
               data: [{
                 name: 'Hit',
                 y: 70
@@ -641,7 +662,7 @@
 
     created () {
       Object.keys(this.widget).forEach(key => {
-        //this.fetchData(key);
+        this.fetchData(key);
       })
     },
 
@@ -681,13 +702,20 @@
                 borderWidth: 0
               } : false,
             series: (chartType !== 'pie') ?
-              data.series :
-              data.series.map(obj => ({
-                ...obj,
-                y: obj.value
-              })),
+              data.series : [],
             xAxis:  { categories: data.xaxis }
           };
+
+          if (chartType === 'pie'){
+            widget.items.series.push({
+              data: data.series.map(obj => ({
+                name: obj.name,
+                y: obj.value
+              }))
+            })
+          }
+
+          console.log(widget.items)
 
           $chart.update(widget.items);
           $chart.redraw();

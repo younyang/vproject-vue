@@ -22,5 +22,4 @@ export default {
 
   // Import Main styles for this application
   @import "./scss/style";
-
 </style>

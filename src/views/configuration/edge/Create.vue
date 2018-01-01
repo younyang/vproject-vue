@@ -110,8 +110,8 @@
         </b-form-fieldset>
 
         <div slot="footer" class="form-btn">
-          <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Edge 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
+          <b-button type="button" variant="outline-secondary" :to="{ name: 'Edge 관리' }">취소</b-button>
+          <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
         </div>
       </b-card>
     </b-form>

@@ -4,26 +4,27 @@
     <div class="app-body">
       <Sidebar :navItems="nav"/>
       <main class="main">
-        <breadcrumb :list="list"/>
+        <div class="page-title">
+          <h1>{{ name }}</h1>
+          <breadcrumb :list="list"/>
+        </div>
         <div class="container-fluid">
           <router-view></router-view>
         </div>
       </main>
-      <AppAside/>
     </div>
   </div>
 </template>
 
 <script>
 import nav from '../_nav'
-import { Header as AppHeader, Sidebar, Aside as AppAside, Footer as AppFooter, Breadcrumb } from '@/components/'
+import { Header as AppHeader, Sidebar, Footer as AppFooter, Breadcrumb } from '@/components/'
 
 export default {
   name: 'full',
   components: {
     AppHeader,
     Sidebar,
-    AppAside,
     Breadcrumb
   },
   data () {
@@ -31,9 +32,10 @@ export default {
       nav: nav.items
     }
   },
+
   computed: {
     name () {
-      return this.$route.name
+      return this.$route.name || this.$route.matched[2].name
     },
     list () {
       return this.$route.matched.slice(0,3)

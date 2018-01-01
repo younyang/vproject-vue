@@ -1,7 +1,7 @@
 <template>
   <header class="app-header navbar">
     <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button" @click="mobileSidebarToggle">&#9776;</button>
-    <b-link class="navbar-brand" to="/">V Project</b-link>
+    <b-link class="navbar-brand" to="/"><span class="sr-only">SK V Project</span></b-link>
     <button class="navbar-toggler sidebar-toggler d-md-down-none" type="button" @click="sidebarMinimize">&#9776;</button>
 
     <b-nav is-nav-bar class="ml-auto">
@@ -21,8 +21,6 @@
         <b-dropdown-item><i class="fa fa-lock"></i> Logout</b-dropdown-item>
       </b-nav-item-dropdown>
     </b-nav>
-
-    <button class="navbar-toggler aside-menu-toggler d-md-down-none" type="button" @click="asideToggle">&#9776;</button>
   </header>
 </template>
 <script>
@@ -40,10 +38,6 @@ export default {
     mobileSidebarToggle (e) {
       e.preventDefault()
       document.body.classList.toggle('sidebar-mobile-show')
-    },
-    asideToggle (e) {
-      e.preventDefault()
-      document.body.classList.toggle('aside-menu-hidden')
     }
   }
 }

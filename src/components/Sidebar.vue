@@ -1,7 +1,6 @@
 <template>
   <div class="sidebar">
     <nav class="sidebar-nav">
-      <div slot="header"></div>
       <ul class="nav">
         <li class="nav-item" v-for="(item, index) in navItems">
           <template v-if="item.title">
