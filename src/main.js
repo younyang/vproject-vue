@@ -29,6 +29,7 @@ const ax = axios.create({
 
 // axios chart instance
 const axChart = axios.create({
+  baseURL: '/api',
   headers: { 'x-vessel-appKey': '0fc75651-8fa5-4d13-a376-69384eacb315'}
 });
 

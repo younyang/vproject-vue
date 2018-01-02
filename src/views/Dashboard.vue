@@ -666,10 +666,6 @@
       })
     },
 
-    mounted (){
-      this.drawMap();
-    },
-
     methods: {
       fetchData (key){
         const widget = this.widget[key];
@@ -681,14 +677,14 @@
 
       drawChart (key, data){
         const widget = this.widget[key];
-        const $chart = this.$refs[`${key}Chart`].chart;
-        let chartType = widget.searchItems.q.chartType === 'BAR' ? 'column' :
+        const chartType = widget.searchItems.q.chartType === 'BAR' ? 'column' :
           widget.searchItems.q.chartType === 'LINE' ? 'line' :
           widget.searchItems.q.chartType === 'PIE' ? 'pie' :
           widget.searchItems.q.chartType === 'AREA' ? 'areaspline' :
             'map';
 
         if (chartType !== 'map'){
+          const $chart = this.$refs[`${key}Chart`].chart;
           widget.items = {
             ...chartOption,
             chart: (chartType === 'pie') ?
@@ -715,10 +711,11 @@
             })
           }
 
-          console.log(widget.items)
-
           $chart.update(widget.items);
           $chart.redraw();
+
+        }else{
+          this.drawMap(data);
         }
       },
 
@@ -731,21 +728,25 @@
         chart.setSize(width-30,height-71)
       },
 
-      drawMap (){
+      drawMap (mapData = {}){
+        console.log(mapData)
         this.$refs.mapContainer.$resizeHandle.remove()
         geojson.features = geojson.features.map(obj => {
           return {
             ...obj,
             properties: {
               ...obj.properties,
-              dataValue: {
-                edge: 50,
-                request: Math.abs(Math.floor(Math.random() * (0 - 110) + 0)),
-                transfer: 15
-              }
+              dataValue: mapData.series.find(({ regionCode }) => regionCode === obj.properties.CTPRVN_CD) ?
+                mapData.series.find(({ regionCode }) => regionCode === obj.properties.CTPRVN_CD) :
+                {
+                  data: null,
+                  instanceId: 'instanceId',
+                  name : null,
+                  value: Math.abs(Math.floor(Math.random() * (0 - 10000) + 0))
+                }
             }
           }
-        })
+        });
 
         const mymap = L.map('mapBox', {
           zoomControl: false,
@@ -770,9 +771,8 @@
         info.update = function(props) {
           const propsDom = props
             ? `<b>${props.CTP_KOR_NM}</b><br />
-               <span>Edge: ${props.dataValue.edge}</span><br />
-               <span>Request: ${props.dataValue.request}</span><br />
-               <span>Data Transfer: ${props.dataValue.transfer}%</span>`
+               <span>Instance ID: ${props.dataValue.instanceId}</span><br />
+               <span>Value: ${props.dataValue.value}</span>`
             : '';
           this._div.innerHTML = propsDom;
         };
@@ -780,7 +780,7 @@
         const geoLayer = L.geoJSON(geojson, {
           style (feature) {
             return {
-              fillColor: getMapColor(feature.properties.dataValue.request),
+              fillColor: getMapColor(feature.properties.dataValue.value),
               weight: 2,
               opacity: 1,
               color: '#fff',
