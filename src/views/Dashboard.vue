@@ -115,7 +115,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.service" ref="serviceChart" style="height: 245px"></highcharts>
+            <highcharts :options="widget.service.items" ref="serviceChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -137,7 +137,7 @@
             </div>
           </div>
           <div class="card-body">
-            <highcharts :options="chart.request" ref="requestChart" style="height: 245px"></highcharts>
+            <highcharts :options="widget.request.items" ref="requestChart" style="height: 245px"></highcharts>
           </div>
         </div>
       </dnd-grid-box>
@@ -321,7 +321,6 @@
           q: {
             serviceIdList:['ALL'],
             serviceTypeList: ['ALL'],
-            typeField: '',
             metricType: 'sum',
             dataType: 'requestCount',
             intervalType: 'D',
@@ -338,6 +337,23 @@
           edge: {
             items: {},
             searchItems: {
+              fromDate: '2017-12-18 00:00',
+              toDate: '2017-12-29 23:59',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                metricType: 'sum',
+                dataType: 'requestCount',
+                intervalType: 'D',
+                intervalValue: 1,
+                targetType: 'TOTAL_EDGE',
+                chartType: 'AREA',
+                peakYn: false,
+                mainMode: 'TARGET',
+                subMode: 'TIME',
+                targetList: []
+              }
+                /*
               fromDate: '2017-12-20 12:00',
               toDate: '2017-12-20 21:00',
               q: {
@@ -354,12 +370,30 @@
                 mainMode: 'TIME',
                 subMode: '',
                 targetList: []
-              }
+              }*/
             }
           },
           cache: {
             items: {},
             searchItems: {
+              fromDate: '2017-12-18 00:00',
+              toDate: '2017-12-29 23:59',
+              q: {
+                serviceIdList:['ALL'],
+                serviceTypeList: ['ALL'],
+                metricType: 'sum',
+                dataType: 'requestCount',
+                intervalType: 'D',
+                intervalValue: 1,
+                targetType: 'TOTAL_EDGE',
+                chartType: 'PIE',
+                peakYn: false,
+                mainMode: 'TARGET',
+                subMode: '',
+                targetList: []
+              }
+
+                /*
               fromDate: '2017-12-26 00:00',
               toDate: '2017-12-26 23:59',
               q: {
@@ -373,7 +407,7 @@
                 peakYn : false,
                 mainMode : "TYPE",
                 targetList: []
-              }
+              }*/
             }
           },
           service: {
@@ -384,7 +418,6 @@
               q: {
                 serviceIdList:['ALL'],
                 serviceTypeList: ['ALL'],
-                typeField: '',
                 metricType: 'sum',
                 dataType: 'requestCount',
                 intervalType: 'D',
@@ -393,7 +426,7 @@
                 chartType: 'BAR',
                 peakYn: false,
                 mainMode: 'TARGET',
-                subMode: 'TIME',
+                subMode: '',
                 targetList: ["Edge-01", "Edge-02", "Edge-03"]
               }
             }
@@ -406,7 +439,6 @@
               q: {
                 serviceIdList:['ALL'],
                 serviceTypeList: ['ALL'],
-                typeField: '',
                 metricType: 'sum',
                 dataType: 'requestCount',
                 intervalType: 'D',
