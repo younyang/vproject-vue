@@ -264,11 +264,11 @@
   const geojson = require('../../static/geo/ctprvn.json');
 
   const getMapColor = (d) => {
-    return d > 100 ? '#800026' :
-      d > 80  ? '#BD0026' :
-      d > 60  ? '#E31A1C' :
-      d > 40  ? '#FC4E2A' :
-      d > 20   ? '#FD8D3C' :
+    return d > 9000 ? '#800026' :
+      d > 8000  ? '#BD0026' :
+      d > 6000  ? '#E31A1C' :
+      d > 4000  ? '#FC4E2A' :
+      d > 2000   ? '#FD8D3C' :
               '#FEB24C';
   };
 
@@ -818,7 +818,7 @@
         legend.onAdd = function (map) {
 
           let div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 20, 40, 60, 80, 100],
+            grades = [0, 2000, 4000, 6000, 8000, 9000],
             labels = [],
             from, to;
 
