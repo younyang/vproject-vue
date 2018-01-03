@@ -17,6 +17,9 @@ body > .app {
   box-sizing: border-box;
 }
 
+i, em {
+  font-style: normal;
+}
 
 /**
  * Header
@@ -157,10 +160,16 @@ body > .app {
  * Button
  */
 .btn {
-  min-width: 40px;
   height: 30px;
   padding: 5px 15px 6px 15px;
   border-radius: 3px;
+
+  &.btn-in {
+    height: 20px;
+    padding: 2px 15px;
+    font-size: 0.6rem;
+    margin-top: 5px;
+  }
 }
 
 .btn:hover,
@@ -180,13 +189,26 @@ body > .app {
 
 
 /**
- * Form control
+ * Form
  */
+i.require {
+  color: #d2312d;
+  font-size: 0.5rem;
+}
+
+.form-group {
+  .col-form-label {
+    padding-top: calc(0.3rem - 1px * 2);
+    padding-bottom: calc(0.3rem - 1px * 2);
+  }
+}
+
 .form-control {
   height: 30px;
   border-radius: 3px;
   border-color: $border-color;
 }
+
 
 
 
@@ -198,7 +220,7 @@ body > .app {
 
   .multiselect__tags {
     min-height: 30px;
-    padding: 4px 30px 0 4px;
+    padding: 3px 30px 0 4px;
     border-radius: 3px;
     border-color: $border-color;
   }
@@ -218,7 +240,7 @@ body > .app {
     height: 28px;
   }
   .multiselect__input {
-    margin-bottom: 4px;
+    margin-bottom: 1px;
   }
   .multiselect__element {
     height: auto;
@@ -293,8 +315,6 @@ body > .app {
   .col-form-label {
     min-width: 75px;
     max-width: 75px;
-    padding-top: calc(0.4rem - 1px * 2);
-    padding-bottom: calc(0.4rem - 1px * 2);
   }
   .label-lg .col-form-label {
     min-width: 105px;
@@ -762,4 +782,172 @@ pre.code {
  */
 .dnd-grid-box .card-body {
   padding: 15px;
+}
+
+
+
+/**
+ * Login
+ */
+.login-page {
+  background: url(../img/bglogin.png) left top repeat;
+
+  input,
+  input:focus,
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus
+  input:-webkit-autofill {
+    color: #585d6b;
+    border: 1px solid #10151d;
+    background-color: #151b25;
+    -webkit-text-fill-color: #585d6b;
+    -webkit-box-shadow: 0 0 0px 1000px #151b25 inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+.login-box {
+  width: 421px;
+  height: 473px;
+  box-sizing: border-box;
+  padding: 210px 20px 20px;
+  background-image: url(../img/login.png);
+
+  .input-group {
+    margin-bottom: 12px;
+  }
+
+  .btn-login {
+    height: 40px;
+    color: #fff;
+    border: 0;
+    margin-bottom: 15px;
+    border-radius: 3px;
+    background: #f2900c; /* Old browsers */
+    background: linear-gradient(to bottom, #f2900c 51%,#f2900c 51%,#fe6401 100%);
+
+    &:hover,
+    &:active {
+      background: #fe6401;
+      background: linear-gradient(to bottom, #fe6401 51%,#fe6401 51%,#f2900c 100%);
+    }
+  }
+
+  .row {
+    margin: 0;
+    .col-6 {
+      padding: 0;
+      margin-right: -1px;
+    }
+  }
+
+  .btn-login-link {
+    font-size: 0.5rem;
+    height: 25px;
+    border: 1px solid #32363f;
+    border-radius: 0;
+    color: #5f6166;
+    background: #282d36;
+
+    &:hover,
+    &:active {
+      color: #fff;
+    }
+  }
+
+  .text-muted {
+    font-size: 0.5rem;
+  }
+
+  .warning {
+    font-size: 0.5rem;
+    margin-top: 15px;
+    color: #e7554b;
+    text-align: center;
+  }
+}
+
+.register {
+  width: 800px;
+  border: 0;
+  background: transparent;
+
+  .ico {
+    font-size: 1rem;
+    .fa-check-circle {
+      color: #47a447;
+    }
+    .fa-times-circle {
+      color: #e7554b;
+    }
+    .fa-question-circle {
+      font-size: 0.875rem;
+      color: $primary-color;
+    }
+  }
+
+  .card-header {
+    height: 63px;
+    padding: 28px 0 0 20px;
+    color: #d4d5d7;
+    font-weight: bold;
+    border-bottom: 1px solid #1d2127;
+    border-radius: 3px 3px 0 0;
+    background: url(../img/register-logo.png) 136px 13px no-repeat #282d36;
+  }
+
+  .card-body {
+    padding: 0 20px;
+    color: #7b8191;
+    background: #2e353e;
+
+    .form-text.text-muted {
+      color: #7b8191 !important;
+    }
+
+    .form-group {
+      position: relative;
+      margin: 0;
+      padding: 10px 0;
+      border-bottom: 1px dotted #23282f;
+
+      .form-text {
+        position: absolute;
+        top: 3px;
+        right: 0;
+      }
+    }
+
+    .form-control,
+    .multiselect {
+      width: 300px;
+    }
+
+    .input-group {
+      width: 320px;
+      .ico {
+        margin: 3px 0 0 7px;
+      }
+    }
+
+    .multiselect__tags {
+      border-color: #10151d;
+      background-color: #151b25;
+    }
+    .multiselect__spinner {
+      background: transparent;
+    }
+    .multiselect__input {
+      border: 0;
+    }
+
+  }
+
+  .card-footer {
+    text-align: right;
+    background: #2e353e;
+    border: 0;
+    border-radius: 0 0 3px 3px;
+  }
 }

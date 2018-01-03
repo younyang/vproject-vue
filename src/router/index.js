@@ -260,6 +260,16 @@ export default new Router({
           component: GridUI
         }
       ]
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: lazyLoading('Login')
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: lazyLoading('Register')
     }
   ]
 })
