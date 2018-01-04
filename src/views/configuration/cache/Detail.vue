@@ -1,222 +1,149 @@
 <template>
   <div class="animated fadeIn">
-    <content-header
-      :title="items.hostName"
-      :name="name">
-    </content-header>
+    <b-card>
+      <!-- Service 선택 -->
+      <b-form-fieldset
+        label="Service"
+        :label-cols="3"
+        :horizontal="true">
+        <b-form-input
+          :value="items.serviceName"
+          type="text"
+          plaintext
+        ></b-form-input>
+      </b-form-fieldset>
 
-    <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
-        기본정보
-        <i class="fa fa-angle-down"></i>
-      </b-button>
-    </div>
-    <b-collapse id="formDefault" visible>
-      <b-card>
-        <!-- ID -->
-        <b-form-fieldset
-          label="Edge ID"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="items.edgeId"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
+      <!-- PoP 선택 -->
+      <b-form-fieldset
+        label="PoP"
+        :label-cols="3"
+        :horizontal="true">
+        <b-form-input
+          :value="items.popName"
+          type="text"
+          plaintext
+        ></b-form-input>
+        <span v-if="items.popBandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.popBandwidth }} GB)</span>
+      </b-form-fieldset>
 
-        <!-- IP -->
-        <b-form-fieldset
-          label="IP"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="items.ip"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- Host Name -->
-        <b-form-fieldset
-          label="Host Name"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.hostName"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- PoP 선택 -->
-        <b-form-fieldset
-          label="PoP 선택 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-if="isEdit"
-            v-model="popId"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popId"
-            :loading="isLoad.popId"
-            label="popName"
-            placeholder="선택"
-          ></multiselect>
-          <b-form-input
-            v-else
-            :value="items.popName"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- 구분 -->
-        <b-form-fieldset
-          label="구분 *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-radio-group
-            :options="[{ text: 'Edge', value: 'Edge' },{ text: 'Relay', value: 'Relay' }]"
-            v-model="items.edgeRelayName"
-          ></b-form-radio-group>
-        </b-form-fieldset>
-
-
-
-        <!-- 사용여부 -->
-        <b-form-fieldset
-          label="사용여부"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            v-if="isEdit"
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
-            v-model="items.referrerUseYn"
-          ></c-switch>
-          <b-badge
-            v-else
-            pill
-            :variant="items.referrerUseYn ? 'success' : 'secondary'">
-            {{ items.referrerUseYn ? '사용' : '미사용' }}
-          </b-badge>
-        </b-form-fieldset>
-
-        <!-- 변경이력 -->
-        <b-form-fieldset
+      <!-- Set2 사용여부 -->
+      <b-form-fieldset
+        label="Set2사용여부 <i class='require'>*</i>"
+        :label-cols="3"
+        :horizontal="true">
+        <c-switch
           v-if="isEdit"
-          label="변경이력"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-textarea
-            v-model="items.modifyHistReason"
-            :rows="6">
-          </b-form-textarea>
-        </b-form-fieldset>
-      </b-card>
-    </b-collapse>
+          type="icon"
+          variant="success"
+          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          :pill="true"
+          @change="onChangeSet2"
+          v-model="items.setApplyYn"
+        ></c-switch>
+        <b-badge
+          v-else
+          pill
+          :variant="items.setApplyYn ? 'success' : 'secondary'">
+          {{ items.setApplyYn ? '사용' : '미사용' }}
+        </b-badge>
+        <span class="form-sub-text">(적용 시간 : 02:00:00 ~ 04:59:00)</span>
+      </b-form-fieldset>
+    </b-card>
 
-    <!-- Policy -->
-    <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.policy
-        :block="true">
-        Policy
-        <i class="fa fa-angle-down"></i>
-      </b-button>
-    </div>
-    <b-collapse id="policy" v-if="!isEdit" visible>
-      <!-- High Referrer -->
-      <b-card v-if="isReferrerType === 'high'">
-        <div slot="header">
-          <a href="#/policy/ip-restriction" class="btn btn-sm btn-outline-secondary" target="_blank">IP Restriction 설정</a>
-          <a href="#/policy/pop-preference" class="btn btn-sm btn-outline-secondary" target="_blank">PoP Preference 설정</a>
-        </div>
 
-        <b-form-fieldset
-          label="IP Restriction"
-          :label-cols="3"
-          :horizontal="true">
-          <div class="form-in-group">
-            <b-form-fieldset
-              v-for="(ip, index) in items.ipRestrictionList"
-              :key="index"
-              :label="String(index + 1)"
-              :label-cols="1"
-              :horizontal="true">
-              <span class="domain-text">{{ ip }}</span>
-            </b-form-fieldset>
-          </div>
-        </b-form-fieldset>
+    <b-card
+      v-if="cacheCase.length > 0"
+      v-for="(cache, index) in cacheCase"
+      :key="index"
+    >
+      <div slot="header">
+        <i class='fa fa-angle-right'></i> <strong>CASE {{ cache.caseSeq }} :</strong> {{ cache.caseName }}
 
-        <b-form-fieldset
-          label="PoP Preference"
-          :label-cols="3"
-          :horizontal="true">
-          <div class="form-in-group">
-            <b-form-fieldset
-              v-for="(popData, index) in items.preferenceList"
-              :key="popData.popId"
-              :label="popData.serviceName"
-              :label-cols="2"
-              :horizontal="true">
-              <span class="domain-text">
-                {{ popData.targetPopIdName1 }} -
-                {{ popData.targetPopIdName2 }} -
-                {{ popData.targetPopIdName3 }} -
-                {{ popData.targetPopIdName4 }} -
-                {{ popData.targetPopIdName5 }}
-              </span>
-            </b-form-fieldset>
-          </div>
-        </b-form-fieldset>
-      </b-card>
+        <b-button
+          v-if="!isEdit"
+          type="button"
+          variant="outline-secondary"
+          class="float-right"
+          @click="showHistory(cache.caseSeq)"
+        >이력관리</b-button>
+      </div>
 
-      <!-- Low Referrer -->
-      <b-card v-if="isReferrerType === 'low'">
-        <div slot="header">
-          <a href="#/policy/onetime-url" class="btn btn-sm btn-outline-secondary" target="_blank">One-Time URL 설정</a>
-        </div>
-
-        <b-form-fieldset
-          label="One-Time URL"
-          :label-cols="3"
-          :horizontal="true">
-          <div class="form-in-group">
-            <b-form-fieldset
-              label="expireTime"
-              :label-cols="4"
-              :horizontal="true">
+      <section class="board" v-if="cache.cacheThrottlingComps.length > 0">
+        <b-table
+          striped
+          bordered
+          show-empty
+          :items="cache.cacheThrottlingComps"
+          :fields="caseFields"
+        >
+          <template slot="bandwidth1" scope="row">
+            <span v-if="isEdit">
+              <b-form-checkbox
+                v-model="row.item.band1UseYn"
+                @change="onChecked(row.item, '1')"
+              ></b-form-checkbox>
               <b-form-input
-                :value="items.oneTimeUrlInfo.expireTime"
-                type="text"
-                plaintext
+                v-model="row.item.bandwidth1"
+                type="number"
+                size="sm"
+                class="inline"
+                style="width:80px"
+                :disabled="!row.item.band1UseYn"
               ></b-form-input>
-            </b-form-fieldset>
-            <b-form-fieldset
-              label="ByPass"
-              :label-cols="4"
-              :horizontal="true">
-              <b-badge
-                pill
-                :variant="items.oneTimeUrlInfo.bypassYn ? 'success' : 'secondary'">
-                {{ items.oneTimeUrlInfo.bypassYn ? '사용' : '미사용' }}
-              </b-badge>
-            </b-form-fieldset>
-          </div>
-        </b-form-fieldset>
-      </b-card>
-    </b-collapse>
+              GB 제한
+            </span>
+            <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
+          </template>
 
+          <template slot="bandwidth2" scope="row">
+            <span v-if="isEdit">
+              <b-form-checkbox
+                v-model="row.item.band2UseYn"
+                :disabled="!items.setApplyYn"
+                @change="onChecked(row.item, '2')"
+              ></b-form-checkbox>
+              <b-form-input
+                v-model="row.item.bandwidth2"
+                type="number"
+                size="sm"
+                class="inline"
+                style="width:80px"
+                :disabled="!row.item.band2UseYn"
+              ></b-form-input>
+              GB 제한
+            </span>
+            <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
+          </template>
+        </b-table>
+      </section>
+      <!-- 배포 일시 / 상태 -->
+      <b-form-fieldset
+        v-if="!isEdit"
+        label="배포 일시 / 상태"
+        :label-cols="3"
+        :horizontal="true">
+        {{ items.createDateTime }}
+        <b-form-input
+          :value="deploy.status ? '성공' : '실패'"
+          style="width:30px"
+          plaintext
+          type="text"></b-form-input>
+        (<a href="#">{{ deploy.count }}</a>)
+      </b-form-fieldset>
+    </b-card>
+
+    <b-card v-if="isEdit">
+      <!-- 변경이력 -->
+      <b-form-fieldset
+        label="변경이력"
+        :label-cols="3"
+        :horizontal="true">
+        <b-form-textarea
+          v-model="items.modifyHistReason"
+          :rows="6">
+        </b-form-textarea>
+      </b-form-fieldset>
+    </b-card>
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
@@ -272,18 +199,6 @@
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
-        <!-- 배포상태 -->
-        <b-form-fieldset
-          label="배포상태"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="deploy.status ? '성공' : '실패'"
-            style="width:30px"
-            plaintext
-            type="text"></b-form-input>
-          (<a href="#">{{ deploy.count }}</a>)
-        </b-form-fieldset>
       </b-card>
     </b-collapse>
 
@@ -293,8 +208,7 @@
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
-      <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" variant="outline-secondary" :to="{ name: 'Referrer 관리' }">목록</b-button>
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Cache Throttling 관리' }">목록</b-button>
       <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
 
@@ -310,7 +224,7 @@
           :fields="history.fields"
         >
           <template slot="histMgmtId" scope="row">
-            <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
+            <a :href="getHistoryLink(row.value, row.item.caseSeq)" target="_blank">보기</a>
           </template>
         </b-table>
       </section>
@@ -336,7 +250,7 @@
 <script>
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'edge',
+    name: 'cache',
     props: ['id'],
     components: {
       cSwitch
@@ -344,24 +258,25 @@
 
     data (){
       return {
-        name: 'Edge 상세',
         originItems: {},
         items: {
-          edgeId: null,
-          ip : null,
-          hostName: null,
-          popId : null,
-          edgeRelayYn : null,
-          edgeRelayName : null,
-          serviceTypeCode: [],
-          edgeDomainCode: [],
-          edgeDomainName: null,
-          edgeUseYn: null,
-          modifyHistReason : "Edge 수정"
+          popId: 20,
+          popName: null,
+          serviceId: 4,
+          serviceName: null,
+          bandwidth: null,
+          popBandwidth: null,
+          setApplyYn: null,
+          modifyHistReason: null,
+          cacheThrottlingCases: []
         },
-        code: {
-          popId: []
+
+        caseFields: {
+          serviceTypeCodeName: {label: 'Service Type'},
+          bandwidth1: {label: 'Set1 (Basic)', 'class': 'text-right'},
+          bandwidth2: {label: 'Set2', 'class': 'text-right'}
         },
+
         history: {
           fields: {
             createId: {label: '등록/수정자', 'class': 'text-left'},
@@ -371,15 +286,10 @@
           },
           items: []
         },
-        isLoad: {
-          popId: true
-        },
         isEdit: false,
         isModalHistory: false,
         isModalMessage: false,
         modalMessage: '',
-
-        isReferrerType: '',
 
         // 배포상태 - 임시
         deploy: {
@@ -390,31 +300,35 @@
     },
 
     computed: {
-      popId: {
-        get () {
-          return this.code.popId.find(obj => obj.popId === this.items.popId) || null;
-        },
-        set (newValue) {
-          this.items.popId = newValue !== null ? newValue.popId : null;
-        }
+      cacheCase () {
+        const cases = this.items.cacheThrottlingCases;
+        return cases.length > 0 ?
+          cases.map(obj => {
+            const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+              obj.cacheThrottlingComps.map(ob => ({
+                ...ob,
+                band1UseYn: ob.bandwidth1 > 0,
+                band2UseYn: ob.bandwidth2 > 0
+              }))
+              : [];
+            return {
+              ...obj,
+              cacheThrottlingComps
+            }
+          }) : [];
       }
     },
 
     created (){
       // History
       const historyId = this.$route.query.histories;
-      const detailUrl = historyId !== undefined ? `/edges/${this.id}/histories/${historyId}` : `/edges/${this.id}`;
+      const caseSeq = this.$route.query.caseSeq;
+      const detailUrl = historyId !== undefined ? `/policy/cacheThrottlings/${this.id}/case/${caseSeq}/histories/${historyId}`
+        : `/policy/cacheThrottlings/${this.id}`;
 
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode')
       }
-
-      // PoP List
-      this.$https.get('/pops')
-        .then((res) => {
-          this.isLoad.popId = false;
-          this.code.popId = res.data.items;
-        });
 
       // Detail Data
       this.$https.get(detailUrl)
@@ -435,9 +349,37 @@
       },
 
       onSubmit (){
-        const { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason } = this.items;
+        const {
+          popId,
+          serviceId,
+          popBandwidth,
+          setApplyYn,
+          modifyHistReason
+        } = this.items;
 
-        this.$https.put(`/referrers/${this.id}`, { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason })
+        const bandwidth = popBandwidth;
+        const cacheCase = this.cacheCase.map(obj => {
+          const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+            obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
+              serviceTypeCode,
+              bandwidth1: parseInt(bandwidth1),
+              bandwidth2: parseInt(bandwidth2)
+            }))
+            : [];
+          return {
+            ...obj,
+            cacheThrottlingComps
+          }
+        });
+
+        this.$https.put(`/policy/cacheThrottlings/${this.id}`, {
+            popId,
+            serviceId,
+            bandwidth,
+            setApplyYn,
+            cacheThrottlingCases: cacheCase,
+            modifyHistReason
+          })
           .then(() => {
             this.$router.go(this.$router.currentRoute);
           })
@@ -452,24 +394,45 @@
       },
 
       onDeleteData (){
-        this.$https.delete(`/referrers/${this.id}?referrerTypeCode=${this.referrerTypeCode}`)
+        this.$https.delete(`/policy/cacheThrottlings/${this.id}`)
           .then(() => {
-            this.$router.push({ name: 'Referrer 관리' });
+            this.$router.push({ name: 'Cache Throttling 관리' });
           })
           .catch((error) => {
             console.log(error);
           });
       },
 
-      getHistoryLink (rowId){
-        return `#/configuration/referrer/${this.id}?histories=${rowId}&referrerTypeCode=${this.referrerTypeCode}`
+      onChecked (item, type){
+        const useYn = `band${type}UseYn`;
+        const bandwidth = `bandwidth${type}`;
+        if (!item[useYn]) {
+          item[bandwidth] = 0;
+        }
       },
 
-      showHistory () {
+      onChangeSet2 (applyYn){
+        const cases = this.cacheCase;
+
+        if (!applyYn && cases.length > 0){
+          cases.forEach(({ cacheThrottlingComps }) => {
+            if (cacheThrottlingComps.length > 0 ){
+              cacheThrottlingComps.forEach(ob => {
+                ob.band2UseYn = false;
+                ob.bandwidth2 = 0;
+              })
+            }
+          });
+        }
+      },
+
+      getHistoryLink (rowId, caseSeq){
+        return `#/configuration/cache/${this.id}?histories=${rowId}&caseSeq=${caseSeq}`
+      },
+
+      showHistory (caseSeq) {
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/referrers/${this.id}/histories`,{
-            referrerTypeCode: this.referrerTypeCode
-          })
+        this.$https.get(`/policy/cacheThrottlings/${this.id}/case/${caseSeq}/histories`)
           .then((res) => {
             this.history.items = res.data.items;
           });

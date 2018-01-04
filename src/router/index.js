@@ -145,6 +145,7 @@ export default new Router({
             {
               path: 'cache/:id',
               name: 'Cache Throttling 상세',
+              props: true,
               component: lazyLoading('configuration/cache/Detail')
             },
             {

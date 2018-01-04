@@ -56,6 +56,7 @@
             v-bind="{on: '\uf00c', off: '\uf00d'}"
             :pill="true"
             v-model="items.setApplyYn"
+            @change="onChangeSet2"
           ></c-switch>
           <span class="form-sub-text">(적용 시간 : 02:00:00 ~ 04:59:00)</span>
         </b-form-fieldset>
@@ -81,6 +82,7 @@
             <template slot="bandwidth1" scope="row">
               <b-form-checkbox
                 v-model="row.item.band1UseYn"
+                @change="onChecked(row.item, '1')"
               ></b-form-checkbox>
 
               <b-form-input
@@ -90,13 +92,14 @@
                 class="inline"
                 style="width:80px"
                 :disabled="!row.item.band1UseYn"
-              ></b-form-input> GB
+              ></b-form-input> GB 제한
             </template>
 
             <template slot="bandwidth2" scope="row">
               <b-form-checkbox
                 v-model="row.item.band2UseYn"
                 :disabled="!items.setApplyYn"
+                @change="onChecked(row.item, '2')"
               ></b-form-checkbox>
 
               <b-form-input
@@ -106,7 +109,7 @@
                 class="inline"
                 style="width:80px"
                 :disabled="!row.item.band2UseYn"
-              ></b-form-input> GB
+              ></b-form-input> GB 제한
             </template>
           </b-table>
         </section>
@@ -175,12 +178,10 @@
           this.items.serviceId = newValue !== null ? newValue.serviceId : null;
         }
       },
-      cacheCase: {
-        get () {
-          return this.items.cacheThrottlingCases;
-        },
-        set (newValue) {
-          this.items.cacheThrottlingCases = newValue.map(obj => {
+      cacheCase () {
+        const cases = this.items.cacheThrottlingCases;
+        return cases.length > 0 ?
+          cases.map(obj => {
             const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
               obj.cacheThrottlingComps.map(ob => ({
                 ...ob,
@@ -192,8 +193,7 @@
               ...obj,
               cacheThrottlingComps
             }
-          });
-        }
+          }) : [];
       }
     },
 
@@ -215,7 +215,7 @@
 
     methods: {
       onSubmit (){
-        const cacheCase = this.items.cacheThrottlingCases.map(obj => {
+        const cacheCase = this.cacheCase.map(obj => {
           const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
             obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
               serviceTypeCode,
@@ -257,11 +257,32 @@
               this.items.bandwidth = res.data.items.popBandwidth;
 
               if (res.data.items.cacheThrottlingCases.length > 0){
-                this.cacheCase = res.data.items.cacheThrottlingCases;
+                this.items.cacheThrottlingCases = res.data.items.cacheThrottlingCases;
               }
             });
-        }else{
-          this.items.bandwidth = null;
+        }
+      },
+
+      onChecked (item, type){
+        const useYn = `band${type}UseYn`;
+        const bandwidth = `bandwidth${type}`;
+        if (!item[useYn]) {
+          item[bandwidth] = 0;
+        }
+      },
+
+      onChangeSet2 (applyYn){
+        const cases = this.cacheCase;
+
+        if (!applyYn && cases.length > 0){
+          cases.forEach(({ cacheThrottlingComps }) => {
+            if (cacheThrottlingComps.length > 0 ){
+              cacheThrottlingComps.forEach(ob => {
+                ob.band2UseYn = false;
+                ob.bandwidth2 = 0;
+              })
+            }
+          });
         }
       }
     }

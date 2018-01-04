@@ -529,11 +529,6 @@
   .timeInfo {
 
   }
-  .searchBox {
-    padding: 5px 0;
-    border-bottom: 1px solid #000;
-    margin-bottom: 10px;
-  }
   .detailStatus {
     border: 1px solid #000;
   }
