@@ -133,6 +133,21 @@ export default new Router({
               ]
             },
             {
+              path: 'cache',
+              name: 'Cache Throttling 관리',
+              component: lazyLoading('configuration/cache', true)
+            },
+            {
+              path: 'cache/create',
+              name: 'Cache Throttling 등록',
+              component: lazyLoading('configuration/cache/Create')
+            },
+            {
+              path: 'cache/:id',
+              name: 'Cache Throttling 상세',
+              component: lazyLoading('configuration/cache/Detail')
+            },
+            {
               path: 'referrer',
               name: 'Referrer 관리',
               component: lazyLoading('configuration/referrer', true)
@@ -270,6 +285,15 @@ export default new Router({
       path: '/register',
       name: 'Register',
       component: lazyLoading('Register')
+    },
+    {
+      path: '/404',
+      name: 'Page404',
+      component: lazyLoading('Page404')
+    },
+    {
+      path: '*',
+      redirect: '/404'
     }
   ]
 })

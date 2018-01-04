@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SK broadband V Project Platform Pilot Login</title>
+    <style>
+      body{margin:0;padding:0;font-family:'Malgun Gothic',-apple-system,Arial,sans-serif;font-size:0.875rem;font-weight:normal;line-height:1.5}
+      *{box-sizing: border-box;outline:none}
+      a{text-decoration:none}
+      button,input{overflow:visible;margin:0;font-family:inherit;font-size:inherit;line-height:inherit}
+      button{-webkit-appearance: button;cursor: pointer}
+      input,input:focus,input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{
+        color:#585d6b;border:1px solid #10151d;background-color:#151b25;-webkit-text-fill-color:#585d6b;-webkit-box-shadow:0 0 0px 1000px #151b25 inset;transition:background-color 5000s ease-in-out 0s;
+      }
+      .app{display:flex;flex-direction:column;min-height:100vh}
+      .flex-row{flex-direction:row !important;}
+      .align-items-center{align-items:center !important;}
+      .justify-content-center{justify-content:center !important;}
+      .sr-only{position:absolute;width:0;height:0;overflow: hidden}
+      .row{display:flex;flex-wrap:wrap}
+      .col-6{flex:0 0 50%;max-width:50%;position:relative;width:100%;min-height:1px;margin-right:-1px}
+      .login-page{background: url(./static/img/bglogin.png) left top repeat;}
+      .login-box{width:421px;height:473px;padding:210px 20px 20px;background-image:url(./static/img/login.png)}
+      .input-group{position:relative;display:flex;width:100%;margin-bottom:12px}
+      .btn{display:block;width:100%;font-weight:normal;text-align:center;white-space:nowrap;vertical-align:middle;user-select:none;
+        border: 1px solid transparent;padding:0.5rem 0.75rem;font-size:0.875rem;line-height: 1.25;transition: all 0.15s ease-in-out}
+      .form-control{display:flex;align-items:center;position:relative;z-index:2;flex:1 1 auto;width:1%;margin-bottom:0;padding:0.5rem 0.75rem;
+        font-size: 0.875rem;line-height: 1.25;color:#585d6b;background:#151b25;border:1px solid #10151d;border-radius:3px;height:30px}
+      .btn-login{height:40px;color:#fff;border:0;margin-bottom:15px;border-radius:3px;background:#f2900c; /* Old browsers */
+        background:linear-gradient(to bottom, #f2900c 51%,#f2900c 51%,#fe6401 100%)}
+      .btn-login:hover,.btn-login:active{background: #fe6401;background:linear-gradient(to bottom, #fe6401 51%,#fe6401 51%,#f2900c 100%)}
+      .btn-login-link{font-size:0.5rem;height:25px;border:1px solid #32363f;border-radius:0;color:#5f6166;background:#282d36}
+      .btn-login-link:hover,.btn-login-link:active{color: #fff}
+      .text-muted {font-size: 0.5rem;color:#536c79 !important;}
+      .warning {font-size:0.5rem;margin-top:15px;color:#e7554b;text-align:center}
+    </style>
+  </head>
+  <body>
+    <div class="app login-page flex-row align-items-center justify-content-center">
+      <div class="login-box">
+        <h1 class="sr-only">SK broadband V Project Pilot 플랫폼 Login</h1>
+
+        <!-- Login -->
+        <div class="login-area">
+          <form id="loginForm">
+            <div class="input-group">
+              <input type="text" placeholder="아이디" class="form-control" name="loginId">
+            </div>
+            <div class="input-group">
+              <input type="password" placeholder="Password" class="form-control" name="password">
+            </div>
+            <button type="submit" id="login" class="btn btn-login btn btn-secondary btn-block">로그인</button>
+          </form>
+
+          <div class="row">
+            <div class="col-6">
+              <button type="button" id="findPwd" class="btn btn-login-link btn btn-secondary btn-block">비밀번호 찾기</button>
+            </div>
+            <div class="col-6">
+              <a href="#/register" class="btn btn-login-link btn btn-secondary btn-block" target="_self">운영자 가입</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 비밀번호 찾기 -->
+        <div class="findpwd-area" style="display: none;">
+          <p class="text-muted">
+            ・ 회원정보에 등록된 아이디/이메일 정보를 입력해주세요.<br>
+            ・ 정보 일치 시, 등록된 이메일 정보로 임시비밀번호 메일이 발송됩니다.
+          </p>
+          <div class="input-group">
+            <input type="text" placeholder="아이디" class="form-control">
+          </div>
+          <div class="input-group">
+            <input type="email" placeholder="이메일" class="form-control">
+          </div>
+          <button type="button" id="findPwdMail" class="btn btn-login btn btn-secondary btn-block">확인</button>
+          <button type="button" id="goLogin" class="btn btn-login-link btn btn-secondary btn-block">로그인 화면으로</button>
+        </div>
+
+        <p class="warning">여기에 에러메세지를 출력해주세요.</p>
+      </div>
+    </div>
+  <script>
+    (function(root){
+      // 로그인 폼
+      var $loginForm = document.getElementById('loginForm');
+      // 로그인 버튼
+      var $login = document.getElementById('login');
+      // 비밀번호 찾기 확인 버튼
+      var $findPwdMail = document.getElementById('findPwdMail');
+      // 비밀번호 찾기 화면으로
+      var $findPwd = document.getElementById('findPwd');
+      // 로그인 화면으로 되돌아가기
+      var $goLogin = document.getElementById('goLogin');
+      // 로그인 영역
+      var $loginArea = document.querySelector('.login-area');
+      // 비밀번호 찾기 영역
+      var $findPwdArea = document.querySelector('.findpwd-area');
+
+      $login.addEventListener('click', login, false);
+
+      $findPwdMail.addEventListener('click', function(){}, false);
+
+      $findPwd.addEventListener('click', function(){
+        $loginArea.style.display = 'none';
+        $findPwdArea.style.display = 'block';
+      }, false);
+
+      $goLogin.addEventListener('click', function(){
+        $loginArea.style.display = 'block';
+        $findPwdArea.style.display = 'none';
+      }, false);
+
+      function login(event){
+        event.preventDefault();
+        var formData = new FormData($loginForm);
+        var request = new XMLHttpRequest();
+        request.open("POST", "/api/auth_check");
+        request.send(formData);
+      }
+    })(window);
+  </script>
+  </body>
+</html>

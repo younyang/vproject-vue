@@ -1,0 +1,269 @@
+<template>
+  <div class="animated fadeIn">
+    <b-form>
+      <b-card>
+        <!-- Service 선택 -->
+        <b-form-fieldset
+          label="Service 선택 <i class='require'>*</i>"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            id="serviceId"
+            v-model="serviceId"
+            class="noEmpty inline"
+            style="width: 50%"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.serviceId"
+            :loading="isLoad.serviceId"
+            label="serviceName"
+            placeholder="선택"
+            @select="onSearchBandwidth"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <!-- PoP 선택 -->
+        <b-form-fieldset
+          label="PoP 선택 <i class='require'>*</i>"
+          :label-cols="3"
+          :horizontal="true">
+          <multiselect
+            id="popId"
+            v-model="popId"
+            class="noEmpty inline"
+            style="width: 50%"
+            :allowEmpty="false"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.popId"
+            :loading="isLoad.popId"
+            label="popName"
+            placeholder="선택"
+            @select="onSearchBandwidth"
+          ></multiselect>
+          <span v-if="items.bandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.bandwidth }} GB)</span>
+        </b-form-fieldset>
+
+        <!-- Set2 사용여부 -->
+        <b-form-fieldset
+          label="Set2사용여부 <i class='require'>*</i>"
+          :label-cols="3"
+          :horizontal="true">
+          <c-switch
+            type="icon"
+            variant="success"
+            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            :pill="true"
+            v-model="items.setApplyYn"
+          ></c-switch>
+          <span class="form-sub-text">(적용 시간 : 02:00:00 ~ 04:59:00)</span>
+        </b-form-fieldset>
+      </b-card>
+
+      <b-card
+        v-if="cacheCase.length > 0"
+        v-for="(cache, index) in cacheCase"
+        :key="index"
+      >
+        <div slot="header">
+          <i class='fa fa-angle-right'></i> <strong>CASE {{ cache.caseSeq }} :</strong> {{ cache.caseName }}
+        </div>
+
+        <section class="board" v-if="cache.cacheThrottlingComps.length > 0">
+          <b-table
+            striped
+            bordered
+            show-empty
+            :items="cache.cacheThrottlingComps"
+            :fields="caseFields"
+          >
+            <template slot="bandwidth1" scope="row">
+              <b-form-checkbox
+                v-model="row.item.band1UseYn"
+              ></b-form-checkbox>
+
+              <b-form-input
+                v-model="row.item.bandwidth1"
+                type="number"
+                size="sm"
+                class="inline"
+                style="width:80px"
+                :disabled="!row.item.band1UseYn"
+              ></b-form-input> GB
+            </template>
+
+            <template slot="bandwidth2" scope="row">
+              <b-form-checkbox
+                v-model="row.item.band2UseYn"
+                :disabled="!items.setApplyYn"
+              ></b-form-checkbox>
+
+              <b-form-input
+                v-model="row.item.bandwidth2"
+                type="number"
+                size="sm"
+                class="inline"
+                style="width:80px"
+                :disabled="!row.item.band2UseYn"
+              ></b-form-input> GB
+            </template>
+          </b-table>
+        </section>
+      </b-card>
+    </b-form>
+
+
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Cache Throttling 관리' }">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장 및 배포</b-button>
+    </div>
+
+  </div>
+</template>
+
+<script>
+  import cSwitch from '@/components/Switch'
+  export default {
+    name: 'cache',
+    components: {
+      cSwitch
+    },
+
+    data (){
+      return {
+        items: {
+          popId: null,
+          serviceId: null,
+          bandWidth: null,
+          setApplyYn: null,
+          modifyHistReason: '등록',
+          cacheThrottlingCases: []
+        },
+
+        caseFields: {
+          serviceTypeCodeName: {label: 'Service Type'},
+          bandwidth1: {label: 'Set1 (Basic)', 'class': 'text-right'},
+          bandwidth2: {label: 'Set2', 'class': 'text-right'}
+        },
+
+        code: {
+          popId: [],
+          serviceId: []
+        },
+        isLoad: {
+          popId: true,
+          serviceId: true
+        }
+      }
+    },
+
+    computed: {
+      popId: {
+        get () {
+          return this.code.popId.find(obj => obj.popId === this.items.popId) || null;
+        },
+        set (newValue) {
+          this.items.popId = newValue !== null ? newValue.popId : null;
+        }
+      },
+      serviceId: {
+        get () {
+          return this.code.serviceId.find(obj => obj.serviceId === this.items.serviceId) || null;
+        },
+        set (newValue) {
+          this.items.serviceId = newValue !== null ? newValue.serviceId : null;
+        }
+      },
+      cacheCase: {
+        get () {
+          return this.items.cacheThrottlingCases;
+        },
+        set (newValue) {
+          this.items.cacheThrottlingCases = newValue.map(obj => {
+            const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+              obj.cacheThrottlingComps.map(ob => ({
+                ...ob,
+                band1UseYn: ob.bandwidth1 > 0,
+                band2UseYn: ob.bandwidth2 > 0
+              }))
+              : [];
+            return {
+              ...obj,
+              cacheThrottlingComps
+            }
+          });
+        }
+      }
+    },
+
+    created (){
+      // PoP ID List
+      this.$https.get('/policy/cacheThrottlings/pops')
+        .then((res) => {
+          this.isLoad.popId = false;
+          this.code.popId = res.data.items;
+        });
+
+      // Service ID List
+      this.$https.get('/policy/services')
+        .then((res) => {
+          this.isLoad.serviceId = false;
+          this.code.serviceId = res.data.items;
+        });
+    },
+
+    methods: {
+      onSubmit (){
+        const cacheCase = this.items.cacheThrottlingCases.map(obj => {
+          const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+            obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
+              serviceTypeCode,
+              bandwidth1: parseInt(bandwidth1),
+              bandwidth2: parseInt(bandwidth2)
+            }))
+            : [];
+          return {
+            ...obj,
+            cacheThrottlingComps
+          }
+        });
+
+        const items = {
+          ...this.items,
+          cacheThrottlingCases: cacheCase
+        };
+
+        // POST
+        this.$https.post('/policy/cacheThrottlings', items)
+          .then((res) => {
+            this.$router.push({
+              name: 'Cache Throttling 상세',
+              params: { id: res.data.items }
+            })
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+
+      onSearchBandwidth (obj, id){
+        const serviceId = (id === 'serviceId') ? obj.serviceId : this.items.serviceId;
+        const popId = (id === 'popId') ? obj.popId : this.items.popId;
+
+        if (serviceId !== null && popId !== null){
+          this.$https.get(`/policy/cacheThrottlings/bandwidth/service/${serviceId}/pop/${popId}`)
+            .then((res) => {
+              this.items.bandwidth = res.data.items.popBandwidth;
+
+              if (res.data.items.cacheThrottlingCases.length > 0){
+                this.cacheCase = res.data.items.cacheThrottlingCases;
+              }
+            });
+        }else{
+          this.items.bandwidth = null;
+        }
+      }
+    }
+  }
+</script>

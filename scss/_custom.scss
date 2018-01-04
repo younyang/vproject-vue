@@ -201,6 +201,9 @@ i.require {
     padding-top: calc(0.3rem - 1px * 2);
     padding-bottom: calc(0.3rem - 1px * 2);
   }
+  .text-muted {
+    vertical-align: middle;
+  }
 }
 
 .form-control {

@@ -15,7 +15,7 @@
           </b-form-input>
           <b-button variant="primary" class="btn-in ml-2" @click="fetchIdExists">중복확인</b-button>
           <span class="ico">
-            <i class="fa fa-check-circle"></i>
+            <i v-if="idCheck === 'success'" class="fa fa-check-circle"></i>
             <i v-if="idCheck === 'fail'" class="fa fa-times-circle"></i>
           </span>
         </b-input-group>
@@ -117,7 +117,7 @@
         </b-form-input>
       </b-form-fieldset>
 
-      <!-- 그룹 -->
+      <!-- 그룹
       <b-form-fieldset
         label="<i class='require'>*</i> 그룹"
         :label-cols="2"
@@ -132,7 +132,7 @@
         ></multiselect>
       </b-form-fieldset>
 
-      <!-- 서비스 -->
+      <!-- 서비스
       <b-form-fieldset
         label="<i class='require'>*</i> 서비스"
         :label-cols="2"
@@ -148,6 +148,7 @@
           placeholder="전체"
         ></multiselect>
       </b-form-fieldset>
+      -->
 
       <div slot="footer">
         <b-button type="button" variant="secondary" :to="{ name: 'Login' }">취소</b-button>
@@ -162,10 +163,22 @@
       <p class="mt-2"><strong>사용가능한 특수문자</strong><br>
         - `~!@#$%^&*()_+-=?/',."</p>
     </b-tooltip>
+
+    <!-- Message Modal -->
+    <b-modal title="Message" size="sm" class="modal-secondary" v-model="isMessage">
+      <div class="d-block text-center">
+        <h5>{{ modalMessage }}</h5>
+      </div>
+      <div slot="modal-footer">
+        <b-button type="button" variant="primary" @click="onMessage">확인</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
+  import { sha256 } from 'js-sha256';
+
   export default {
     name: 'Register',
 
@@ -197,7 +210,10 @@
         },
 
         idCheck: null,
-        passwordCheck: null
+        passwordCheck: null,
+        status: null,
+        isMessage: false,
+        modalMessage: null
       }
     },
 
@@ -247,13 +263,32 @@
 
     methods: {
       onSubmit () {
+          /*
+        const items = {
+          ...this.items,
+          password: sha256(this.items.password)
+        };*/
         this.$https.post('/setting/operators', this.items)
-          .then(res => {
-
+          .then(() => {
+            this.status = 'success';
+            this.isMessage = true;
+            this.modalMessage = '운영자 가입신청이 완료되었습니다.'
           })
           .catch(error => {
-            console.log(error);
+            this.status = 'danger';
+            this.isMessage = true;
+            this.modalMessage = error.response.data.error.message;
           })
+      },
+
+      onMessage (){
+        if (this.status === 'success'){
+          this.$router.push({ name: 'Login'});
+        } else {
+          this.status = null;
+          this.isMessage = false;
+          this.modalMessage = null;
+        }
       },
 
       fetchIdExists () {

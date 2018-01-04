@@ -34,6 +34,10 @@ export default {
           url: '/configuration/edge'
         },
         {
+          name: 'Cache Throttling 관리',
+          url: '/configuration/cache'
+        },
+        {
           name: 'Referrer 관리',
           url: '/configuration/referrer'
         },

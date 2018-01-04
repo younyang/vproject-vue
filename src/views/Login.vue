@@ -37,12 +37,14 @@
         <b-button type="button" :block="true" class="btn btn-login-link" @click="isPwdMode = false">로그인 화면으로</b-button>
       </div>
 
-      <p class="warning">회원정보가 일치하지 않습니다.(오류 1회)</p>
+      <p class="warning" v-if="errorMessage !== null">{{ errorMessage }}</p>
     </div>
   </div>
 </template>
 
 <script>
+  import { sha256 } from 'js-sha256';
+
   export default {
     name: 'Login',
 
@@ -58,18 +60,25 @@
           email: ''
         },
 
-        isPwdMode: false
+        isPwdMode: false,
+        errorMessage: null
       }
     },
 
     methods: {
       onLogin () {
+          /*
+        const items = {
+          ...this.items,
+          password: sha256(this.items.password)
+        };*/
+
         this.$https.post('/auth_check', this.items)
           .then(res => {
 
           })
           .catch(error => {
-            console.log(error);
+            this.errorMessage = error.response.data.error.message;
           })
       },
 
