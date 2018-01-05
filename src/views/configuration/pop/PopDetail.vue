@@ -285,11 +285,11 @@
       <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-      <b-button type="button" size="sm" variant="outline-primary">배포</b-button>
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <b-button type="button" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
+      <b-button type="button" variant="outline-primary" @click="onDeploy">배포</b-button>
+      <b-button type="button" variant="outline-primary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
+      <b-button type="button" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-list"></i> 목록</b-button>
     </div>
 
     <!-- History Modal -->
@@ -464,6 +464,16 @@
 
       onSubmit (){
         this.$https.put(`/pops/${this.id}`, this.items)
+          .then((res) => {
+            this.$router.go(this.$router.currentRoute);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+
+      onDeploy (){
+        this.$https.put(`/pops/${this.id}/serviceProcess`)
           .then((res) => {
             this.$router.go(this.$router.currentRoute);
           })

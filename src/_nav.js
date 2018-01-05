@@ -17,10 +17,6 @@ export default {
         {
           name: 'Bucket 관리',
           url: '/service/bucket'
-        },
-        {
-          name: 'Account 관리',
-          url: '/service/account'
         }
       ]
     },

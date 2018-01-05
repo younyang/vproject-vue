@@ -93,11 +93,6 @@ export default new Router({
               path: 'bucket',
               name: 'Bucket 관리',
               component: lazyLoading('services/Bucket')
-            },
-            {
-              path: 'account',
-              name: 'Account 관리',
-              component: lazyLoading('services/Account')
             }
           ]
         },
