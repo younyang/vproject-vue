@@ -86,6 +86,14 @@ export default {
         {
           name: 'Domain Processing 관리',
           url: '/workflow/domain'
+        },
+        {
+          name: 'Preload',
+          url: '/workflow/contPreload'
+        },
+        {
+          name: 'Purge',
+          url: '/workflow/contPurge'
         }
       ]
     },

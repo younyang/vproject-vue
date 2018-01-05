@@ -232,7 +232,7 @@
       this.fetchList();
 
       // PoP ID List
-      this.$https.get('/policy/cacheThrottlings/pops')
+      this.$https.get('/policy/pops')
         .then((res) => {
           this.isLoad.popId = false;
           this.code.popId = res.data.items;

@@ -250,7 +250,7 @@
           this.code.companyCode = res.data.items;
           this.companyCode = res.data.items[0];
         });
-
+      /*
       // Services
       this.$https.get('/services', {
           q: { serviceUseYn: true }
@@ -258,7 +258,7 @@
         .then((res) => {
           this.isLoad.serviceCode = false;
           this.code.serviceCode = res.data.items;
-        });
+        });*/
     },
 
     methods: {

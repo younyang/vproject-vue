@@ -269,6 +269,28 @@ export default new Router({
               path: 'domain',
               name: 'Domain Processing 관리',
               component: lazyLoading('workflow/domain', true)
+            },
+            {
+              path: 'contPreload',
+              name: 'Preload',
+              component: lazyLoading('workflow/content/Preload')
+            },
+            {
+              path: 'contPreload/:id',
+              name: 'Preload 상세',
+              props: true,
+              component: lazyLoading('workflow/content/PreloadDetail')
+            },
+            {
+              path: 'contPurge',
+              name: 'Purge',
+              component: lazyLoading('workflow/content/Purge')
+            },
+            {
+              path: 'contPurge/:id',
+              name: 'Purge 상세',
+              props: true,
+              component: lazyLoading('workflow/content/PurgeDetail')
             }
           ]
         },

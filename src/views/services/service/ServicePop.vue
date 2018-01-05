@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
     <content-header
-      :title="items.serviceName"
+      :title="serviceName"
       :name="name">
     </content-header>
 
@@ -22,6 +22,8 @@
             bordered
             hover
             show-empty
+            :fields="popFields"
+            :items="popItems"
           >
           </b-table>
         </section>
@@ -29,7 +31,7 @@
     </b-collapse>
 
     <!-- 배포이력 -->
-    <div class="collapse-title" v-if="!isEdit">
+    <div class="collapse-title">
       <b-button
         variant="secondary"
         v-b-toggle.history
@@ -46,9 +48,10 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="배포일시"
+            :value="deploy.modifyDateTime"
             plaintext
-            type="text"></b-form-input>
+            type="text"
+          ></b-form-input>
         </b-form-fieldset>
         <!-- 배포자 -->
         <b-form-fieldset
@@ -56,9 +59,10 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="배포자"
+            :value="deploy.modifyId"
             plaintext
-            type="text"></b-form-input>
+            type="text"
+          ></b-form-input>
         </b-form-fieldset>
         <!-- 배포상태 -->
         <b-form-fieldset
@@ -66,23 +70,30 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="배포상태"
+            :value="deploy.popDeployStateCodeName"
             plaintext
-            type="text"></b-form-input>
+            class="inline"
+            type="text"
+          ></b-form-input>
+          <b-button
+            class="btn-in"
+            v-if="deploy.popDeployStateCode === 'FAIL'"
+            @click="isModalMessage = true"
+          >재실행</b-button>
+          <b-button class="btn-in" @click="showHistory">이력</b-button>
         </b-form-fieldset>
       </b-card>
     </b-collapse>
 
 
 
-    <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 배포</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">목록</b-button>
+      <b-button type="button" variant="primary" @click="isModalMessage = true">배포</b-button>
     </div>
 
 
-    <!-- History Modal
+    <!-- History Modal -->
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
@@ -103,7 +114,17 @@
         <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
       </div>
     </b-modal>
-    -->
+
+    <!-- Message Modal -->
+    <b-modal title="Message" size="sm" v-model="isModalMessage" class="modal-primary">
+      <div class="d-block text-center">
+        <h5>PoP 정보를 정말 배포하시겠습니까?</h5>
+      </div>
+      <div slot="modal-footer">
+        <b-button type="button" variant="primary" @click="onSubmit">확인</b-button>
+        <b-button type="button" variant="outline-secondary" @click="isModalMessage = false">취소</b-button>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -121,31 +142,100 @@
     data (){
       return {
         name: 'Service 상세',
-        originItems: {},
-        items: [],
-        isEdit: false,
-        isModalHistory: false
+        serviceName: '',
+        servicePopList: [],
+        deploy: {
+          modifyDateTime: null,
+          modifyId: null,
+          popDeployStateCode: null,
+          popDeployStateCodeName: null
+        },
+        isModalMessage: false,
+        isModalHistory: false,
+        history: {
+          fields: {
+            modifyId: {label: '배포자', 'class': 'text-left'},
+            modifyDateTime: {label: '배포일시'},
+            popDeployStateCodeName: {label: '상태'},
+            popDeployReason: {label: '배포내용', 'class': 'text-left'}
+          },
+          items: []
+        }
+      }
+    },
+
+    computed: {
+      popItems () {
+        return this.servicePopList.length > 0 ?
+          this.servicePopList.map(item => {
+            item.servicePopTypeList.forEach(({ serviceTypeCodeName, serviceTypeQty }) => {
+              item[serviceTypeCodeName] = serviceTypeQty;
+            });
+            return { ...item }
+          }) : [];
+      },
+
+      popFields () {
+        const fields = {
+          popName: {label: 'PoP'},
+          edgeQty: {label: 'Edge', 'class': 'text-right'}
+        };
+        if (this.servicePopList.length > 0){
+          const item = this.servicePopList[0];
+          item.servicePopTypeList.forEach(({ serviceTypeCodeName }) => {
+            fields[serviceTypeCodeName] = {
+              label: serviceTypeCodeName,
+              'class': 'text-right'
+            };
+          });
+        }
+        return fields;
       }
     },
 
     created (){
+      // History
+      const historyId = this.$route.query.histories;
+      const detailUrl = historyId !== undefined ? `/services/${this.id}/restriction/histories/${historyId}` : `/services/${this.id}/restriction`;
 
+      if (historyId){
+        document.querySelector('body.app').classList.add('history-mode')
+      }
+
+      // Service Name
+      this.$https.get(`/services/${this.id}`)
+        .then((res) => {
+          this.serviceName = res.data.items.serviceName;
+        });
+
+      // PoP data
+      this.$https.get(`/services/${this.id}/pops`)
+        .then((res) => {
+          this.servicePopList = res.data.items.servicePopList;
+        });
+
+      // PoP deploy data
+      this.$https.get(`/services/${this.id}/pops/deploy`)
+        .then((res) => {
+          this.deploy = res.data.items.servicePopDeployHistory;
+        });
     },
 
     methods: {
-      onEdit () {
-
-      },
-      onView () {
-
-      },
       onSubmit () {
-
+        this.$https.post(`/services/${this.id}/pops/deploy`)
+          .then(() => {
+            this.$router.go(this.$router.currentRoute);
+          });
       },
+
       showHistory () {
-
+        this.isModalHistory = !this.isModalHistory;
+        this.$https.get(`/services/${this.id}/pops/deploy/histories`)
+          .then((res) => {
+            this.history.items = res.data.items;
+          });
       }
-
     }
   }
 </script>
