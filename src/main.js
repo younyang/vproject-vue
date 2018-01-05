@@ -7,7 +7,7 @@ import axios from 'axios'
 import router from './router'
 import Multiselect from 'vue-multiselect'
 import VueHighcharts from 'vue-highcharts'
-
+import auth from './auth'
 
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
@@ -32,6 +32,25 @@ const axChart = axios.create({
   baseURL: '/api',
   headers: { 'x-vessel-appKey': '0fc75651-8fa5-4d13-a376-69384eacb315'}
 });
+
+
+let errorCheck = false;
+const errorAuth = (error) => {
+  if (error.response.status === 403) {
+    if (!errorCheck){
+      errorCheck = true;
+      alert(error.response.data.error.message);
+      auth.logout(() => {
+        window.location = '/#/login';
+      });
+    }
+  }
+  return Promise.reject(error);
+};
+
+ax.interceptors.response.use((res) => { return res }, errorAuth);
+axChart.interceptors.response.use((res) => { return res }, errorAuth);
+
 
 
 Vue.prototype.$https = {

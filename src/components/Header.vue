@@ -15,18 +15,38 @@
       </b-nav-item-dropdown>
       <b-nav-item-dropdown right>
         <template slot="button-content">
-          <span class="d-md-down-none">younyang</span>
+          <span class="d-md-down-none">{{ userName }}</span>
         </template>
         <b-dropdown-item><i class="fa fa-user"></i> 회원정보 수정</b-dropdown-item>
-        <b-dropdown-item><i class="fa fa-lock"></i> Logout</b-dropdown-item>
+        <b-dropdown-item @click="logout"><i class="fa fa-lock"></i> Logout</b-dropdown-item>
       </b-nav-item-dropdown>
     </b-nav>
   </header>
 </template>
 <script>
+import auth from '../auth';
+
 export default {
   name: 'header',
+  data (){
+    return {
+      userName: null
+    }
+  },
+
+  mounted () {
+    this.userName = auth.getUserInfo('operatorName')
+  },
+
   methods: {
+    logout () {
+      this.$https.put('/logout')
+        .then(() => {
+            auth.logout(() => {
+            this.$router.push({ name: 'Login' });
+          })
+      });
+    },
     sidebarToggle (e) {
       e.preventDefault()
       document.body.classList.toggle('sidebar-hidden')

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import auth from '../auth'
 import lazyLoading from './lazyLoading'
-
 
 // Containers
 import Full from '@/containers/Full'
@@ -10,6 +10,17 @@ import Map from '@/views/Map'
 import GridUI from '@/views/GridUI'
 
 Vue.use(Router)
+
+const requireAuth = (to, from, next) => {
+  if (!auth.loggedIn()) {
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    })
+  } else {
+    next()
+  }
+}
 
 export default new Router({
   mode: 'hash', // Demo is living in GitHub.io, so required!
@@ -23,6 +34,7 @@ export default new Router({
       redirect: '/dashboard',
       name: 'Home',
       component: Full,
+      beforeEnter: requireAuth,
       children: [
         {
           path: 'dashboard',

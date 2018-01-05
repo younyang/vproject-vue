@@ -4,13 +4,15 @@
       <h1 class="sr-only">SK broadband V Project Pilot 플랫폼 Login</h1>
 
       <div v-if="!isPwdMode">
-        <div class="input-group">
-          <input type="text" class="form-control" v-model="items.loginId" placeholder="아이디">
-        </div>
-        <div class="input-group">
-          <input type="password" class="form-control" v-model="items.password" placeholder="Password">
-        </div>
-        <b-button type="button" :block="true" class="btn btn-login" @click="onLogin">로그인</b-button>
+        <b-form @submit.prevent="onLogin">
+          <div class="input-group">
+            <input type="text" class="form-control" v-model="items.loginId" placeholder="아이디">
+          </div>
+          <div class="input-group">
+            <input type="password" class="form-control" v-model="items.password" placeholder="Password">
+          </div>
+          <b-button type="submit" :block="true" class="btn btn-login">로그인</b-button>
+        </b-form>
 
         <div class="row">
           <div class="col-6">
@@ -43,7 +45,22 @@
 </template>
 
 <script>
+  import auth from '../auth'
   import { sha256 } from 'js-sha256';
+
+  function authRequest (loginId, password, callback) {
+    setTimeout(() => {
+      if (loginId === 'admin' && password === '!admin1234') {
+        callback({
+          authenticated: true,
+          token: Math.random().toString(36).substring(7)
+        })
+      } else {
+        callback({ authenticated: false })
+      }
+    }, 0)
+  }
+
 
   export default {
     name: 'Login',
@@ -65,17 +82,27 @@
       }
     },
 
+    mounted () {
+      console.clear();
+    },
+
     methods: {
       onLogin () {
-          /*
+        const formData = new FormData();
+        formData.append('loginId', this.items.loginId);
+        formData.append('password', this.items.password);
+
+        /*
         const items = {
           ...this.items,
           password: sha256(this.items.password)
         };*/
 
-        this.$https.post('/auth_check', this.items)
+        this.$https.post('/auth_check', formData)
           .then(res => {
-
+            sessionStorage.token = Math.random().toString(36).substring(7);
+            sessionStorage.setItem('operatorName', res.data.items.operatorName );
+            this.$router.replace(this.$route.query.redirect || '/');
           })
           .catch(error => {
             this.errorMessage = error.response.data.error.message;
