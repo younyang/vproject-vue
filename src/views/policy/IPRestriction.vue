@@ -248,6 +248,15 @@
     },
 
     created (){
+      // History
+      const historyId = this.$route.query.histories;
+      const detailUrl = historyId !== undefined ? `/policy/ipRestriction/hist/${historyId}` : `/policy/ipRestriction`;
+
+      if (historyId){
+        document.querySelector('body.app').classList.add('history-mode')
+      }
+
+
       // IP Restriction
       this.$https.get('/policy/ipRestriction')
         .then((res) => {
@@ -291,12 +300,12 @@
       },
 
       getHistoryLink (rowId){
-        return `#/service/service/${this.id}/ip?histories=${rowId}`
+        return `#/policy/ipRestriction?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/services/${this.id}/restriction/histories`)
+        this.$https.get(`/policy/ipRestriction/hist`)
           .then((res) => {
             this.history.items = res.data.items;
           });

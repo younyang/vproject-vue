@@ -19,7 +19,7 @@
             :loading="isLoad.serviceId"
             label="serviceName"
             placeholder="선택"
-            @select="onSearchBandwidth"
+            @select="onSearchPoP"
           ></multiselect>
         </b-form-fieldset>
 
@@ -63,8 +63,8 @@
       </b-card>
 
       <b-card
-        v-if="cacheCase.length > 0"
-        v-for="(cache, index) in cacheCase"
+        v-if="items.cacheThrottlingCases.length > 0"
+        v-for="(cache, index) in items.cacheThrottlingCases"
         :key="index"
       >
         <div slot="header">
@@ -76,6 +76,7 @@
             striped
             bordered
             show-empty
+            foot-clone
             :items="cache.cacheThrottlingComps"
             :fields="caseFields"
           >
@@ -88,6 +89,7 @@
               <b-form-input
                 v-model="row.item.bandwidth1"
                 type="number"
+                min="0"
                 size="sm"
                 class="inline"
                 style="width:80px"
@@ -105,11 +107,30 @@
               <b-form-input
                 v-model="row.item.bandwidth2"
                 type="number"
+                min="0"
                 size="sm"
                 class="inline"
                 style="width:80px"
                 :disabled="!row.item.band2UseYn"
               ></b-form-input> GB 제한
+            </template>
+
+            <template slot="FOOT_serviceTypeCodeName" scope="data">
+              Total
+            </template>
+            <template slot="FOOT_bandwidth1" scope="data">
+              <span
+                class="warning text-danger"
+                v-if="total[index].bandwidth1 > items.bandwidth"
+              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
+              <span :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }}</span>
+            </template>
+            <template slot="FOOT_bandwidth2" scope="data">
+              <span
+                class="warning text-danger"
+                v-if="total[index].bandwidth2 > items.bandwidth"
+              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
+              <span :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }}</span>
             </template>
           </b-table>
         </section>
@@ -119,7 +140,7 @@
 
     <div class="page-btn">
       <b-button type="button" variant="outline-secondary" :to="{ name: 'Cache Throttling 관리' }">취소</b-button>
-      <b-button type="button" variant="primary" @click="onSubmit">저장 및 배포</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit" :disabled="!onCheckBandwidth()">저장 및 배포</b-button>
     </div>
 
   </div>
@@ -138,8 +159,8 @@
         items: {
           popId: null,
           serviceId: null,
-          bandWidth: null,
-          setApplyYn: null,
+          bandwidth: null,
+          setApplyYn: false,
           modifyHistReason: '등록',
           cacheThrottlingCases: []
         },
@@ -155,7 +176,7 @@
           serviceId: []
         },
         isLoad: {
-          popId: true,
+          popId: false,
           serviceId: true
         }
       }
@@ -178,33 +199,25 @@
           this.items.serviceId = newValue !== null ? newValue.serviceId : null;
         }
       },
-      cacheCase () {
-        const cases = this.items.cacheThrottlingCases;
-        return cases.length > 0 ?
-          cases.map(obj => {
-            const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
-              obj.cacheThrottlingComps.map(ob => ({
-                ...ob,
-                band1UseYn: ob.bandwidth1 > 0,
-                band2UseYn: ob.bandwidth2 > 0
-              }))
-              : [];
+
+      total (){
+        const items = this.items.cacheThrottlingCases.length > 0 ?
+          this.items.cacheThrottlingCases.map(({ cacheThrottlingComps }) => {
             return {
-              ...obj,
-              cacheThrottlingComps
+              bandwidth1: cacheThrottlingComps
+                .map(({bandwidth1}) => bandwidth1)
+                .reduce((p, n) => parseInt(p) + parseInt(n)),
+              bandwidth2: cacheThrottlingComps
+                .map(({bandwidth2}) => bandwidth2)
+                .reduce((p, n) => parseInt(p) + parseInt(n))
             }
-          }) : [];
+          }) : [{ bandwidth1: 0, bandwidth2: 0 }];
+
+        return items;
       }
     },
 
     created (){
-      // PoP ID List
-      this.$https.get('/policy/cacheThrottlings/pops')
-        .then((res) => {
-          this.isLoad.popId = false;
-          this.code.popId = res.data.items;
-        });
-
       // Service ID List
       this.$https.get('/policy/services')
         .then((res) => {
@@ -215,7 +228,7 @@
 
     methods: {
       onSubmit (){
-        const cacheCase = this.cacheCase.map(obj => {
+        const cacheCase = this.items.cacheThrottlingCases.map(obj => {
           const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
             obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
               serviceTypeCode,
@@ -247,20 +260,48 @@
           });
       },
 
-      onSearchBandwidth (obj, id){
-        const serviceId = (id === 'serviceId') ? obj.serviceId : this.items.serviceId;
-        const popId = (id === 'popId') ? obj.popId : this.items.popId;
+      onSearchPoP (obj){
+        const serviceId = obj.serviceId;
+        this.code.popId = [];
+        this.items = {
+          ...this.items,
+          popId: null,
+          bandwidth: null,
+          setApplyYn: false,
+          cacheThrottlingCases: []
+        };
 
-        if (serviceId !== null && popId !== null){
-          this.$https.get(`/policy/cacheThrottlings/bandwidth/service/${serviceId}/pop/${popId}`)
-            .then((res) => {
-              this.items.bandwidth = res.data.items.popBandwidth;
+        // PoP ID List
+        this.isLoad.popId = true;
+        this.$https.get(`/policy/cacheThrottlings/services/${serviceId}/pops`)
+          .then((res) => {
+            this.isLoad.popId = false;
+            this.code.popId = res.data.items;
+          });
+      },
 
-              if (res.data.items.cacheThrottlingCases.length > 0){
-                this.items.cacheThrottlingCases = res.data.items.cacheThrottlingCases;
-              }
-            });
-        }
+      onSearchBandwidth (obj){
+        const serviceId = this.items.serviceId;
+        const popId = obj.popId;
+        this.$https.get(`/policy/cacheThrottlings/bandwidth/service/${serviceId}/pop/${popId}`)
+          .then((res) => {
+            this.items.bandwidth = res.data.items.popBandwidth;
+            this.items.cacheThrottlingCases = res.data.items.cacheThrottlingCases;
+
+            if (this.items.cacheThrottlingCases.length > 0){
+              this.setCacheCaseData();
+            }
+          });
+      },
+
+      onCheckBandwidth (){
+        let isCheckBandwidth = true;
+        this.total.forEach(({ bandwidth1, bandwidth2}) => {
+          if (bandwidth1 > this.items.bandwidth || bandwidth2 > this.items.bandwidth){
+            isCheckBandwidth = false;
+          }
+        });
+        return isCheckBandwidth;
       },
 
       onChecked (item, type){
@@ -272,7 +313,7 @@
       },
 
       onChangeSet2 (applyYn){
-        const cases = this.cacheCase;
+        const cases = this.items.cacheThrottlingCases;
 
         if (!applyYn && cases.length > 0){
           cases.forEach(({ cacheThrottlingComps }) => {
@@ -284,6 +325,22 @@
             }
           });
         }
+      },
+
+      setCacheCaseData (){
+        this.items.cacheThrottlingCases = this.items.cacheThrottlingCases.map(obj => {
+          const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+            obj.cacheThrottlingComps.map(ob => ({
+              ...ob,
+              band1UseYn: ob.bandwidth1 > 0,
+              band2UseYn: ob.bandwidth2 > 0
+            }))
+            : [];
+          return {
+            ...obj,
+            cacheThrottlingComps
+          }
+        });
       }
     }
   }

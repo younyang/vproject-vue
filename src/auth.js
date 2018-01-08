@@ -1,20 +1,20 @@
 /* globals localStorage */
 export default {
   getToken () {
-    return sessionStorage.token;
+    return localStorage.token;
   },
 
   getUserInfo (key) {
-    return sessionStorage.getItem(key)
+    return localStorage.getItem(key)
   },
 
   logout (callback) {
-    delete sessionStorage.token;
+    delete localStorage.token;
     if (callback) callback()
   },
 
   loggedIn () {
-    return !!sessionStorage.token
+    return !!localStorage.token
   },
 
   onChange () {}

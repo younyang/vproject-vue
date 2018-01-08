@@ -100,8 +100,8 @@
 
         this.$https.post('/auth_check', formData)
           .then(res => {
-            sessionStorage.token = Math.random().toString(36).substring(7);
-            sessionStorage.setItem('operatorName', res.data.items.operatorName );
+            localStorage.token = Math.random().toString(36).substring(7);
+            localStorage.setItem('operatorName', res.data.items.operatorName );
             this.$router.replace(this.$route.query.redirect || '/');
           })
           .catch(error => {

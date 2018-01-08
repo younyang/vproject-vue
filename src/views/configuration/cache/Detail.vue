@@ -23,7 +23,7 @@
           type="text"
           plaintext
         ></b-form-input>
-        <span v-if="items.popBandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.popBandwidth }} GB)</span>
+        <span v-if="items.bandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.bandwidth }} GB)</span>
       </b-form-fieldset>
 
       <!-- Set2 사용여부 -->
@@ -52,8 +52,8 @@
 
 
     <b-card
-      v-if="cacheCase.length > 0"
-      v-for="(cache, index) in cacheCase"
+      v-if="items.cacheThrottlingCases.length > 0"
+      v-for="(cache, index) in items.cacheThrottlingCases"
       :key="index"
     >
       <div slot="header">
@@ -73,6 +73,7 @@
           striped
           bordered
           show-empty
+          foot-clone
           :items="cache.cacheThrottlingComps"
           :fields="caseFields"
         >
@@ -85,6 +86,7 @@
               <b-form-input
                 v-model="row.item.bandwidth1"
                 type="number"
+                min="0"
                 size="sm"
                 class="inline"
                 style="width:80px"
@@ -105,6 +107,7 @@
               <b-form-input
                 v-model="row.item.bandwidth2"
                 type="number"
+                min="0"
                 size="sm"
                 class="inline"
                 style="width:80px"
@@ -113,6 +116,24 @@
               GB 제한
             </span>
             <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
+          </template>
+
+          <template slot="FOOT_serviceTypeCodeName" scope="data">
+            Total
+          </template>
+          <template slot="FOOT_bandwidth1" scope="data">
+              <span
+                class="warning text-danger"
+                v-if="total[index].bandwidth1 > items.bandwidth"
+              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
+            <span :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }}</span>
+          </template>
+          <template slot="FOOT_bandwidth2" scope="data">
+              <span
+                class="warning text-danger"
+                v-if="total[index].bandwidth2 > items.bandwidth"
+              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
+            <span :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }}</span>
           </template>
         </b-table>
       </section>
@@ -204,7 +225,7 @@
 
     <div class="page-btn" v-if="isEdit">
       <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
-      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit" :disabled="!onCheckBandwidth()">저장</b-button>
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
@@ -300,22 +321,20 @@
     },
 
     computed: {
-      cacheCase () {
-        const cases = this.items.cacheThrottlingCases;
-        return cases.length > 0 ?
-          cases.map(obj => {
-            const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
-              obj.cacheThrottlingComps.map(ob => ({
-                ...ob,
-                band1UseYn: ob.bandwidth1 > 0,
-                band2UseYn: ob.bandwidth2 > 0
-              }))
-              : [];
+      total (){
+        const items = this.items.cacheThrottlingCases.length > 0 ?
+          this.items.cacheThrottlingCases.map(({ cacheThrottlingComps }) => {
             return {
-              ...obj,
-              cacheThrottlingComps
+              bandwidth1: cacheThrottlingComps
+                .map(({bandwidth1}) => bandwidth1)
+                .reduce((p, n) => parseInt(p) + parseInt(n)),
+              bandwidth2: cacheThrottlingComps
+                .map(({bandwidth2}) => bandwidth2)
+                .reduce((p, n) => parseInt(p) + parseInt(n))
             }
-          }) : [];
+          }) : [{ bandwidth1: 0, bandwidth2: 0 }];
+
+        return items;
       }
     },
 
@@ -333,7 +352,12 @@
       // Detail Data
       this.$https.get(detailUrl)
         .then((res) => {
-          this.items = { ...this.items, ...res.data.items };
+          this.items = {
+            ...this.items,
+            ...res.data.items,
+            bandwidth: res.data.items.popBandwidth
+          };
+          this.setCacheCaseData();
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
     },
@@ -352,13 +376,12 @@
         const {
           popId,
           serviceId,
-          popBandwidth,
+          bandwidth,
           setApplyYn,
           modifyHistReason
         } = this.items;
 
-        const bandwidth = popBandwidth;
-        const cacheCase = this.cacheCase.map(obj => {
+        const cacheCase = this.items.cacheThrottlingCases.map(obj => {
           const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
             obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
               serviceTypeCode,
@@ -403,6 +426,16 @@
           });
       },
 
+      onCheckBandwidth (){
+        let isCheckBandwidth = true;
+        this.total.forEach(({ bandwidth1, bandwidth2}) => {
+          if (bandwidth1 > this.items.bandwidth || bandwidth2 > this.items.bandwidth){
+            isCheckBandwidth = false;
+          }
+        });
+        return isCheckBandwidth;
+      },
+
       onChecked (item, type){
         const useYn = `band${type}UseYn`;
         const bandwidth = `bandwidth${type}`;
@@ -412,7 +445,7 @@
       },
 
       onChangeSet2 (applyYn){
-        const cases = this.cacheCase;
+        const cases = this.items.cacheThrottlingCases;
 
         if (!applyYn && cases.length > 0){
           cases.forEach(({ cacheThrottlingComps }) => {
@@ -424,6 +457,22 @@
             }
           });
         }
+      },
+
+      setCacheCaseData (){
+        this.items.cacheThrottlingCases = this.items.cacheThrottlingCases.map(obj => {
+          const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+            obj.cacheThrottlingComps.map(ob => ({
+              ...ob,
+              band1UseYn: ob.bandwidth1 > 0,
+              band2UseYn: ob.bandwidth2 > 0
+            }))
+            : [];
+          return {
+            ...obj,
+            cacheThrottlingComps
+          }
+        });
       },
 
       getHistoryLink (rowId, caseSeq){

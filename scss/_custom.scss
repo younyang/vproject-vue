@@ -389,6 +389,15 @@ i.require {
 @each $color, $value in $theme-colors {
   @include text-emphasis-variant('.table-text-#{$color}', $value);
 }
+.table {
+  tfoot .warning {
+    font-size: 0.5rem;
+    font-weight: normal;
+    float: left;
+    line-height: 20px;
+    padding-right: 20px;
+  }
+}
 
 
 
