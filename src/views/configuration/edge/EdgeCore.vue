@@ -213,7 +213,7 @@
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="outline-primary">배포</b-button>
+      <b-button type="button" size="sm" variant="outline-primary" @click="onDeploy">배포</b-button>
       <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
     </div>
 
@@ -376,7 +376,16 @@
               console.log(error);
             });
         }
+      },
 
+      onDeploy (){
+        this.$https.post(`/edges/${this.id}/cores/apply`)
+          .then((res) => {
+            this.$router.go(this.$router.currentRoute);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       },
 
       onAddList (){
