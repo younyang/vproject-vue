@@ -11,14 +11,14 @@
         <div @mousedown.prevent.stop="toggle()" class="multiselect__select"></div>
       </slot>
       <div ref="tags" class="multiselect__tags">
-        <div class="multiselect__tags-wrap" v-show="value !== ''">
+        <div class="multiselect__tags-wrap" v-show="value !== null">
           <span class="multiselect__tag">
-            <span>{{ value }}</span>
-            <i aria-hidden="true" tabindex="1" @mousedown.prevent="onRemove(opt)" class="multiselect__tag-icon"></i>
+            <span>{{ getValue() }}</span>
+            <i aria-hidden="true" tabindex="1" @mousedown.prevent="onRemove(value)" class="multiselect__tag-icon"></i>
           </span>
         </div>
         <span
-          v-show="value === ''"
+          v-show="value === null"
           class="multiselect__single"
           @mousedown.prevent="toggle">
           {{ placeholder }}
@@ -35,7 +35,7 @@
             <li class="multiselect__element" v-for="(opt, index) in options" :key="index">
               <span
                 @click.stop="onSelect(opt)"
-                :class="{'multiselect__option--selected': isOptionSelected(opt)}"
+                :class="{'multiselect__option--selected multiselect__option--disabled': isOptionSelected(opt)}"
                 class="multiselect__option">
                 <slot name="option" :option="opt">
                   <span>{{ getOptionLabel(opt) }}</span>
@@ -73,8 +73,8 @@
       },
 
       value: {
-        type: String,
-        default: ''
+        type: Object,
+        default: null
       },
 
       options: {
@@ -122,9 +122,12 @@
       },
 
       onRemove (opt) {
-        this.value = '';
         this.$emit('remove', deepClone(opt), this.id, this.shareModel);
         this.deactivate();
+      },
+
+      getValue (){
+        return this.value ? this.value[this.label] : '';
       },
 
       getOptionLabel (opt){

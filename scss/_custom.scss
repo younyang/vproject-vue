@@ -231,6 +231,7 @@ i.require {
   }
   .multiselect__tag {
     margin-bottom: 0;
+    font-size: 0.825rem;
   }
   .multiselect__single {
     margin-bottom: 0;
@@ -253,6 +254,10 @@ i.require {
   .multiselect__option {
     min-height: 28px;
     padding: 6px 10px;
+    &:hover {
+      background: #41B883;
+      color: white;
+    }
   }
   .multiselect__content-wrapper {
     border-color: $border-color;
@@ -262,6 +267,7 @@ i.require {
   .multiselect__option {
     font-size: 0.825rem;
   }
+
 
   &.multiple .multiselect__single {
     display: none !important;

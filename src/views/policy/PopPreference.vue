@@ -25,7 +25,7 @@
           >
 
             <template slot="targetPopId1" scope="row">
-              <span>
+              <span v-if="row.item.isEdit">
                 <select-box
                   label="popName"
                   trackBy="popId"
@@ -35,39 +35,83 @@
                   :shareModel="row.item"
                   :isSelected="isOptionSelected"
                   @select="onOptionSelect"
+                  @remove="onOptionRemove"
                 >
                 </select-box>
               </span>
-              <span>{{ row.item.targetPopIdName1 }}</span>
+              <span v-else>{{ row.value ? row.value.popName : '' }}</span>
             </template>
+
             <template slot="targetPopId2" scope="row">
+              <span v-if="row.item.isEdit">
+                <select-box
+                  label="popName"
+                  trackBy="popId"
+                  :id="`row_${row.index}_2`"
+                  :value="row.value"
+                  :options="code.popList"
+                  :shareModel="row.item"
+                  :isSelected="isOptionSelected"
+                  @select="onOptionSelect"
+                  @remove="onOptionRemove"
+                >
+                </select-box>
+              </span>
+              <span v-else>{{ row.value ? row.value.popName : '' }}</span>
             </template>
+
             <template slot="targetPopId3" scope="row">
               <span v-if="row.item.isEdit">
+                <select-box
+                  label="popName"
+                  trackBy="popId"
+                  :id="`row_${row.index}_2`"
+                  :value="row.value"
+                  :options="code.popList"
+                  :shareModel="row.item"
+                  :isSelected="isOptionSelected"
+                  @select="onOptionSelect"
+                  @remove="onOptionRemove"
+                >
+                </select-box>
               </span>
-              <span v-else>{{ row.item.targetPopIdName3 }}</span>
+              <span v-else>{{ row.value ? row.value.popName : '' }}</span>
             </template>
+
             <template slot="targetPopId4" scope="row">
               <span v-if="row.item.isEdit">
-                <multiselect
-                  v-model="row.item.popList"
+                <select-box
                   label="popName"
-                  track-by="popId"
-                  class="multiple pops"
-                  :multiple="true"
-                  :showLabels="false"
-                  :searchable="false"
+                  trackBy="popId"
+                  :id="`row_${row.index}_2`"
+                  :value="row.value"
                   :options="code.popList"
+                  :shareModel="row.item"
+                  :isSelected="isOptionSelected"
+                  @select="onOptionSelect"
+                  @remove="onOptionRemove"
                 >
-                </multiselect>
+                </select-box>
               </span>
-              <span v-else>{{ row.item.targetPopIdName4 }}</span>
+              <span v-else>{{ row.value ? row.value.popName : '' }}</span>
             </template>
+
             <template slot="targetPopId5" scope="row">
               <span v-if="row.item.isEdit">
-
+                <select-box
+                  label="popName"
+                  trackBy="popId"
+                  :id="`row_${row.index}_2`"
+                  :value="row.value"
+                  :options="code.popList"
+                  :shareModel="row.item"
+                  :isSelected="isOptionSelected"
+                  @select="onOptionSelect"
+                  @remove="onOptionRemove"
+                >
+                </select-box>
               </span>
-              <span v-else>{{ row.item.targetPopIdName5 }}</span>
+              <span v-else>{{ row.value ? row.value.popName : '' }}</span>
             </template>
 
             <template slot="popPreferenceUseYn" scope="row">
@@ -114,7 +158,14 @@
           :items="history.items"
           :fields="history.fields"
         >
-          <template slot="bypassYn" scope="row">
+          <template slot="preference" scope="row">
+            <span class="preText">{{ row.item.targetPopIdName1 }}</span> -
+            <span class="preText">{{ row.item.targetPopIdName2 }}</span> -
+            <span class="preText">{{ row.item.targetPopIdName3 }}</span> -
+            <span class="preText">{{ row.item.targetPopIdName4 }}</span> -
+            <span class="preText">{{ row.item.targetPopIdName5 }}</span>
+          </template>
+          <template slot="popPreferenceUseYn" scope="row">
             {{ row.value ? '사용' : '미사용' }}
           </template>
         </b-table>
@@ -160,10 +211,10 @@
         },
         history: {
           fields: {
-            createId: {label: '등록/수정자', 'class': 'text-left'},
+            modifyId: {label: '등록/수정자', 'class': 'text-left'},
             histBeginDateTime: {label: '등록/수정일시'},
-            expireTime: {label: 'ExpireTime', 'class': 'text-right'},
-            bypassYn: { label: 'byPass'}
+            preference: {label: 'PoP Preference', 'class': 'text-left'},
+            popPreferenceUseYn: { label: '사용여부'}
           },
           items: []
         },
@@ -203,27 +254,26 @@
       // PoP Preference List fetch
       fetchPreference (obj = {}){
         const { serviceId } = obj;
+        this.service = obj;
+
         this.$https.get('/policy/popPreference', {
             q: { serviceId }
           })
           .then((res) => {
             this.items = res.data.items.map(obj => {
-              const popList = [];
+              const targetPoP = {};
               Object.keys(obj).forEach(key => {
                 if(/^targetPopId\d/.test(key)){
                   let pop = this.code.popList.find(({ popId }) => popId === parseInt(obj[key]));
-                  if (pop){
-                    popList.push({
-                      target: key.split('targetPopId')[1],
-                      popId: pop.popId,
-                      popName: pop.popName
-                    });
-                  }
+                  targetPoP[key] = pop ? {
+                    popId: pop.popId,
+                    popName: pop.popName
+                  } : null;
                 }
               });
               return {
                 ...obj,
-                popList,
+                ...targetPoP,
                 isEdit: false
               }
             });
@@ -247,22 +297,19 @@
       onSubmit (row) {
         const popIdObj = {};
         Object.keys(row.item).forEach(key => {
-          if(/^targetPopIdName/.test(key)){
-            const number = key.split('targetPopIdName')[1];
-            popIdObj[`targetPopId${number}`] = row.item[key][0] ? row.item[key][0].popId : null
+          if(/^targetPopId\d/.test(key)){
+            popIdObj[key] = row.item[key] ? row.item[key].popId : null
           }
         });
         const item = {
           popId: row.item.popId,
-          serviceId: this.service.serviceId,
+          serviceId: parseInt(this.service.serviceId),
           popPreferenceUseYn: row.item.popPreferenceUseYn,
           modifyHistReason : row.item.modifyHistReason || '',
           ...popIdObj
         };
 
-        console.log(item)
-
-        this.$https.put(`/policy/popPreference`,item)
+        this.$https.put(`/policy/popPreference`, item)
           .then(() => {
             row.item.isEdit = false;
             this.items[row.index] = row.item;
@@ -276,41 +323,34 @@
 
       onOptionSelect (obj, id, item){
         const targetId = `targetPopId${id.split('_')[2]}`;
-        const targetName = `targetPopIdName${id.split('_')[2]}`;
-        const currentItem = this.code.popList.find(({ popId }) => popId === parseInt(obj.popId));
-        item[targetId] = currentItem.popId;
-        item[targetName] = currentItem.popName;
+        const { popId, popName } = this.code.popList.find(({ popId }) => popId === parseInt(obj.popId));
+        item[targetId] = { popId, popName };
+      },
+
+      onOptionRemove (obj, id, item){
+        const targetId = `targetPopId${id.split('_')[2]}`;
+        item[targetId] = null;
       },
 
       isOptionSelected (opt, model) {
         const selectedItem = [];
         Object.keys(model).forEach(key => {
           if(/^targetPopId\d/.test(key)){
-            selectedItem.push(model[key]);
+            const current = model[key] ? model[key]['popId'] : null;
+            selectedItem.push(current);
           }
         });
         return selectedItem.length ? (selectedItem.find(value => value == opt.popId)) : false;
       },
 
-      getPopValue (id){
-        return this.code.popList.find(({ popId }) => popId === parseInt(id)) || null
-      },
-
-      onSelect (obj, id){
-        const rowIndex = id.split('_')[1];
-        const number = id.split('_')[2];
-        const target = {
-          [`targetPopId${number}`]: String(obj.popId),
-          [`targetPopIdName${number}`]: String(obj.popName)
-        };
-
-        this.items[rowIndex] = {...this.items[rowIndex], ...target}
-        //this.items[rowIndex][targetName] = obj.popName;
-      },
-
       showHistory (row) {
+        const popId = row.item.popId;
+        const { serviceId } = this.service;
+
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/policy/oneTimeUrl/hist/${row.item.popId}`)
+        this.$https.get(`/policy/popPreference/hist`,{
+            q: { serviceId, popId }
+          })
           .then((res) => {
             this.history.items = res.data.items;
           });
@@ -320,8 +360,8 @@
 </script>
 
 <style>
-  .select-share li > .selected {
-    background: grey
+  .preText {
+    display: inline-block;
+    min-width: 80px;
   }
 </style>
-
