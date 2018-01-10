@@ -92,7 +92,12 @@ export default new Router({
             {
               path: 'bucket',
               name: 'Bucket 관리',
-              component: lazyLoading('services/Bucket')
+              component: lazyLoading('services/bucket', true)
+            },{
+              path: 'bucket/:id',
+              name: 'Bucket 상세',
+              props: true,
+              component: lazyLoading('services/bucket/Detail')
             }
           ]
         },
