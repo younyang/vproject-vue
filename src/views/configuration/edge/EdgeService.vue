@@ -184,6 +184,7 @@
           serviceIdList: true
         },
         isEdit: false,
+        isCreate: false,
         isModalHistory: false
       }
     },
@@ -225,6 +226,7 @@
         })
         .catch(() => {
           this.isEdit = true;
+          this.isCreate = true;
         });
     },
 
@@ -242,13 +244,25 @@
         const serviceId = this.items.serviceIdList.map(({ serviceId }) => serviceId);
         const { modifyHistReason } = this.items;
 
-        this.$https.put(`/edges/${this.id}/services`, { serviceId, modifyHistReason })
-          .then(() => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        if (this.isCreate){
+          this.$https.post(`/edges/${this.id}/services`, { serviceId, modifyHistReason })
+            .then(() => {
+              this.isCreate = false;
+              this.isEdit = false;
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }else{
+          this.$https.put(`/edges/${this.id}/services`, { serviceId, modifyHistReason })
+            .then(() => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
       getHistoryLink (rowId){

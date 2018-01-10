@@ -8,7 +8,7 @@ $primary-color: #0088cc;
 html,
 body,
 body > .app {
-  min-width: 995px;
+//  min-width: 1200px;
   background-color: #fff;
 }
 
@@ -220,6 +220,8 @@ i.require {
  */
 .multiselect {
   min-height: 30px;
+  min-width: 105px;
+  line-height: 1;
 
   .multiselect__tags {
     min-height: 30px;
@@ -261,8 +263,27 @@ i.require {
     font-size: 0.825rem;
   }
 
+  &.multiple .multiselect__single {
+    display: none !important;
+  }
+
   &.noEmpty .multiselect__option--highlight {
     background: #41B886 !important;
+  }
+
+  &.pops .multiselect__tag {
+    display: none;
+  }
+  &.pops .multiselect__tag:first-child {
+    display: inline-block;
+  }
+  &.disSelect {
+    pointer-events: none;
+    cursor: default;
+    .multiselect__tag-icon {
+      pointer-events: all;
+      cursor: pointer;
+    }
   }
 }
 
@@ -565,9 +586,7 @@ i.require {
 /**
  * Multiple Select
  */
-.multiselect__tag {
-  margin-bottom: 3px;
-}
+
 
 /* View Style */
 .multiselect.multiselect--disabled.view-type {
@@ -602,7 +621,7 @@ i.require {
   }
 }
 
-/* Pops */
+/* Pops
 .multiselect.pops {
   position: relative;
   min-width: 110px;
@@ -630,6 +649,7 @@ i.require {
   }
 
 }
+*/
 .multiselect.disSelect {
   pointer-events: none;
   cursor: default;

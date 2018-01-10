@@ -6,6 +6,7 @@
           <multiselect
             :value = "service"
             label="serviceName"
+            class="noEmpty"
             :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
@@ -23,65 +24,36 @@
             :fields="fields"
           >
 
-            <template slot="targetPopIdName1" scope="row">
-              <span v-if="row.item.isEdit">
-                <multiselect
-                  v-model="row.item.targetPopIdName1"
+            <template slot="targetPopId1" scope="row">
+              <span>
+                <select-box
                   label="popName"
-                  track-by="popId"
-                  class="inline pops"
-                  :class="{'disSelect': row.value[0] !== undefined}"
-                  :multiple="true"
-                  :showLabels="false"
-                  :searchable="false"
+                  trackBy="popId"
+                  :id="`row_${row.index}_1`"
+                  :value="row.value"
                   :options="code.popList"
+                  :shareModel="row.item"
+                  :isSelected="isOptionSelected"
+                  @select="onOptionSelect"
                 >
-                </multiselect>
+                </select-box>
               </span>
-              <span v-else>{{ row.value[0] ? row.value[0].popName : '' }}</span>
+              <span>{{ row.item.targetPopIdName1 }}</span>
             </template>
-            <template slot="targetPopIdName2" scope="row">
-              <span v-if="row.item.isEdit">
-                <multiselect
-                  v-model="row.item.targetPopIdName2"
-                  label="popName"
-                  track-by="popId"
-                  class="inline pops"
-                  :class="{'disSelect': row.value[0] !== undefined}"
-                  :multiple="true"
-                  :showLabels="false"
-                  :searchable="false"
-                  :options="code.popList"
-                >
-                </multiselect>
-              </span>
-              <span v-else>{{ row.value[0] ? row.value[0].popName : '' }}</span>
+            <template slot="targetPopId2" scope="row">
             </template>
-            <template slot="targetPopIdName3" scope="row">
+            <template slot="targetPopId3" scope="row">
               <span v-if="row.item.isEdit">
-                <multiselect
-                  v-model="row.item.targetPopIdName3"
-                  label="popName"
-                  track-by="popId"
-                  class="inline pops"
-                  :class="{'disSelect': row.value[0] !== undefined}"
-                  :multiple="true"
-                  :showLabels="false"
-                  :searchable="false"
-                  :options="code.popList"
-                >
-                </multiselect>
               </span>
-              <span v-else>{{ row.value[0] ? row.value[0].popName : '' }}</span>
+              <span v-else>{{ row.item.targetPopIdName3 }}</span>
             </template>
-            <template slot="targetPopIdName4" scope="row">
+            <template slot="targetPopId4" scope="row">
               <span v-if="row.item.isEdit">
                 <multiselect
-                  v-model="row.item.targetPopIdName4"
+                  v-model="row.item.popList"
                   label="popName"
                   track-by="popId"
-                  class="inline pops"
-                  :class="{'disSelect': row.value[0] !== undefined}"
+                  class="multiple pops"
                   :multiple="true"
                   :showLabels="false"
                   :searchable="false"
@@ -89,24 +61,13 @@
                 >
                 </multiselect>
               </span>
-              <span v-else>{{ row.value[0] ? row.value[0].popName : '' }}</span>
+              <span v-else>{{ row.item.targetPopIdName4 }}</span>
             </template>
-            <template slot="targetPopIdName5" scope="row">
+            <template slot="targetPopId5" scope="row">
               <span v-if="row.item.isEdit">
-                <multiselect
-                  v-model="row.item.targetPopIdName5"
-                  label="popName"
-                  track-by="popId"
-                  class="inline pops"
-                  :class="{'disSelect': row.value[0] !== undefined}"
-                  :multiple="true"
-                  :showLabels="false"
-                  :searchable="false"
-                  :options="code.popList"
-                >
-                </multiselect>
+
               </span>
-              <span v-else>{{ row.value[0] ? row.value[0].popName : '' }}</span>
+              <span v-else>{{ row.item.targetPopIdName5 }}</span>
             </template>
 
             <template slot="popPreferenceUseYn" scope="row">
@@ -128,12 +89,12 @@
 
             <template slot="action" scope="row">
               <span v-if="row.item.isEdit">
-                <b-button type="button" size="sm" variant="danger" @click="onView(row)">취소</b-button>
-                <b-button type="button" size="sm" variant="primary" @click="onSubmit(row)">저장</b-button>
+                <b-button type="button" variant="danger" @click="onView(row)">취소</b-button>
+                <b-button type="button" variant="primary" @click="onSubmit(row)">저장</b-button>
               </span>
               <span v-else>
-                <b-button type="button" size="sm" variant="outline-primary" @click="showHistory(row)">이력</b-button>
-                <b-button type="button" size="sm" variant="primary" @click="onEdit(row)">수정</b-button>
+                <b-button type="button" variant="outline-primary" @click="showHistory(row)">이력</b-button>
+                <b-button type="button" variant="primary" @click="onEdit(row)">수정</b-button>
               </span>
             </template>
           </b-table>
@@ -167,21 +128,23 @@
 </template>
 
 <script>
+  import SelectBox from '@/components/forms/SelectBox'
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'onetime',
+    name: 'pop-preference',
     components: {
+      SelectBox,
       cSwitch
     },
     data (){
       return {
         fields: {
           popName: {label: 'PoP'},
-          targetPopIdName1: {label: '1 *'},
-          targetPopIdName2: {label: '2 *'},
-          targetPopIdName3: {label: '3 *'},
-          targetPopIdName4: {label: '4 *'},
-          targetPopIdName5: {label: '5 *'},
+          targetPopId1: {label: '1 *'},
+          targetPopId2: {label: '2 *'},
+          targetPopId3: {label: '3 *'},
+          targetPopId4: {label: '4 *'},
+          targetPopId5: {label: '5 *'},
           popPreferenceUseYn: {label: '사용여부'},
           action: { label: '관리'}
         },
@@ -245,16 +208,22 @@
           })
           .then((res) => {
             this.items = res.data.items.map(obj => {
-              const popListObj = {};
+              const popList = [];
               Object.keys(obj).forEach(key => {
-                if(/^targetPopIdName\d/.test(key)){
-                  let pop = this.code.popList.find(({ popId }) => popId === obj[key]);
-                  popListObj[key] = pop ? [pop] : [];
+                if(/^targetPopId\d/.test(key)){
+                  let pop = this.code.popList.find(({ popId }) => popId === parseInt(obj[key]));
+                  if (pop){
+                    popList.push({
+                      target: key.split('targetPopId')[1],
+                      popId: pop.popId,
+                      popName: pop.popName
+                    });
+                  }
                 }
               });
               return {
                 ...obj,
-                ...popListObj,
+                popList,
                 isEdit: false
               }
             });
@@ -305,6 +274,40 @@
           })
       },
 
+      onOptionSelect (obj, id, item){
+        const targetId = `targetPopId${id.split('_')[2]}`;
+        const targetName = `targetPopIdName${id.split('_')[2]}`;
+        const currentItem = this.code.popList.find(({ popId }) => popId === parseInt(obj.popId));
+        item[targetId] = currentItem.popId;
+        item[targetName] = currentItem.popName;
+      },
+
+      isOptionSelected (opt, model) {
+        const selectedItem = [];
+        Object.keys(model).forEach(key => {
+          if(/^targetPopId\d/.test(key)){
+            selectedItem.push(model[key]);
+          }
+        });
+        return selectedItem.length ? (selectedItem.find(value => value == opt.popId)) : false;
+      },
+
+      getPopValue (id){
+        return this.code.popList.find(({ popId }) => popId === parseInt(id)) || null
+      },
+
+      onSelect (obj, id){
+        const rowIndex = id.split('_')[1];
+        const number = id.split('_')[2];
+        const target = {
+          [`targetPopId${number}`]: String(obj.popId),
+          [`targetPopIdName${number}`]: String(obj.popName)
+        };
+
+        this.items[rowIndex] = {...this.items[rowIndex], ...target}
+        //this.items[rowIndex][targetName] = obj.popName;
+      },
+
       showHistory (row) {
         this.isModalHistory = !this.isModalHistory;
         this.$https.get(`/policy/oneTimeUrl/hist/${row.item.popId}`)
@@ -315,4 +318,10 @@
     }
   }
 </script>
+
+<style>
+  .select-share li > .selected {
+    background: grey
+  }
+</style>
 
