@@ -8,17 +8,18 @@
           class="inline"
           :horizontal="true">
           <multiselect
-            v-model="searchType"
+            v-model="searchWordTypeCode"
             label="codeName"
             class="noEmpty"
             :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
-            :options="code.searchType"
+            :options="code.searchWordTypeCode"
           ></multiselect>
-          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
+          <b-form-input type="text" class="keyword" v-model="searchItem.searchWord" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
 
+        <!--
         <b-form-fieldset
           label="Service Type"
           class="label-lg"
@@ -34,9 +35,11 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
+        -->
       </div>
 
       <div class="form-group">
+        <!--
         <b-form-fieldset
           label="Genre"
           style="width:60%"
@@ -52,17 +55,18 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
+        -->
 
         <b-form-fieldset
           label="상태"
-          class="label-lg"
+          style="width:60%"
           :horizontal="true">
           <multiselect
-            v-model="statusCode"
+            v-model="processStateCode"
             :showLabels="false"
             :searchable="false"
-            :options="code.statusCode"
-            :loading="isLoad.statusCode"
+            :options="code.processStateCode"
+            :loading="isLoad.processStateCode"
             label="codeName"
             track-by="code"
             placeholder="전체"
@@ -77,16 +81,16 @@
           style="width:100%"
           :horizontal="true">
           <multiselect
-            v-model="searchDateType"
+            v-model="periodTypeCode"
             label="codeName"
             :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
-            :options="code.searchDateType"
+            :options="code.periodTypeCode"
           ></multiselect>
 
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input> ~
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateTo"></b-form-input>
+          <b-form-input type="date" class="form-date" v-model="searchItem.startDate"></b-form-input> ~
+          <b-form-input type="date" class="form-date" v-model="searchItem.endDate"></b-form-input>
 
           <b-button class="btn-day" @click="onCalendar('today')">오늘</b-button>
           <b-button class="btn-day" @click="onCalendar(7, 'days')">7일</b-button>
@@ -157,27 +161,17 @@
     data (){
       return {
         fields: {
-          pid: {label: 'PID'},
-          cid: {label: 'CID'},
-          content: {label: 'Content', 'class': 'text-left'},
-          genre: {label: 'Genre'},
-          serviceType: {label: 'Service Type'},
-          fileSize: {label: 'Total_file_size', 'class': 'text-right'},
-          createDate: {label: '요청일시'},
-          modifyDate: {label: '처리일시'},
-          status: {label: '상태'}
+          processId: {label: 'PID'},
+          contentId: {label: 'CID'},
+          contentName: {label: 'Content', 'class': 'text-left'},
+          contentGenreName: {label: 'Genre'},
+          contentServiceTypeCode: {label: 'Service Type'},
+          contentTotalFileSize: {label: 'Total_file_size', 'class': 'text-right'},
+          processBeginDatetime: {label: '요청일시'},
+          processEndDatetime: {label: '처리일시'},
+          processStateCodeName: {label: '상태'}
         },
-        items: [{
-          pid: 123,
-          cid: 456,
-          content: '스파이더 맨',
-          genre: '영화',
-          serviceType: 'CMS',
-          fileSize: '200 MB',
-          createDate: '2018-05-21 11:00:32',
-          modifyDate: '2018-05-21 11:00:32',
-          status: '성'
-        }],
+        items: [],
         pageInfo: {
           page: 1,
           size: 10,
@@ -189,69 +183,60 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'content',
-          searchKeyword: null,
+          searchWordTypeCode: 'CT',
+          searchWord: null,
           serviceTypeCode: null,
           genreCode: null,
-          statusCode: null,
-          searchDateType: 'createDate',
-          searchDateFrom: null,
-          searchDateTo: null
+          processStateCode: null,
+          periodTypeCode: 'BEGIN',
+          startDate: null,
+          endDate: null
         },
         code: {
-          searchType: [{
-            code: 'content',
+          searchWordTypeCode: [{
+            code: 'CT',
             codeName: 'Content'
           },{
-            code: 'pid',
+            code: 'P',
             codeName: 'PID'
           },{
-            code: 'cid',
+            code: 'C',
             codeName: 'CID'
           }],
-          searchDateType: [{
-            code: 'createDate',
-            codeName: '등록일'
+          periodTypeCode: [{
+            code: 'BEGIN',
+            codeName: '요청일자'
           },{
-            code: 'modifyDate',
-            codeName: '수정일'
+            code: 'END',
+            codeName: '처리일자'
           }],
-          serviceTypeCode: [{
-            code: 'SERVICE_01',
-            codeName: 'VOD'
-          }],
-          genreCode: [{
-            code: 'GENRE_01',
-            codeName: '영화'
-          }],
-          statusCode: [{
-            code: 'STATUS_01',
-            codeName: '진행중'
-          }]
+          serviceTypeCode: [],
+          genreCode: [],
+          processStateCode: []
         },
         isLoad: {
-          serviceTypeCode: false,
-          genreCode: false,
-          statusCode: false
+          serviceTypeCode: true,
+          genreCode: true,
+          processStateCode: true
         }
       }
     },
 
     computed: {
-      searchType: {
+      searchWordTypeCode: {
         get () {
-          return this.code.searchType.find(obj => obj.code === this.searchItem.searchType) || null;
+          return this.code.searchWordTypeCode.find(obj => obj.code === this.searchItem.searchWordTypeCode) || null;
         },
         set (newValue) {
-          this.searchItem.searchType = newValue !== null ? newValue.code : null;
+          this.searchItem.searchWordTypeCode = newValue !== null ? newValue.code : null;
         }
       },
-      searchDateType: {
+      periodTypeCode: {
         get () {
-          return this.code.searchDateType.find(obj => obj.code === this.searchItem.searchDateType) || null;
+          return this.code.periodTypeCode.find(obj => obj.code === this.searchItem.periodTypeCode) || null;
         },
         set (newValue) {
-          this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
+          this.searchItem.periodTypeCode = newValue !== null ? newValue.code : null;
         }
       },
       serviceTypeCode: {
@@ -270,26 +255,35 @@
           this.searchItem.genreCode = newValue !== null ? newValue.code : null;
         }
       },
-      statusCode: {
+      processStateCode: {
         get () {
-          return this.code.statusCode.find(obj => obj.code === this.searchItem.statusCode) || null;
+          return this.code.processStateCode.find(obj => obj.code === this.searchItem.processStateCode) || null;
         },
         set (newValue) {
-          this.searchItem.statusCode = newValue !== null ? newValue.code : null;
+          this.searchItem.processStateCode = newValue !== null ? newValue.code : null;
         }
       }
     },
 
     created (){
-      // Preload List
-      // this.fetchList();
+      // Purge List
+      this.fetchList();
+
+      // State Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'PROCESS_STATE' }
+        })
+        .then((res) => {
+          this.isLoad.processStateCode = false;
+          this.code.processStateCode = res.data.items;
+        });
     },
 
     methods: {
       details (item) {
         this.$router.push({
           name: 'Purge 상세',
-          params: { id: item.pid }
+          params: { id: item.processId }
         })
       },
 
@@ -300,7 +294,7 @@
           q: this.queryParams
         };
 
-        this.$https.get('/serviceprocess', {...defaultParams, ...params})
+        this.$https.get('/contentprocess/purges', {...defaultParams, ...params})
           .then((res) => {
             this.items = res.data.items;
             this.pageInfo = res.data.pageInfo;
@@ -328,7 +322,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchWordTypeCode'){
-            this.searchItem[key] = 'P';
+            this.searchItem[key] = 'CT';
           } else if (key === 'periodTypeCode') {
             this.searchItem[key] = 'BEGIN';
           } else {
@@ -349,3 +343,4 @@
     }
   }
 </script>
+

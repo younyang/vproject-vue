@@ -17,7 +17,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="123"
+            :value="items.processId"
             type="text"
             plaintext
           ></b-form-input>
@@ -25,11 +25,11 @@
 
         <!-- CID -->
         <b-form-fieldset
-          label="TID"
+          label="CID"
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="456"
+            :value="items.contentId"
             type="text"
             plaintext
           ></b-form-input>
@@ -41,7 +41,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="스파이더 맨"
+            :value="items.contentName"
             type="text"
             plaintext
           ></b-form-input>
@@ -53,7 +53,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="영화"
+            :value="items.contentGenreName"
             type="text"
             plaintext
           ></b-form-input>
@@ -64,11 +64,16 @@
           label="File Info"
           :label-cols="3"
           :horizontal="true">
-          <b-form-input
-            value=""
-            type="text"
-            plaintext
-          ></b-form-input>
+
+          <b-table
+            striped
+            bordered
+            show-empty
+            :items="items.fileList"
+            :fields="fields"
+          >
+          </b-table>
+
         </b-form-fieldset>
 
         <!-- Total_file_size -->
@@ -77,10 +82,12 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="200 MB"
+            :value="items.contentTotalFileSize"
             type="text"
+            class="inline"
+            style="width:60px"
             plaintext
-          ></b-form-input>
+          ></b-form-input> MB
         </b-form-fieldset>
 
         <!-- 요청일시 -->
@@ -89,7 +96,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="2018-05-21 10:00:32"
+            :value="items.processBeginDatetime"
             type="text"
             plaintext
           ></b-form-input>
@@ -101,7 +108,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="2018-05-21 10:00:32"
+            :value="items.processEndDatetime"
             type="text"
             plaintext
           ></b-form-input>
@@ -113,7 +120,7 @@
           :label-cols="3"
           :horizontal="true">
           <b-form-input
-            value="성공"
+            :value="items.processStateCodeName"
             type="text"
             plaintext
           ></b-form-input>
@@ -136,17 +143,36 @@
     data (){
       return {
         items: {
+          processId: null,
+          contentId: null,
+          contentName: null,
+          contentGenreName: null,
+          contentServiceTypeCode: null,
+          fileList: [{
+            contentFilePath: null,
+            contentFileName: null,
+            contentFileSize: null
+          }],
+          contentTotalFileSize: null,
+          processBeginDatetime: null,
+          processEndDatetime: null,
+          processStateCodeName: null,
+        },
+
+        fields: {
+          contentFilePath: {label: 'File path', 'class': 'text-left'},
+          contentFileName: {label: 'File name', 'class': 'text-left'},
+          contentFileSize: {label: 'File size', 'class': 'text-right'},
         }
       }
     },
 
-    computed: {
-    },
-
     created (){
-    },
-
-    methods: {
+      // Detail Data
+      this.$https.get(`/contentprocess/purges/${this.id}`)
+        .then((res) => {
+          this.items = { ...res.data.items };
+        });
     }
   }
 </script>
