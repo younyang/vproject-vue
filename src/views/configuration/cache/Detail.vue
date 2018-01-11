@@ -83,16 +83,14 @@
                 v-model="row.item.band1UseYn"
                 @change="onChecked(row.item, '1')"
               ></b-form-checkbox>
-              <b-form-input
-                v-model="row.item.bandwidth1"
-                type="number"
-                min="0"
-                size="sm"
-                class="inline"
-                style="width:80px"
+              <cleave
+                class="form-control"
+                style="width: 80px;"
+                v-model.number="row.item.bandwidth1"
+                :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
                 :disabled="!row.item.band1UseYn"
-              ></b-form-input>
-              GB 제한
+                @input="setDefault(row.item, 'bandwidth1')"
+              ></cleave> GB 제한
             </span>
             <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
           </template>
@@ -104,16 +102,14 @@
                 :disabled="!items.setApplyYn"
                 @change="onChecked(row.item, '2')"
               ></b-form-checkbox>
-              <b-form-input
-                v-model="row.item.bandwidth2"
-                type="number"
-                min="0"
-                size="sm"
-                class="inline"
-                style="width:80px"
+              <cleave
+                class="form-control"
+                style="width: 80px;"
+                v-model.number="row.item.bandwidth2"
+                :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
                 :disabled="!row.item.band2UseYn"
-              ></b-form-input>
-              GB 제한
+                @input="setDefault(row.item, 'bandwidth2')"
+              ></cleave> GB 제한
             </span>
             <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
           </template>
@@ -326,11 +322,11 @@
           this.items.cacheThrottlingCases.map(({ cacheThrottlingComps }) => {
             return {
               bandwidth1: cacheThrottlingComps
-                .map(({bandwidth1}) => bandwidth1)
-                .reduce((p, n) => parseInt(p) + parseInt(n)),
+                .map(({bandwidth1}) => bandwidth1 !== '' ? bandwidth1 : 0)
+                .reduce((p, n) => p + n),
               bandwidth2: cacheThrottlingComps
-                .map(({bandwidth2}) => bandwidth2)
-                .reduce((p, n) => parseInt(p) + parseInt(n))
+                .map(({bandwidth2}) => bandwidth2 !== '' ? bandwidth2 : 0)
+                .reduce((p, n) => p + n)
             }
           }) : [{ bandwidth1: 0, bandwidth2: 0 }];
 
@@ -385,8 +381,8 @@
           const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
             obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
               serviceTypeCode,
-              bandwidth1: parseInt(bandwidth1),
-              bandwidth2: parseInt(bandwidth2)
+              bandwidth1,
+              bandwidth2
             }))
             : [];
           return {
@@ -473,6 +469,10 @@
             cacheThrottlingComps
           }
         });
+      },
+
+      setDefault (item, key) {
+        item[key] = item[key] !== '' ? parseInt(item[key]) : 0;
       },
 
       getHistoryLink (rowId, caseSeq){

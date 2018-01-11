@@ -14,13 +14,13 @@
 
             <template slot="expireTime" scope="row">
               <span v-if="row.item.isEdit">
-                <b-form-input
-                v-model="row.item.expireTime"
-                type="text"
-                size="sm"
-                class="inline"
-                style="width:60px"
-                ></b-form-input> 초
+                <cleave
+                  class="form-control"
+                  style="width: 60px;"
+                  v-model="row.item.expireTime"
+                  :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+                  @input="setDefault(row.item, 'expireTime')"
+                ></cleave> 초
               </span>
               <span v-else>{{ row.value }} 초</span>
             </template>
@@ -44,12 +44,12 @@
 
             <template slot="action" scope="row">
               <span v-if="row.item.isEdit">
-                <b-button type="button" size="sm" variant="danger" @click="onView(row)">취소</b-button>
-                <b-button type="button" size="sm" variant="primary" @click="onSubmit(row)">저장</b-button>
+                <b-button type="button" variant="danger" @click="onView(row)">취소</b-button>
+                <b-button type="button" variant="primary" @click="onSubmit(row)">저장</b-button>
               </span>
               <span v-else>
-                <b-button type="button" size="sm" variant="outline-primary" @click="showHistory(row)">이력</b-button>
-                <b-button type="button" size="sm" variant="primary" @click="onEdit(row)">수정</b-button>
+                <b-button type="button" variant="outline-primary" @click="showHistory(row)">이력</b-button>
+                <b-button type="button" variant="primary" @click="onEdit(row)">수정</b-button>
               </span>
             </template>
           </b-table>
@@ -76,7 +76,7 @@
       </section>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
   </div>
@@ -101,7 +101,7 @@
         originItems: [],
         history: {
           fields: {
-            createId: {label: '등록/수정자', 'class': 'text-left'},
+            modifyId: {label: '등록/수정자', 'class': 'text-left'},
             histBeginDateTime: {label: '등록/수정일시'},
             expireTime: {label: 'ExpireTime', 'class': 'text-right'},
             bypassYn: { label: 'byPass'}
@@ -152,6 +152,10 @@
             console.log(error);
             this.onView(row);
           })
+      },
+
+      setDefault (item, key) {
+        item[key] = item[key] !== '' ? parseInt(item[key]) : 0;
       },
 
       showHistory (row) {

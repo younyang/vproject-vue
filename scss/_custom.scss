@@ -209,6 +209,9 @@ i.require {
 .form-control {
   height: 30px;
   border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.825rem;
+  line-height: 1.5;
   border-color: $border-color;
 }
 
@@ -417,6 +420,11 @@ i.require {
   @include text-emphasis-variant('.table-text-#{$color}', $value);
 }
 .table {
+  .form-control,
+  .multiselect {
+    display: inline-block;
+  }
+
   tfoot .warning {
     font-size: 0.5rem;
     font-weight: normal;
