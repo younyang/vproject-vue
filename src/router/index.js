@@ -93,11 +93,17 @@ export default new Router({
               path: 'bucket',
               name: 'Bucket 관리',
               component: lazyLoading('services/bucket', true)
-            },{
+            },
+            {
+              path: 'bucket/create',
+              name: 'Bucket 등록',
+              component: lazyLoading('services/bucket/BucketCreate')
+            },
+            {
               path: 'bucket/:id',
               name: 'Bucket 상세',
               props: true,
-              component: lazyLoading('services/bucket/Detail')
+              component: lazyLoading('services/bucket/BucketDetail')
             }
           ]
         },

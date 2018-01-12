@@ -87,7 +87,7 @@
 
 
     <section class="board-btn">
-      <b-button type="button" variant="primary">
+      <b-button type="button" variant="primary" :to="{ name: 'Bucket 등록' }">
         등록
       </b-button>
     </section>
