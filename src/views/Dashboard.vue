@@ -3,24 +3,25 @@
     <div class="dashHeader d-flex justify-content-between">
       <div class="form-inline">
         <multiselect
-          class="inline"
+          class="inline noEmpty select-temp"
           v-model="templateType"
           :allowEmpty="false"
           :showLabels="false"
           :searchable="false"
           :options="code.templateType"
         ></multiselect>
-        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="icon-pencil"></i></b-button>
-        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="fa fa-plus"></i></b-button>
-        <b-button type="button" variant="primary" class="ml-1" @click=""><i class="icon-grid"></i></b-button>
+        <b-button type="button" class="only-icon" v-b-tooltip.hover title="Add Widget"><i class="fa fa-th-large"></i></b-button>
+        <b-button type="button" class="only-icon" v-b-tooltip.hover title="Add Template"><i class="fa fa-plus"></i></b-button>
+        <b-button type="button" class="only-icon" v-b-tooltip.hover title="Edit Template"><i class="fa fa-cog"></i></b-button>
       </div>
       <div>
         <c-switch
           type="text"
-          variant="secondary-outline"
-          on="Light"
-          off="Dark"
-          v-model="theme"
+          class="v-switch dash"
+          on="Dark"
+          off="Light"
+          v-model="darkTheme"
+          @change="onThemeChange"
           :pill="true"
         ></c-switch>
       </div>
@@ -37,14 +38,12 @@
         <div class="card dash-box">
           <div class="card-header">
             Edge Data Transfer
-            <div class="card-actions">
-              <b-button size="sm" class="btn-minimize" @click="onEditWidget('edge')">
+            <div class="card-buttons">
+              <b-button class="only-icon" v-b-tooltip.hover title="Edit" @click="onEditWidget('edge')">
                 <i class="fa fa-pencil"></i>
-                <span class="sr-only">Edit</span>
               </b-button>
-              <b-button size="sm" class="btn-minimize">
-                <i class="fa fa-close"></i>
-                <span class="sr-only">Delete</span>
+              <b-button class="only-icon" v-b-tooltip.hover title="Delete">
+                <i class="fa fa-times"></i>
               </b-button>
             </div>
           </div>
@@ -59,14 +58,12 @@
         <div class="card dash-box">
           <div class="card-header">
             지역별 Data Transfer 현황
-            <div class="card-actions">
-              <b-button size="sm" class="btn-minimize">
+            <div class="card-buttons">
+              <b-button class="only-icon" v-b-tooltip.hover title="Edit" @click="onEditWidget('map')">
                 <i class="fa fa-pencil"></i>
-                <span class="sr-only">Edit</span>
               </b-button>
-              <b-button size="sm" class="btn-minimize">
-                <i class="fa fa-close"></i>
-                <span class="sr-only">Delete</span>
+              <b-button class="only-icon" v-b-tooltip.hover title="Delete">
+                <i class="fa fa-times"></i>
               </b-button>
             </div>
           </div>
@@ -81,14 +78,12 @@
         <div class="card dash-box">
           <div class="card-header">
             Cache Status
-            <div class="card-actions">
-              <b-button size="sm" class="btn-minimize" @click="onEditWidget('cache')">
+            <div class="card-buttons">
+              <b-button class="only-icon" v-b-tooltip.hover title="Edit" @click="onEditWidget('cache')">
                 <i class="fa fa-pencil"></i>
-                <span class="sr-only">Edit</span>
               </b-button>
-              <b-button size="sm" class="btn-minimize">
-                <i class="fa fa-close"></i>
-                <span class="sr-only">Delete</span>
+              <b-button class="only-icon" v-b-tooltip.hover title="Delete">
+                <i class="fa fa-times"></i>
               </b-button>
             </div>
           </div>
@@ -103,14 +98,12 @@
         <div class="card dash-box">
           <div class="card-header">
             Service Type 별 Request
-            <div class="card-actions">
-              <b-button size="sm" class="btn-minimize" @click="onEditWidget('service')">
+            <div class="card-buttons">
+              <b-button class="only-icon" v-b-tooltip.hover title="Edit" @click="onEditWidget('service')">
                 <i class="fa fa-pencil"></i>
-                <span class="sr-only">Edit</span>
               </b-button>
-              <b-button size="sm" class="btn-minimize">
-                <i class="fa fa-close"></i>
-                <span class="sr-only">Delete</span>
+              <b-button class="only-icon" v-b-tooltip.hover title="Delete">
+                <i class="fa fa-times"></i>
               </b-button>
             </div>
           </div>
@@ -125,14 +118,12 @@
         <div class="card dash-box">
           <div class="card-header">
             Request Count
-            <div class="card-actions">
-              <b-button size="sm" class="btn-minimize" @click="onEditWidget('request')">
+            <div class="card-buttons">
+              <b-button class="only-icon" v-b-tooltip.hover title="Edit" @click="onEditWidget('request')">
                 <i class="fa fa-pencil"></i>
-                <span class="sr-only">Edit</span>
               </b-button>
-              <b-button size="sm" class="btn-minimize">
-                <i class="fa fa-close"></i>
-                <span class="sr-only">Delete</span>
+              <b-button class="only-icon" v-b-tooltip.hover title="Delete">
+                <i class="fa fa-times"></i>
               </b-button>
             </div>
           </div>
@@ -306,7 +297,7 @@
 
     data () {
       return {
-        theme: true,
+        darkTheme: true,
         templateType: 'Template 1',
         isModalWidget: false,
         code: {
@@ -476,11 +467,11 @@
           }
         },
         gridSize: {
-          w: 100,
-          h: 100
+          w: 98,
+          h: 98
         },
         bubbleUp: false,
-        margin: 7,
+        margin: 11,
         boxCount: 4,
         layout: [
           {
@@ -693,6 +684,7 @@
     },
 
     created () {
+      this.onThemeChange(this.darkTheme);
       Object.keys(this.widget).forEach(key => {
         this.fetchData(key);
       })
@@ -894,51 +886,16 @@
 
       onSubmitWidget (){
 
+      },
+
+      onThemeChange (value){
+        const $body = document.querySelector('body.app');
+        if (value){
+          $body.classList.add('dark')
+        }else{
+          $body.classList.remove('dark')
+        }
       }
     }
   }
 </script>
-
-<style>
-  .dash-box {
-    width: 100%;
-    height: 100%;
-  }
-  .leaflet-container {
-    background: #f0f0f0
-  }
-  .map-box {
-    min-height: 587px;
-  }
-
-  .map-box .info {
-    padding: 6px 8px;
-    background: #fff;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-  }
-  .map-box .info h4 {
-    margin: 0 0 5px;
-    color: #777;
-  }
-  .map-box .legend {
-    text-align: left;
-    line-height: 18px;
-    color: #555;
-  }
-  .map-box .legend i {
-    width: 18px;
-    height: 18px;
-    float: left;
-    margin-right: 8px;
-    opacity: 0.7;
-  }
-
-
-  .dashHeader {
-    position: relative;
-    z-index: 100;
-    margin-bottom: 15px;
-  }
-</style>

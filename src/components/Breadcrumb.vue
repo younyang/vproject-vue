@@ -1,5 +1,5 @@
 <template>
-  <ol class="breadcrumb">
+  <ol class="breadcrumb" v-if="$route.name !== 'Dashboard'">
     <li class="breadcrumb-item" v-for="(item, index) in list"><span class="active" v-if="isLast(index)">{{ showName(item) }}</span>
       <router-link :to="getPath(item.path)" v-else>{{ showName(item) }}</router-link>
     </li>
@@ -15,6 +15,7 @@ export default {
       default: () => []
     }
   },
+
   methods: {
     isLast (index) {
       return index === this.list.length - 1
