@@ -108,12 +108,10 @@
 
 <script>
   import cSwitch from '@/components/Switch'
-  import FormSelect from "bootstrap-vue/src/components/form-select/form-select";
 
   export default {
     name: "bucket",
     components: {
-      FormSelect,
       cSwitch
     },
 

@@ -1,20 +1,16 @@
 <template>
   <div class="animated fadeIn">
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
         기본정보
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <div class="formView">
         <!-- PID -->
         <b-form-fieldset
           label="PID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="id"
@@ -26,7 +22,6 @@
         <!-- TID -->
         <b-form-fieldset
           label="TID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.taskIds"
@@ -38,7 +33,6 @@
         <!-- Process -->
         <b-form-fieldset
           label="Process"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processSectionCodeName"
@@ -50,7 +44,6 @@
         <!-- 상태 -->
         <b-form-fieldset
           label="상태"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processStateCodeName"
@@ -62,7 +55,6 @@
         <!-- 시작 -->
         <b-form-fieldset
           label="시작"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processBeginDatetime"
@@ -74,7 +66,6 @@
         <!-- 종료 -->
         <b-form-fieldset
           label="종료"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processEndDatetime"
@@ -82,212 +73,190 @@
             plaintext
           ></b-form-input>
         </b-form-fieldset>
-      </b-card>
+      </div>
     </b-collapse>
 
     <!-- 상세 -->
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.detail
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.detail>
+        <i class="fa"></i>
         상세
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="detail" visible>
+      <b-card class="dashed mb-0">
 
-      <b-card>
-        <div class="d-flex justify-content-center">
-          <!-- Process Box Block -->
+        <!-- Process -->
+        <div class="process-group">
           <div
-            class="processBox"
+            class="process-box"
             v-for="(item, index) in items.processTaskList"
             @click="onClickProcess(item.interlockTargetCode, index)"
           >
             <div :class="statusClass(item.taskStateCode)">
               <!-- Title -->
               <h5>{{ item.interlockTargetCodeName }}</h5>
-
               <!-- progress icon -->
-              <i v-if="items.taskStateCode === 'TASK_STATE_02'" class="fa fa-cog fa-spin"></i>
-
+              <i class="fa" :class="statusClass(item.taskStateCode)"></i>
               <!-- Activity Count -->
               <div class="activeCount" v-if="item.interlockTargetCodeName !== 'DNS'">
-                <span>{{ item.interlockSuccessQty }}</span> /
+                <span class="success">{{ item.interlockSuccessQty }}</span> /
                 <span>{{ item.interlockTotalQty }}</span>
               </div>
             </div>
           </div>
         </div>
-      </b-card>
 
+        <!-- Content -->
+        <div class="process-content">
+          <h5><i class="fa fa-circle"></i> {{ activeItems.processTask.interlockTargetCodeName }}</h5>
 
-      <b-card>
-        <div slot="header">
-          <i class='fa fa-angle-right'></i> {{ activeItems.processTask.interlockTargetCodeName }}
-        </div>
-        <div class="timeInfo">
-          <span>시작: {{ activeItems.processTask.taskBeginDatetime }}</span> /
-          <span class="ml-2">종료: {{ activeItems.processTask.taskEndDatetime }}</span>
-        </div>
+          <div class="timeInfo">
+            <span class="mr-2"><strong>시작</strong>: {{ activeItems.processTask.taskBeginDatetime }}</span> /
+            <span class="ml-2"><strong>종료</strong>: {{ activeItems.processTask.taskEndDatetime }}</span>
+            <b-button
+              v-if="activeItems.processTask.taskStateCode === 'TASK_STATE_04'"
+              variant="primary"
+              @click="onTaskReset(activeItems.processTask.taskId)"
+              class="ml-2">재실행</b-button>
+          </div>
 
-        <div class="searchInfo" v-if="taskName === 'E'">
-          <b-tabs
-            v-model="edgeTabIndex"
-            v-if="isEdgeSummary"
-            @input="fetchEdge(activeItems.processTask.taskId)"
-          >
-            <b-tab title="summary" active>
-              <section class="board">
-                <b-table
-                  striped
-                  bordered
-                  hover
-                  show-empty
-                  :items="summaryItems"
-                  :fields="summaryFields"
-                >
-                </b-table>
-              </section>
-            </b-tab>
-            <b-tab title="detail">
-              <div class="row searchBox">
-                <div class="col-3">
-                  <b-form-fieldset
-                    label="Service"
-                    :label-cols="5"
-                    :horizontal="true">
-                    <multiselect
-                      v-model="serviceId"
-                      :id="`taskSelect_${activeItems.processTask.taskId}`"
-                      :showLabels="false"
-                      :searchable="false"
-                      :options="code.serviceId"
-                      class="sm"
-                      label="serviceName"
-                      track-by="serviceId"
-                      placeholder="전체"
-                      @input="onChangeService"
-                    ></multiselect>
-                  </b-form-fieldset>
-                </div>
-                <div class="col-3">
-                  <b-form-fieldset
-                    label="Service Type"
-                    :label-cols="7"
-                    :horizontal="true">
-                    <multiselect
-                      v-model="serviceTypeCode"
-                      :id="`taskSelect_${activeItems.processTask.taskId}`"
-                      :showLabels="false"
-                      :searchable="false"
-                      :options="code.serviceTypeCode"
-                      class="inline sm"
-                      label="serviceTypeCodeName"
-                      track-by="serviceTypeCode"
-                      placeholder="전체"
-                      @input="onChangeServiceType"
-                    ></multiselect>
-                  </b-form-fieldset>
-                </div>
-                <div class="col-3">
-                  <b-form-fieldset
-                    label="상태"
-                    :label-cols="3"
-                    :horizontal="true">
-                    <multiselect
-                      :id="`taskSelect_${activeItems.processTask.taskId}`"
-                      :showLabels="false"
-                      :searchable="false"
-                      :options="code.taskStateCode"
-                      :loading="isLoad.taskStateCode"
-                      class="inline sm"
-                      label="codeName"
-                      track-by="code"
-                      placeholder="전체"
-                      @input="onChangeStatus"
-                    ></multiselect>
-                  </b-form-fieldset>
-                </div>
-                <div class="col-3">
-                  <b-button
-                    type="button"
-                    size="sm"
-                    variant="outline-secondary"
-                    @click="fetchActivity(activeItems.processTask.taskId, searchItem)"
-                  >검색</b-button>
-                </div>
-              </div>
-
-              <div class="detailStatus d-flex" v-for="(detail, i) in detailItems">
-                <div class="pop">
-                  <h6>{{ detail.popName }}</h6>
-                  <strong>{{ detail.popEndQty }}</strong> /
-                  <span>{{ detail.popTotalQty }}</span>
-                </div>
-                <div class="statusBoxWrap d-flex flex-wrap">
-                  <div
-                    class="statusBox"
-                    :class="statusClass(status.taskActivityStateCode)"
-                    v-for="(status, i) in detail.activityEdgePopList"
-                  >
-                    <h6>{{ status.hostName }}</h6>
-                  </div>
-                </div>
-              </div>
-            </b-tab>
-          </b-tabs>
-        </div>
-
-        <div v-if="taskName === 'HR' || taskName === 'LR'">
+          <!-- Task -->
           <div class="searchInfo">
-            <div class="row searchBox">
-              <div class="col-3">
-                <b-form-fieldset
-                  label="상태"
-                  :label-cols="3"
-                  :horizontal="true">
+            <!-- Edge(Summary) -->
+            <b-tabs
+              pills
+              v-model="edgeTabIndex"
+              v-if="taskName === 'E' && isEdgeSummary"
+              @input="fetchEdge(activeItems.processTask.taskId)"
+            >
+              <!-- Edge(Summary) > List -->
+              <b-tab title="Summary" active>
+                <section class="board">
+                  <b-table
+                    show-empty
+                    :items="summaryItems"
+                    :fields="summaryFields"
+                  >
+                  </b-table>
+                </section>
+              </b-tab>
+
+              <!-- Edge(Summary) > Detail -->
+              <b-tab title="Detail">
+                <b-form class="searchBox" inline>
+                  <label>Service</label>
                   <multiselect
+                    v-model="serviceId"
                     :id="`taskSelect_${activeItems.processTask.taskId}`"
                     :showLabels="false"
                     :searchable="false"
-                    :options="code.taskStateCode"
-                    class="inline sm"
+                    :options="code.serviceId"
+                    class="inline"
+                    label="serviceName"
+                    track-by="serviceId"
+                    placeholder="전체"
+                  ></multiselect>
+
+                  <label>Service Type</label>
+                  <multiselect
+                    v-model="serviceTypeCode"
+                    :id="`taskSelect_${activeItems.processTask.taskId}`"
+                    :showLabels="false"
+                    :searchable="false"
+                    :options="code.serviceTypeCode"
+                    class="inline"
+                    label="serviceTypeCodeName"
+                    track-by="serviceTypeCode"
+                    placeholder="전체"
+                  ></multiselect>
+
+                  <label>상태</label>
+                  <multiselect
+                    v-model="taskActivityStateCode"
+                    :id="`taskSelect_${activeItems.processTask.taskId}`"
+                    :showLabels="false"
+                    :searchable="false"
+                    :options="code.taskActivityStateCode"
+                    class="inline"
                     label="codeName"
                     track-by="code"
                     placeholder="전체"
-                    @input="onChangeStatus"
                   ></multiselect>
-                </b-form-fieldset>
-              </div>
-              <div class="col-3">
-                <b-button
-                  type="button"
-                  size="sm"
-                  variant="outline-secondary"
-                  @click="fetchActivity(activeItems.processTask.taskId, { taskActivityStateCode: searchItem.taskActivityStateCode })"
-                >검색</b-button>
-              </div>
-            </div>
-          </div>
 
-          <div class="statusBoxWrap d-flex flex-wrap">
-            <div
-              class="statusBox"
-              :class="statusClass(active.taskActivityStateCode)"
-              v-for="(active, i) in activeItems.taskActivityList"
-            >
-              <h6>{{ active.popName }}</h6>
-              <span>{{ active.hostName }}</span>
+                  <div class="search-btn">
+                    <b-button type="button" variant="outline-secondary" @click="resetActivity(activeItems.processTask.taskId)"><i class="icon-reload"></i></b-button>
+                    <b-button type="button" variant="primary" @click="fetchActivity(activeItems.processTask.taskId, searchItem)"><i class="icon-magnifier"></i></b-button>
+                  </div>
+                </b-form>
+
+                <div class="detailStatus d-flex" v-for="(detail, i) in detailItems">
+                  <div class="pop">
+                    <h6>{{ detail.popName }}</h6>
+                    <strong>{{ detail.popEndQty }}</strong><span>/{{ detail.popTotalQty }}</span>
+                  </div>
+                  <div class="statusBoxWrap d-flex flex-wrap">
+                    <div
+                      class="statusBox"
+                      :class="statusClass(status.taskActivityStateCode)"
+                      v-for="(status, i) in detail.activityEdgePopList"
+                    >
+                      <h6>{{ status.hostName }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </b-tab>
+            </b-tabs>
+            <!--// Edge(Summary) -->
+
+            <!-- HR/LR -->
+            <div v-if="taskName === 'HR' || taskName === 'LR'">
+              <b-form class="searchBox" inline>
+                <label>상태</label>
+                <multiselect
+                  v-model="taskActivityStateCode"
+                  :id="`taskSelect_${activeItems.processTask.taskId}`"
+                  :showLabels="false"
+                  :searchable="false"
+                  :options="code.taskActivityStateCode"
+                  class="inline"
+                  label="codeName"
+                  track-by="code"
+                  placeholder="전체"
+                ></multiselect>
+
+                <div class="search-btn">
+                  <b-button type="button" variant="outline-secondary" @click="resetActivity(activeItems.processTask.taskId)"><i class="icon-reload"></i></b-button>
+                  <b-button
+                    type="button"
+                    variant="primary"
+                    @click="fetchActivity(activeItems.processTask.taskId, { taskActivityStateCode: searchItem.taskActivityStateCode })"
+                  ><i class="icon-magnifier"></i></b-button>
+                </div>
+              </b-form>
+
+              <div class="statusBoxWrap d-flex flex-wrap">
+                <div
+                  class="statusBox"
+                  :class="statusClass(active.taskActivityStateCode)"
+                  v-for="(active, i) in activeItems.taskActivityList"
+                >
+                  <div class="names">
+                    <h6>{{ active.popName }}</h6>
+                    <span>{{ active.hostName }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
+            <!--// HR/LR -->
+
           </div>
         </div>
       </b-card>
     </b-collapse>
 
     <div class="page-btn">
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Service Processing 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <b-button type="button" active-class="" variant="outline-secondary" :to="{ name: 'Service Processing 관리' }">목록</b-button>
     </div>
   </div>
 </template>
@@ -350,15 +319,12 @@
         edgeTabIndex: 0,
 
         code: {
-          taskStateCode: [],
           serviceId: [],
           serviceTypeCode: [],
+          taskActivityStateCode: []
         },
 
         queryParams: {},
-        isLoad: {
-          taskStateCode: false
-        },
         isEdit: false
       }
     },
@@ -379,6 +345,14 @@
         set (newValue) {
           this.searchItem.serviceTypeCode = newValue !== null ? newValue.serviceTypeCode : null;
         }
+      },
+      taskActivityStateCode: {
+        get () {
+          return this.code.taskActivityStateCode.find(obj => obj.code === this.searchItem.taskActivityStateCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.taskActivityStateCode = newValue !== null ? newValue.code : null;
+        }
       }
     },
 
@@ -388,19 +362,13 @@
           q: { groupCode: 'TASK_ACTIVE_STATE' }
         })
         .then((res) => {
-          this.isLoad.taskStateCode = false;
-          this.code.taskStateCode = res.data.items;
+          this.code.taskActivityStateCode = res.data.items;
         });
 
       // Detail Data
       this.$https.get(`/serviceprocess/${this.id}`)
         .then((res) => {
           this.items = { ...this.items, ...res.data.items };
-          this.items.processTaskList = this.items.processTaskList.map(obj => ({
-            ...obj,
-            taskStateCode: this.code.taskStateCode.find(({ code }) => code === obj.taskStateCode) || null
-          }));
-
           this.taskList = this.items.taskIds.split(',');
           this.activeStep(0);
         });
@@ -423,6 +391,13 @@
               this.activeItems.taskActivityList : []
             this.setActiveItems();
           });
+      },
+
+      resetActivity (taskId){
+        Object.keys(this.searchItem).forEach((key) => {
+          this.searchItem[key] = null;
+        });
+        this.fetchActivity(taskId, this.searchItem);
       },
 
       fetchEdge (taskId){
@@ -457,13 +432,16 @@
         const typefields = {};
 
         typelist.forEach((obj, i) => {
-          typefields[`typeCode_${i}`] = obj.serviceTypeCodeName;
+          typefields[`typeCode_${i}`] = {
+            label: obj.serviceTypeCodeName,
+            'class': 'text-right'
+          };
         });
 
         this.summaryFields = {
-          serviceName: {label: 'Service'},
+          serviceName: {label: 'Service', 'class':'text-left'},
           ...typefields,
-          serviceTotalQty: {label: 'Total'},
+          serviceTotalQty: {label: 'Total', 'class':'text-right'},
           serviceStateCodeName: {label: '상태'}
         };
 
@@ -496,74 +474,24 @@
 
       },
 
-      onChangeService (obj){
-        this.searchItem.serviceId = obj !== null ? obj.serviceId : null;
-      },
-
-      onChangeServiceType (obj){
-        this.searchItem.serviceTypeCode = obj !== null ? obj.serviceTypeCode : null;
-      },
-
-      onChangeStatus (obj, id){
-        this.searchItem.taskActivityStateCode = obj !== null ? obj.code : null;
-        if (!this.isEdgeSummary) {
-          const taskId = id.split('taskSelect_')[1];
-          const codeObj = obj !== null ? { taskActivityStateCode: obj.code } : {};
-          this.fetchActivity(taskId, codeObj);
-        }
+      onTaskReset (taskId){
+        this.$https.put(`/serviceprocess/${this.id}/tasks/${taskId}/retry`)
+          .then(() => {
+            this.$router.go(this.$router.currentRoute);
+          })
+          .catch(err => {
+            console.log(err);
+          })
       },
 
       statusClass (code) {
         const codeSplit = typeof code === 'string' ? code.split('STATE_')[1] : '';
-        return codeSplit === '01' ? ''
-          : codeSplit === '02' ? 'bg-primary'
-          : codeSplit === '03' ? 'bg-success'
-          : codeSplit === '03' ? 'bg-danger'
-          : 'bg-secondary';
+        return codeSplit === '01' ? 'st-ready'
+          : codeSplit === '02' ? 'st-process'
+          : codeSplit === '03' ? 'st-success'
+          : codeSplit === '04' ? 'st-danger'
+          : '';
       }
     }
   }
 </script>
-
-<style>
-  .timeInfo {
-
-  }
-  .detailStatus {
-    border: 1px solid #000;
-  }
-  .detailStatus .pop {
-    background: #ddd;
-    border-right: 1px solid #000;
-  }
-  .statusBoxWrap {
-    margin: 0 -10px;
-  }
-  .detailStatus .statusBoxWrap {
-    margin: 0;
-  }
-  .statusBox {
-    margin: 10px;
-    border: 1px solid #000;
-    padding: 15px;
-    text-align: center;
-  }
-  .statusBox > h6 {
-    font-size: 12px;
-  }
-  .statusBox > span {
-    font-size: 11px;
-  }
-  .processBox {
-    margin: 10px;
-    border: 1px solid #000;
-    text-align: center;
-    min-width: 100px;
-    background: #fff;
-  }
-  .processBox > div {
-    padding: 15px;
-    height: 100%;
-    cursor: pointer;
-  }
-</style>

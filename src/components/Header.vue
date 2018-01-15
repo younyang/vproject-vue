@@ -1,8 +1,7 @@
 <template>
   <header class="app-header navbar">
-    <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button" @click="mobileSidebarToggle">&#9776;</button>
     <b-link class="navbar-brand" to="/"><span class="sr-only">SK V Project</span></b-link>
-    <button class="navbar-toggler sidebar-toggler d-md-down-none" type="button" @click="sidebarMinimize">&#9776;</button>
+    <button class="navbar-toggler sidebar-toggler" type="button" @click="sidebarMinimize">&#9776;</button>
 
     <b-nav is-nav-bar class="ml-auto">
       <b-nav-item-dropdown right no-caret class="d-md-down-none">

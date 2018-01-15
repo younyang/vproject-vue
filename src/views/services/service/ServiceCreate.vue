@@ -1,11 +1,10 @@
 <template>
   <div class="animated fadeIn">
     <b-form>
-      <b-card>
+      <div class="formView">
         <!-- Account -->
         <b-form-fieldset
-          label="Account *"
-          :label-cols="3"
+          label="Account <i class='require'>*</i>"
           :horizontal="true">
           <multiselect
             v-model="accountId"
@@ -197,7 +196,7 @@
           <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">취소</b-button>
           <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
         </div>
-      </b-card>
+      </div>
     </b-form>
 
     <b-modal hide-footer title="Message" size="sm" v-model="isModalMessage" :class="state.serviceName ? 'modal-primary' : 'modal-danger'">

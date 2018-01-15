@@ -108,7 +108,6 @@ app-root {
   }
 }
 
-@include media-breakpoint-up(lg) {
   .sidebar-compact {
     .sidebar {
       flex: 0 0 $sidebar-compact-width;
@@ -170,7 +169,7 @@ app-root {
       }
     }
   }
-}
+
 
 //
 // Aside Menu
@@ -313,7 +312,7 @@ app-root {
 //
 // Mobile layout
 //
-
+/*
 @include media-breakpoint-down(md) {
 
   .app-header {
@@ -391,3 +390,4 @@ app-root {
     }
   }
 }
+*/

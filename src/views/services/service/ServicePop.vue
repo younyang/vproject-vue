@@ -31,7 +31,7 @@
     </b-collapse>
 
     <!-- 배포이력 -->
-    <div class="collapse-title">
+    <div class="collapse-title" v-if="false">
       <b-button
         variant="secondary"
         v-b-toggle.history
@@ -40,7 +40,7 @@
         <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" visible>
+    <b-collapse id="history" visible v-if="false">
       <b-card>
         <!-- 배포일시 -->
         <b-form-fieldset
@@ -89,7 +89,7 @@
 
     <div class="page-btn">
       <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">목록</b-button>
-      <b-button type="button" variant="primary" @click="isModalMessage = true">배포</b-button>
+      <b-button type="button" variant="primary" @click="isModalMessage = true" v-if="false">배포</b-button>
     </div>
 
 

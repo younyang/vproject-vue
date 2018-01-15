@@ -122,8 +122,6 @@
 
     <section class="board">
       <b-table
-        striped
-        bordered
         hover
         show-empty
         :items="items"
@@ -131,7 +129,7 @@
         @row-clicked="details"
       >
         <template slot="serviceTypeName" scope="row">
-          <span class="badge badge-pill badge-success" v-for="val in row.value">
+          <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
@@ -163,14 +161,10 @@
         class="mt-2"
       ></b-pagination>
     </section>
-
-
-
   </div>
 </template>
 
 <script>
-  import db from '@/firebaseInit'
   import moment from 'moment'
 
   export default {
@@ -183,7 +177,7 @@
         fields: {
           serviceId: {label: 'ID'},
           serviceName: {label: 'Service Name', 'class': 'text-left'},
-          serviceTypeName: {label: 'Service Type'},
+          serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
           accountName: {label: 'Account'},
           cnameUseYn: {label: 'CNAME'},
           sslCertUseYn: {label: 'SSL 인증서'},
