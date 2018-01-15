@@ -31,9 +31,10 @@ i, em {
   background-color: #1d2127;
   .navbar-brand {
     width: 207px;
+    height: 60px;
     border-right: 1px solid #2f3139;
     border-bottom: 0;
-    background-color: inherit;
+    background-color: transparent;
     background-size: auto auto;
   }
 }
@@ -43,6 +44,7 @@ i, em {
  */
 .sidebar-fixed .sidebar {
   width: 207px;
+  background: #1d2127;
   z-index: 1;
 
   .sidebar-nav {
@@ -51,6 +53,10 @@ i, em {
   }
   .nav {
     width: 207px;
+    .nav-item.nav-dropdown.open {
+      box-shadow: 0 1px #1a94d1 inset;
+      background: #006faa;
+    }
   }
 }
 .app-body .sidebar {
@@ -998,6 +1004,14 @@ body > .app {
 }
 body.dark > .app {
   background: #181a20;
+
+  .app-header.navbar {
+    border-bottom: 1px solid #2f3139;
+
+    .navbar-brand {
+    }
+  }
+
 
   .page-title {
     border-color: #2f3139;

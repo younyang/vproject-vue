@@ -92,7 +92,8 @@ export default {
           url: '/workflow/contPurge'
         }
       ]
-    },
+    }
+    /*
     {
       title: true,
       name: 'UI Component Sample',
@@ -117,5 +118,6 @@ export default {
       url: '/gridUI',
       icon: 'icon-grid'
     }
+    */
   ]
 }

@@ -39,7 +39,7 @@ export default new Router({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: lazyLoading('Dashboard')
+          component: lazyLoading('dashboard', true)
         },
         {
           path: 'service',

@@ -252,7 +252,7 @@
   import '@dattn/dnd-grid/dist/index.css'
   import L from 'leaflet'
 
-  const geojson = require('../../static/geo/ctprvn.json');
+  const geojson = require('../../../static/geo/ctprvn.json');
 
   const getMapColor = (d) => {
     return d > 9000 ? '#800026' :
@@ -297,7 +297,7 @@
 
     data () {
       return {
-        darkTheme: true,
+        darkTheme: false,
         templateType: 'Template 1',
         isModalWidget: false,
         code: {
@@ -688,6 +688,10 @@
       Object.keys(this.widget).forEach(key => {
         this.fetchData(key);
       })
+    },
+
+    beforeDestroy (){
+      this.onThemeChange(false);
     },
 
     methods: {
