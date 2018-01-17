@@ -15,16 +15,12 @@
             :options="code.searchType"
             placeholder="전체"
           ></multiselect>
-          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword"
-                        placeholder="Enter Search text"></b-form-input>
+          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
 
-      </div>
-
-      <div class="form-group">
         <b-form-fieldset
           label="Service Type"
-          class="..."
+          class="label-lg"
           :horizontal="true">
           <multiselect
             v-model="serviceTypeCode"
@@ -37,7 +33,9 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
+      </div>
 
+      <div class="form-group">
         <b-form-fieldset
           label="사용여부"
           style="width:60%"
@@ -50,7 +48,6 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
-
       </div>
 
       <div class="form-group">
