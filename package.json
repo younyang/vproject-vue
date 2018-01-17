@@ -23,15 +23,12 @@
     "moment": "^2.19.4",
     "simple-line-icons": "^2.4.1",
     "vue": "2.4.2",
-    "vue-chartjs": "2.8.2",
     "vue-choropleth": "0.0.4",
     "vue-cleave": "^1.2.2",
     "vue-cleave-component": "^1.0.1",
-    "vue-highcharts": "0.0.10",
     "vue-multiselect": "^2.0.8",
     "vue-router": "2.7.0",
-    "vuejs-datepicker": "^0.9.21",
-    "vuetable-2": "^1.7.1"
+    "vuejs-datepicker": "^0.9.21"
   },
   "devDependencies": {
     "autoprefixer": "7.1.3",

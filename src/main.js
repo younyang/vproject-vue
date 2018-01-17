@@ -6,13 +6,11 @@ import App from './App'
 import axios from 'axios'
 import router from './router'
 import Multiselect from 'vue-multiselect'
-import VueHighcharts from 'vue-highcharts'
 import Cleave from 'vue-cleave-component';
 import auth from './auth'
 
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
-Vue.use(VueHighcharts);
 Vue.use(Cleave);
 
 // axios instance
