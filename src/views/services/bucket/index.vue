@@ -77,8 +77,8 @@
         </b-form-fieldset>
       </div>
       <div class="search-btn">
-        <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
-        <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
+        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
       </div>
     </b-form>
 
@@ -91,16 +91,13 @@
 
     <section class="board">
       <b-table
-        striped
-        bordered
         hover
-        show-empty
         :items="items"
         :fields="fields"
         @row-clicked="details"
       >
         <template slot="serviceTypeName" scope="row">
-          <span class="badge badge-pill badge-success" v-for="val in row.value">
+          <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>

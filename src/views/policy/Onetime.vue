@@ -1,79 +1,78 @@
 <template>
   <div class="animated fadeIn">
-    <div class="row">
-      <div class="col">
-        <section class="board">
-          <b-table
-            striped
-            bordered
-            hover
-            show-empty
-            :items="items"
-            :fields="fields"
+    <section class="board">
+      <b-table
+        show-empty
+        :items="items"
+        :fields="fields"
+      >
+        <template slot="expireTime" scope="row">
+          <span v-if="row.item.isEdit">
+            <cleave
+              class="form-control"
+              style="width: 60px;"
+              v-model="row.item.expireTime"
+              :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+              @input="setDefault(row.item, 'expireTime')"
+            ></cleave> 초
+          </span>
+          <span v-else>{{ row.value }} 초</span>
+        </template>
+
+        <template slot="bypassYn" scope="row">
+          <c-switch
+            v-if="row.item.isEdit"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
+            v-model="row.item.bypassYn"
+          ></c-switch>
+          <span
+            v-else
+            class="badge ins"
+            :class="{'primary' : row.value }"
           >
+            {{ row.value ? '사용' : '미사용' }}
+          </span>
+        </template>
 
-            <template slot="expireTime" scope="row">
-              <span v-if="row.item.isEdit">
-                <cleave
-                  class="form-control"
-                  style="width: 60px;"
-                  v-model="row.item.expireTime"
-                  :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
-                  @input="setDefault(row.item, 'expireTime')"
-                ></cleave> 초
-              </span>
-              <span v-else>{{ row.value }} 초</span>
-            </template>
+        <template slot="action" scope="row">
+          <span v-if="row.item.isEdit">
+            <b-button type="button" variant="in-table" @click="onView(row)">취소</b-button>
+            <b-button type="button" variant="in-table" @click="onSubmit(row)">저장</b-button>
+          </span>
+          <span v-else>
+            <b-button type="button" variant="in-table" @click="showHistory(row)">이력</b-button>
+            <b-button type="button" variant="in-table" @click="onEdit(row)">수정</b-button>
+          </span>
+        </template>
+      </b-table>
+    </section>
 
-            <template slot="bypassYn" scope="row">
-              <c-switch
-                v-if="row.item.isEdit"
-                type="icon"
-                variant="success"
-                v-bind="{on: '\uf00c', off: '\uf00d'}"
-                :pill="true"
-                v-model="row.item.bypassYn"
-              ></c-switch>
-              <b-badge
-                v-else
-                pill
-                :variant="row.value ? 'success' : 'secondary'">
-                {{ row.value ? '사용' : '미사용' }}
-              </b-badge>
-            </template>
-
-            <template slot="action" scope="row">
-              <span v-if="row.item.isEdit">
-                <b-button type="button" variant="danger" @click="onView(row)">취소</b-button>
-                <b-button type="button" variant="primary" @click="onSubmit(row)">저장</b-button>
-              </span>
-              <span v-else>
-                <b-button type="button" variant="outline-primary" @click="showHistory(row)">이력</b-button>
-                <b-button type="button" variant="primary" @click="onEdit(row)">수정</b-button>
-              </span>
-            </template>
-          </b-table>
-        </section>
-
-      </div>
-    </div><!--/.row-->
 
     <!-- History Modal -->
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
-          hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="bypassYn" scope="row">
             {{ row.value ? '사용' : '미사용' }}
           </template>
         </b-table>
       </section>
+
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
 
       <div slot="modal-footer">
         <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
@@ -93,7 +92,7 @@
       return {
         fields: {
           popName: {label: 'PoP'},
-          expireTime: {label: 'ExpireTime *'},
+          expireTime: {label: 'ExpireTime<i class="require">*</i>'},
           bypassYn: {label: 'Bypass'},
           action: { label: '관리'}
         },
@@ -101,12 +100,17 @@
         originItems: [],
         history: {
           fields: {
-            modifyId: {label: '등록/수정자', 'class': 'text-left'},
+            createId: {label: '등록/수정자', 'class': 'text-left'},
             histBeginDateTime: {label: '등록/수정일시'},
             expireTime: {label: 'ExpireTime', 'class': 'text-right'},
             bypassYn: { label: 'byPass'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         isModalHistory: false
       }
@@ -163,6 +167,7 @@
         this.$https.get(`/policy/oneTimeUrl/hist/${row.item.popId}`)
           .then((res) => {
             this.history.items = res.data.items;
+            this.history.pageInfo.totalCount = res.data.items.length;
           });
       }
     }

@@ -14,19 +14,19 @@
         ></multiselect>
         <b-button
           type="button"
-          class="only-icon"
+          variant="only-icon"
           v-b-tooltip.hover
           :title="`Add Widget`"
         ><i class="fa fa-th-large"></i></b-button>
         <b-button
           type="button"
-          class="only-icon"
+          variant="only-icon"
           v-b-tooltip.hover
           :title="`Add Template`"
         ><i class="fa fa-plus"></i></b-button>
         <b-button
           type="button"
-          class="only-icon"
+          variant="only-icon"
           v-b-tooltip.hover
           :title="`Edit Template`"
         ><i class="fa fa-cog"></i></b-button>
@@ -63,21 +63,19 @@
             {{ title }}
             <div class="card-buttons">
               <!-- Chart Type -->
-              <b-button
-                class="only-icon"
-                style="padding: 0 6px"
-                v-for="(type, i) in types"
-                :key="i"
-                v-b-tooltip.hover
-                :title="type"
-                @click="onChangeWidget(wid, type)"
-              ><i class="fa" :class="getTypeIcon(type)"></i>
-              </b-button>
+              <b-form-radio-group
+                v-model="searchItems.q.chartType"
+                buttons
+                button-variant="only-icon"
+                :options="getTypeOptions(types)"
+                :name="`${wid}-radio`"
+                @change="onChangeWidget(wid)"
+              ></b-form-radio-group>
 
-              <b-button class="only-icon" v-b-tooltip.hover :title="`Edit`" @click="onEditWidget(wid)">
+              <b-button variant="only-icon" v-b-tooltip.hover :title="`Edit`" @click="onEditWidget(wid)">
                 <i class="fa fa-pencil"></i>
               </b-button>
-              <b-button class="only-icon" v-b-tooltip.hover :title="`Remove`" @click="onRemoveWidget(wid)">
+              <b-button variant="only-icon" v-b-tooltip.hover :title="`Remove`" @click="onRemoveWidget(wid)">
                 <i class="fa fa-times"></i>
               </b-button>
             </div>
@@ -510,6 +508,13 @@
         this.temp = gridSetting[`template${type}`];
       },
 
+      getTypeOptions (types = []){
+        return types.map(val => ({
+          value: val,
+          text: `<i class='fa ${this.getTypeIcon(val)}'></i>`
+        }));
+      },
+
       getTypeIcon (type){
         return type === 'LINE' ? 'fa-line-chart' :
           type === 'AREA' ? 'fa-area-chart' :
@@ -562,12 +567,8 @@
         this.isModalWidget = true;
       },
 
-      onChangeWidget (key, type) {
-        const findIndex = this.widget.findIndex(({ wid }) => wid === key);
-        const widget = this.widget[findIndex];
-        widget.searchItems.q.chartType = type;
-        this.widget.splice(findIndex, 1, widget);
-
+      onChangeWidget (key) {
+        const widget = this.widget.find(({ wid }) => wid === key);
         this.fetchData(widget);
       },
 

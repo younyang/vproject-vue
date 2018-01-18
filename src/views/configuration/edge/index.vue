@@ -123,8 +123,8 @@
         </b-form-fieldset>
       </div>
       <div class="search-btn">
-        <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
-        <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
+        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
       </div>
     </b-form>
 
@@ -140,8 +140,6 @@
 
     <section class="board">
       <b-table
-        striped
-        bordered
         hover
         show-empty
         :items="items"
@@ -185,8 +183,6 @@
     <b-modal size="lg" title="선택" v-model="isModalCreate">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="createList.items"
@@ -197,7 +193,7 @@
       </section>
 
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="secondary" @click="isModalCreate = false"><i class="fa fa-ban"></i> 취소</b-button>
+        <b-button type="button" variant="outline-secondary" @click="isModalCreate = false">취소</b-button>
       </div>
     </b-modal>
 
@@ -216,7 +212,7 @@
           ip: {label: 'IP', 'class': 'text-left'},
           hostName: {label: 'Host Name', 'class': 'text-left'},
           edgeRelayName: {label: '구분'},
-          serviceTypeName: {label: 'Service Type'},
+          serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
           edgeDomainName: {label: 'Domain'},
           popName: {label: 'PoP'},
           createDateTime: {label: '등록일'},

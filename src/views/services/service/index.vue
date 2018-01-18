@@ -105,8 +105,8 @@
         </b-form-fieldset>
       </div>
       <div class="search-btn">
-        <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
-        <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
+        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
       </div>
     </b-form>
 

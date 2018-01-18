@@ -48,7 +48,6 @@ i, em {
   width: 207px;
   background: #1d2127;
   border-right: 1px solid #2f3139;
-  z-index: 1;
 
   .sidebar-nav {
     width: 207px;
@@ -218,38 +217,80 @@ i, em {
   padding: 5px 15px 6px 15px;
   border-radius: 3px;
 
-  &.btn-in {
-    height: 20px;
-    padding: 2px 15px;
-    font-size: 0.6rem;
-    margin-top: 5px;
+  &:hover,
+  &:focus,
+  &:active {
+    box-shadow: none;
   }
 }
-.btn:hover,
-.btn:focus,
-.btn:active {
-  box-shadow: none;
-}
+
+// Primary button
 .btn-primary {
   background-color: $primary-color;
 }
+// Secondary button
 .btn-outline-secondary {
   color: #626262;
   border-color: #ccc;
   background: #fff;
 }
-.btn.only-icon {
+// In Table button
+.btn-in-table {
+  color: #000;
+  font-size: 11px;
+  padding: 0 9px;
+  height: 20px;
+  border: 1px solid $border-color;
+  background: #eee;
+  &:after {
+    float: right;
+    content: '';
+    display: block;
+    height: 0;
+    margin: 5px 0 0 6px;
+    border-left: 2px solid #000;
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+  }
+  &:hover {
+    background: #ccc;
+  }
+}
+
+// Icon button
+.btn-only-icon {
+  width: 24px;
+  height: 24px;
   font-size: 1rem;
   color: #818181;
+  padding: 0;
   background: transparent;
   border: 0;
   &:hover,
   &:focus,
-  &:active {
-    background: transparent;
+  &:active
+  &.active,
+  &.active.focus {
+    background: #d8d8d8;
     border: 0;
   }
 }
+// Group > Icon button
+.btn-group {
+  label.btn-only-icon {
+    text-align: center;
+    line-height: 23px;
+    cursor: pointer;
+    &.active,
+    &.active.focus {
+      background: #d8d8d8;
+      border: 0;
+      outline: 0;
+      box-shadow: none;
+    }
+  }
+}
+// Page button area
 .page-btn {
   margin-top: 15px;
   padding-bottom: 1px;
@@ -261,26 +302,35 @@ i, em {
 .v-switch.switch-text {
   width: 60px;
   height: 20px;
+  margin: 0;
+  vertical-align: middle;
 
   .switch-input:checked ~ .switch-handle {
     left: 42px;
   }
-  .switch-input:checked ~ .switch-handle {
-    border-color: #869fac;
-  }
   .switch-handle {
     width: 16px;
     height: 16px;
-    background: #fff;
-    border: 1px solid #c2cfd6;
+    background: #e7e7e7;
+    border: 0;
+  }
+
+  .switch-label {
+    border-color: transparent;
+    background-color: #999;
   }
   .switch-label::after {
+    color: #fff;
     left: 6px !important;
   }
   .switch-label::before {
+    color: #fff;
     right: 6px !important;
   }
-
+  .switch-input:checked ~ .switch-label {
+    border-color: transparent;
+    background: $primary-color !important;
+  }
 }
 
 
@@ -291,6 +341,14 @@ i, em {
   border-radius: 2px;
   margin: 0 2px;
   background: #8799af;
+
+  &.ins {
+    min-width: 60px;
+  }
+
+  &.primary {
+    background: $primary-color;
+  }
 }
 
 
@@ -323,6 +381,7 @@ i.require {
 .multiselect {
   min-height: 30px;
   min-width: 105px;
+  vertical-align: middle;
   line-height: 1;
 
   .multiselect__tags {
@@ -408,6 +467,11 @@ i.require {
     display: none !important;
   }
 
+  &.pops {
+    min-width: 100px;
+    width: 100px;
+  }
+
   &.pops .multiselect__tag {
     display: none;
   }
@@ -447,10 +511,8 @@ i.require {
       top: 0;
       right: 12px;
     }
-    .btn.only-icon {
+    .btn-only-icon {
       margin: 0.7rem 0 0;
-      padding: 0 3px;
-      height: auto;
     }
   }
 }
@@ -459,6 +521,11 @@ i.require {
 // Modal
 .modal-dialog {
   margin: 80px auto;
+
+  .pagination {
+    margin-bottom: 0;
+    float: right;
+  }
 }
 .modal-header {
   color: #fff;
@@ -543,7 +610,7 @@ section.board {
 
   &.table-hover {
     tbody tr:hover {
-      background-color: rgba(0, 0, 0, 0.03);
+      background-color: #f4f5e5;
     }
     tbody td {
       cursor: pointer;
@@ -553,6 +620,28 @@ section.board {
   .form-control,
   .multiselect {
     display: inline-block;
+    height: 26px;
+    min-height: 26px;
+    margin: -0.45rem 0;
+  }
+
+  .multiselect {
+    .multiselect__tags {
+      min-height: 26px;
+      padding: 1px 24px 0 4px;
+    }
+    .multiselect__tag {
+      padding: 2px 10px 2px 20px;
+      margin-top: 2px;
+    }
+    .multiselect__tag-icon {
+      line-height: 15px;
+    }
+    .multiselect__select {
+      width: 24px;
+      height: 24px;
+      padding: 0 4px;
+    }
   }
 
 }
@@ -655,6 +744,32 @@ section.board {
     .btn {
       display: block;
       margin: 5px 0;
+    }
+  }
+
+  // inline style
+  &.form-inline {
+    padding: 10px 20px;
+
+    label {
+      height: 20px;
+      margin: 5px 15px 5px 20px;
+      padding-right: 15px;
+      border-right: 1px solid #dce8ee;
+      font-size: 0.75rem;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
+    .search-btn {
+      top: 10px;
+      margin: 0;
+    }
+    .search-btn .btn {
+      display: inline-block;
+      margin: 0;
     }
   }
 }
@@ -835,7 +950,7 @@ section.board {
     margin-top: 0 !important;
 
     .nav-item a,
-    .btn.only-icon {
+    .btn-only-icon {
       pointer-events: none;
     }
   }
@@ -856,8 +971,7 @@ section.board {
     min-width: 180px;
   }
 
-  .btn.only-icon {
-    padding: 5px 8px;
+  .btn-only-icon {
     .fa-th-large {
       transform: scale(0.9, 1);
     }
@@ -901,6 +1015,15 @@ $dnd-function: ease-out;
   width: 100%;
   height: 100%;
 
+  .btn-group .btn-only-icon {
+    margin-left: 0.3rem;
+    border-radius: 3px !important;
+
+    span {
+      line-height: 24px;
+    }
+  }
+
   .card-body {
     padding: 15px;
   }
@@ -935,7 +1058,7 @@ $dnd-function: ease-out;
 
 // Dark Theme
 body > .app {
-  transition: background .25s ease-out;
+  transition: background .2s ease-out;
 }
 body.dark > .app {
   background: #181a20;
@@ -978,6 +1101,27 @@ body.dark > .app {
     .card-header {
       color: #fefefe;
       border-color: #181a20;
+    }
+  }
+
+  .btn-only-icon {
+    &:hover,
+    &:focus,
+    &:active
+    &.active,
+    &.active.focus {
+      background: #111;
+      color: #fff;
+    }
+  }
+
+  .btn-group {
+    label.btn-only-icon {
+      &.active,
+      &.active.focus {
+        background: #111;
+        color: #fff;
+      }
     }
   }
 
@@ -1154,31 +1298,6 @@ body.dark > .app {
   }
   .tab-pane {
     padding: 0;
-  }
-
-  .searchBox {
-    padding: 10px 20px;
-
-    label {
-      height: 20px;
-      margin: 5px 15px 5px 20px;
-      padding-right: 15px;
-      border-right: 1px solid #dce8ee;
-      font-size: 0.75rem;
-
-      &:first-child {
-        margin-left: 0;
-      }
-    }
-
-    .search-btn {
-      top: 10px;
-      margin: 0;
-    }
-    .search-btn .btn {
-      display: inline-block;
-      margin: 0;
-    }
   }
 }
 
