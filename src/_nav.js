@@ -57,13 +57,15 @@ export default {
           url: '/policy/popPreference'
         },
         {
-          name: 'GTM Config',
-          url: '/policy/gtmConfig'
+          name: 'GTM 관리',
+          url: '/policy/gtm'
         },
+        /*
         {
           name: 'GEO IP',
           url: '/policy/geoIp'
         },
+        */
         {
           name: 'IP Restriction',
           url: '/policy/ipRestriction'
@@ -79,10 +81,12 @@ export default {
           name: 'Service Processing 관리',
           url: '/workflow/service'
         },
+        /*
         {
           name: 'Domain Processing 관리',
           url: '/workflow/domain'
         },
+        */
         {
           name: 'Preload',
           url: '/workflow/contPreload'

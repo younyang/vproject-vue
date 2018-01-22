@@ -4,7 +4,6 @@
       <div class="form-group">
         <b-form-fieldset
           label="검색어"
-          style="width:60%"
           class="inline"
           :horizontal="true">
           <multiselect
@@ -38,7 +37,6 @@
       <div class="form-group">
         <b-form-fieldset
           label="사용여부"
-          style="width:60%"
           :horizontal="true">
           <multiselect
             v-model="searchItem.useYn"
@@ -53,8 +51,7 @@
       <div class="form-group">
         <b-form-fieldset
           label="기간"
-          class="inline"
-          style="width:100%"
+          class="inline date"
           :horizontal="true">
           <multiselect
             v-model="searchDateType"
@@ -65,8 +62,7 @@
             placeholder="전체"
           ></multiselect>
 
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input>
-          ~
+          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input> ~
           <b-form-input type="date" class="form-date" v-model="searchItem.searchDateTo"></b-form-input>
 
           <b-button class="btn-day" @click="onCalendar('today')">오늘</b-button>

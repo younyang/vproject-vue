@@ -1,10 +1,9 @@
 <template>
   <div class="animated fadeIn">
     <b-form class="searchBox" @reset="onReset">
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="검색어"
-          style="width:60%"
           class="inline"
           :horizontal="true">
           <multiselect
@@ -36,10 +35,9 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="CNAME"
-          style="width:60%"
           :horizontal="true">
           <multiselect
             v-model="searchItem.cnameUseYn"
@@ -64,10 +62,9 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="사용여부"
-          style="width:60%"
           :horizontal="true">
           <multiselect
             v-model="searchItem.serviceUseYn"
@@ -79,11 +76,10 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="기간"
-          class="inline"
-          style="width:100%"
+          class="inline date"
           :horizontal="true">
           <multiselect
             v-model="searchDateType"

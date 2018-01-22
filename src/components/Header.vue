@@ -3,7 +3,7 @@
     <b-link class="navbar-brand" to="/"><span class="sr-only">SK V Project</span></b-link>
     <button class="navbar-toggler sidebar-toggler" type="button" @click="sidebarMinimize">&#9776;</button>
 
-    <b-nav is-nav-bar class="ml-auto">
+    <b-nav class="ml-auto">
       <b-nav-item-dropdown right no-caret class="d-md-down-none">
         <template slot="button-content">
           <i class="icon-bell"></i><span class="badge badge-pill badge-danger">3</span>

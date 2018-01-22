@@ -210,7 +210,7 @@
             <!--// Edge(Summary) -->
 
             <!-- HR/LR -->
-            <div v-if="taskName === 'HR' || taskName === 'LR'">
+            <div v-if="taskName === 'HR' || taskName === 'LR' || (taskName === 'E' && !isEdgeSummary)">
               <b-form class="searchBox" inline>
                 <label>상태</label>
                 <multiselect
@@ -466,7 +466,8 @@
 
       onClickProcess (task, index){
         if (task === 'INTERLOCK_TARGET_01'){
-            this.$router.push({ name: 'Domain Processing 관리'})
+            return;
+            //this.$router.push({ name: 'Domain Processing 관리'})
         }
         this.setTaskName(task);
         this.queryParams = {};

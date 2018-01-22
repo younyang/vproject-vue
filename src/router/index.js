@@ -234,9 +234,9 @@ export default new Router({
               component: lazyLoading('policy/PopPreference')
             },
             {
-              path: 'gtmConfig',
-              name: 'GTM Config',
-              component: lazyLoading('policy/GTMconfig')
+              path: 'gtm',
+              name: 'GTM 관리',
+              component: lazyLoading('policy/GTM')
             },
             {
               path: 'geoIp',

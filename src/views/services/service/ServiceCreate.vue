@@ -1,203 +1,206 @@
 <template>
   <div class="animated fadeIn">
-    <b-form>
-      <div class="formView">
-        <!-- Account -->
-        <b-form-fieldset
-          label="Account <i class='require'>*</i>"
-          :horizontal="true">
-          <multiselect
-            v-model="accountId"
-            :options="code.accountId"
-            :showLabels="false"
-            :custom-label="getSelectLabel"
-            :loading="isLoad.accountId"
-            placeholder="Select account"
-          ></multiselect>
-        </b-form-fieldset>
+    <b-form class="formView">
+      <!-- Account -->
+      <b-form-fieldset
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <template slot="label">
+          Company<i class="require">*</i>
+        </template>
+        <multiselect
+          v-model="accountId"
+          :options="code.accountId"
+          :showLabels="false"
+          :custom-label="getSelectLabel"
+          :loading="isLoad.accountId"
+          placeholder="Select account"
+        ></multiselect>
+      </b-form-fieldset>
 
-        <!-- Service Name -->
-        <b-form-fieldset
-          label="Service Name *"
-          description="Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
-          :label-cols="3"
-          :horizontal="true">
-          <b-input-group>
-            <b-form-input
-              v-model="items.serviceName"
-              type="text"
-              placeholder="Enter service name">
-            </b-form-input>
-            <b-input-group-button slot="right" class="ml-2">
-              <b-button variant="outline-secondary" @click="fetchNameExists">중복확인</b-button>
-            </b-input-group-button>
-          </b-input-group>
-        </b-form-fieldset>
+      <!-- Service Name -->
+      <b-form-fieldset
+        description="※ Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
+        :horizontal="true">
+        <template slot="label">
+          Service Name<i class="require">*</i>
+        </template>
 
-        <!-- Service Type -->
-        <b-form-fieldset
-          label="Service Type *"
-          :label-cols="3"
-          :horizontal="true">
+        <b-input-group>
+          <b-form-input
+            v-model="items.serviceName"
+            type="text"
+            placeholder="Enter service name">
+          </b-form-input>
+          <b-input-group-button slot="right" class="ml-2">
+            <b-button variant="outline-secondary" @click="fetchNameExists">중복확인</b-button>
+          </b-input-group-button>
+        </b-input-group>
+      </b-form-fieldset>
 
-          <multiselect
-            v-model="serviceTypeCode"
-            :multiple="true"
-            :showLabels="false"
-            :options="code.serviceTypeCode"
-            label="codeName"
-            :loading="isLoad.serviceTypeCode"
-            track-by="code"
-            @select="onSelectType"
-            @remove="onRemoveType"
-            placeholder="Select service type"
-          ></multiselect>
-        </b-form-fieldset>
+      <!-- Service Type -->
+      <b-form-fieldset
+        label="Service Type *"
+        :label-cols="3"
+        :horizontal="true">
 
-        <!-- Domain -->
-        <b-form-fieldset
-          label="Domain"
-          :label-cols="3"
-          :horizontal="true">
-          <ul class="icons-list">
-            <li v-for="(domain, index) in serviceDomainList">
-              <i class="bg-primary" v-b-tooltip.hover :title="domain.serviceCodeName">{{ domain.serviceCodeVal }}</i>
-              <div class="desc">
-                <small>Domain</small>
-                <div class="title">
-                  <multiselect
-                    label="codeName"
-                    v-model="domain.domainProtocolCode"
-                    class="inline sm protocol"
-                    :allowEmpty="true"
-                    :showLabels="false"
-                    :searchable="false"
-                    :options="code.domainProtocolCode"
-                    :loading="isLoad.domainProtocolCode"
-                    placeholder="://"
-                  ></multiselect>
-                  {{ domain.serviceCodeVal | lowercase }}.{{ items.serviceName }}.vessels.com
-                </div>
-              </div>
-              <div class="value">
-                <div class="small text-muted">Hashing Type</div>
+        <multiselect
+          v-model="serviceTypeCode"
+          :multiple="true"
+          :showLabels="false"
+          :options="code.serviceTypeCode"
+          label="codeName"
+          :loading="isLoad.serviceTypeCode"
+          track-by="code"
+          @select="onSelectType"
+          @remove="onRemoveType"
+          placeholder="Select service type"
+        ></multiselect>
+      </b-form-fieldset>
+
+      <!-- Domain -->
+      <b-form-fieldset
+        label="Domain"
+        :label-cols="3"
+        :horizontal="true">
+        <ul class="icons-list">
+          <li v-for="(domain, index) in serviceDomainList">
+            <i class="bg-primary" v-b-tooltip.hover :title="domain.serviceCodeName">{{ domain.serviceCodeVal }}</i>
+            <div class="desc">
+              <small>Domain</small>
+              <div class="title">
                 <multiselect
-                  v-model="domain.domainHashingTypeCode"
                   label="codeName"
-                  class="inline sm"
+                  v-model="domain.domainProtocolCode"
+                  class="inline sm protocol"
                   :allowEmpty="true"
                   :showLabels="false"
                   :searchable="false"
-                  :options="code.domainHashingTypeCode"
-                  :loading="isLoad.domainHashingTypeCode"
-                  placeholder="Select"
+                  :options="code.domainProtocolCode"
+                  :loading="isLoad.domainProtocolCode"
+                  placeholder="://"
                 ></multiselect>
+                {{ domain.serviceCodeVal | lowercase }}.{{ items.serviceName }}.vessels.com
               </div>
-            </li>
-          </ul>
-        </b-form-fieldset>
+            </div>
+            <div class="value">
+              <div class="small text-muted">Hashing Type</div>
+              <multiselect
+                v-model="domain.domainHashingTypeCode"
+                label="codeName"
+                class="inline sm"
+                :allowEmpty="true"
+                :showLabels="false"
+                :searchable="false"
+                :options="code.domainHashingTypeCode"
+                :loading="isLoad.domainHashingTypeCode"
+                placeholder="Select"
+              ></multiselect>
+            </div>
+          </li>
+        </ul>
+      </b-form-fieldset>
 
-        <!-- CNAME -->
-        <b-form-fieldset
-          label="CNAME 사용여부"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="items.cnameUseYn"
-            :pill="true"
-          ></c-switch>
-        </b-form-fieldset>
+      <!-- CNAME -->
+      <b-form-fieldset
+        label="CNAME 사용여부"
+        :label-cols="3"
+        :horizontal="true">
+        <c-switch
+          type="icon"
+          variant="success"
+          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          v-model="items.cnameUseYn"
+          :pill="true"
+        ></c-switch>
+      </b-form-fieldset>
 
-        <!-- CNAME Domain -->
-        <b-form-fieldset
-          v-if="items.cnameUseYn"
-          label="CNAME 도메인"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="items.cnameDomainName"
-            type="text"
-          ></b-form-input>
-        </b-form-fieldset>
+      <!-- CNAME Domain -->
+      <b-form-fieldset
+        v-if="items.cnameUseYn"
+        label="CNAME 도메인"
+        :label-cols="3"
+        :horizontal="true">
+        <b-form-input
+          v-model="items.cnameDomainName"
+          type="text"
+        ></b-form-input>
+      </b-form-fieldset>
 
-        <!-- SSL 인증서 -->
-        <b-form-fieldset
-          label="SSL 인증서"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="items.sslCertUseYn"
-            :pill="true"
-          ></c-switch>
-        </b-form-fieldset>
+      <!-- SSL 인증서 -->
+      <b-form-fieldset
+        label="SSL 인증서"
+        :label-cols="3"
+        :horizontal="true">
+        <c-switch
+          type="icon"
+          variant="success"
+          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          v-model="items.sslCertUseYn"
+          :pill="true"
+        ></c-switch>
+      </b-form-fieldset>
 
-        <!-- SSL 인증서 정보 입력-->
-        <b-form-fieldset
-          v-if="items.sslCertUseYn"
-          label="SSL 인증서"
-          :label-cols="3"
-          :horizontal="true">
+      <!-- SSL 인증서 정보 입력-->
+      <b-form-fieldset
+        v-if="items.sslCertUseYn"
+        label="SSL 인증서"
+        :label-cols="3"
+        :horizontal="true">
 
-          <div class="form-in-group">
-            <!-- Cert -->
-            <b-form-fieldset
-              label="Cert"
-              :label-cols="2"
-              :horizontal="true">
-              <b-form-textarea
-                v-model="items.sslCert"
-                :rows="2"
-                placeholder="Cert"
-              ></b-form-textarea>
-            </b-form-fieldset>
-            <b-form-fieldset
-              label="Key"
-              :label-cols="2"
-              :horizontal="true">
-              <b-form-textarea
-                v-model="items.sslCertKey"
-                :rows="2"
-                placeholder="Key"
-              ></b-form-textarea>
-            </b-form-fieldset>
-            <b-form-fieldset
-              label="만료일"
-              :label-cols="2"
-              :horizontal="true">
-              <b-form-input
-                type="date"
-                v-model="items.sslCertExpireDate"
-              ></b-form-input>
-            </b-form-fieldset>
-          </div>
-        </b-form-fieldset>
-
-        <!-- 사용여부 -->
-        <b-form-fieldset
-          label="사용여부"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            v-model="items.serviceUseYn"
-            :pill="true"
-          ></c-switch>
-        </b-form-fieldset>
-
-        <div slot="footer" class="form-btn">
-          <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">취소</b-button>
-          <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+        <div class="form-in-group">
+          <!-- Cert -->
+          <b-form-fieldset
+            label="Cert"
+            :label-cols="2"
+            :horizontal="true">
+            <b-form-textarea
+              v-model="items.sslCert"
+              :rows="2"
+              placeholder="Cert"
+            ></b-form-textarea>
+          </b-form-fieldset>
+          <b-form-fieldset
+            label="Key"
+            :label-cols="2"
+            :horizontal="true">
+            <b-form-textarea
+              v-model="items.sslCertKey"
+              :rows="2"
+              placeholder="Key"
+            ></b-form-textarea>
+          </b-form-fieldset>
+          <b-form-fieldset
+            label="만료일"
+            :label-cols="2"
+            :horizontal="true">
+            <b-form-input
+              type="date"
+              v-model="items.sslCertExpireDate"
+            ></b-form-input>
+          </b-form-fieldset>
         </div>
-      </div>
+      </b-form-fieldset>
+
+      <!-- 사용여부 -->
+      <b-form-fieldset
+        label="사용여부"
+        :label-cols="3"
+        :horizontal="true">
+        <c-switch
+          type="icon"
+          variant="success"
+          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          v-model="items.serviceUseYn"
+          :pill="true"
+        ></c-switch>
+      </b-form-fieldset>
     </b-form>
+
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+    </div>
 
     <b-modal hide-footer title="Message" size="sm" v-model="isModalMessage" :class="state.serviceName ? 'modal-primary' : 'modal-danger'">
       <div class="d-block text-center">

@@ -4,7 +4,6 @@
       <div class="form-group">
         <b-form-fieldset
           label="검색어"
-          style="width:60%"
           class="inline"
           :horizontal="true">
           <multiselect
@@ -39,7 +38,6 @@
       <div class="form-group">
         <b-form-fieldset
           label="주소"
-          style="width:60%"
           class="inline"
           :horizontal="true">
           <multiselect
@@ -83,8 +81,7 @@
       <div class="form-group">
         <b-form-fieldset
           label="기간"
-          class="inline"
-          style="width:100%"
+          class="inline date"
           :horizontal="true">
           <multiselect
             v-model="searchDateType"

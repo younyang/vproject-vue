@@ -8,6 +8,30 @@ import router from './router'
 import Multiselect from 'vue-multiselect'
 import Cleave from 'vue-cleave-component';
 import auth from './auth'
+import validate from './validate'
+
+/*
+import VeeValidate from 'vee-validate'
+import ko from 'vee-validate/dist/locale/ko.js'
+
+const validateConfig = {
+  locale: 'ko',
+  dictionary: {
+    ko
+  }
+};
+
+const validateDictionary = {
+  ko: {
+    messages: {
+      email: () => `올바른 이메일 형식이 아닙니다.`,
+      required: (field) => `필수 입력란입니다.`,
+      confirmed: (field, confirmedField) => `${confirmedField}와 일치하지 않습니다.`,
+      url: () => `올바른 URL 형식이 아닙니다.`
+    }
+  }
+}
+*/
 
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
@@ -51,7 +75,7 @@ const errorAuth = (error) => {
 ax.interceptors.response.use((res) => { return res }, errorAuth);
 axChart.interceptors.response.use((res) => { return res }, errorAuth);
 
-
+Vue.prototype.$valid = validate;
 
 Vue.prototype.$https = {
   get (url = '', params = {}){
