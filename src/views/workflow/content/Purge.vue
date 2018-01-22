@@ -1,10 +1,9 @@
 <template>
   <div class="animated fadeIn">
     <b-form class="searchBox" @reset="onReset">
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="검색어"
-          style="width:60%"
           class="inline"
           :horizontal="true">
           <multiselect
@@ -38,7 +37,7 @@
         -->
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <!--
         <b-form-fieldset
           label="Genre"
@@ -59,7 +58,6 @@
 
         <b-form-fieldset
           label="상태"
-          style="width:60%"
           :horizontal="true">
           <multiselect
             v-model="processStateCode"
@@ -74,11 +72,10 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="기간"
-          class="inline"
-          style="width:100%"
+          class="inline date"
           :horizontal="true">
           <multiselect
             v-model="periodTypeCode"
@@ -100,56 +97,50 @@
         </b-form-fieldset>
       </div>
       <div class="search-btn">
-        <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
-        <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
+        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
       </div>
     </b-form>
 
-    <div class="row">
-      <div class="col">
-        <section class="board-btn">
-          <b-button type="button" variant="primary">
-            엑셀 다운로드
-          </b-button>
-        </section>
+    <section class="board-btn">
+      <b-button type="button" variant="primary">
+        엑셀 다운로드
+      </b-button>
+    </section>
 
-        <section class="board">
-          <b-table
-            striped
-            bordered
-            hover
-            show-empty
-            :items="items"
-            :fields="fields"
-            @row-clicked="details"
-          >
-          </b-table>
-        </section>
+    <section class="board">
+      <b-table
+        hover
+        show-empty
+        :items="items"
+        :fields="fields"
+        @row-clicked="details"
+      >
+      </b-table>
+    </section>
 
-        <section class="board-article d-flex justify-content-between">
-          <b-form inline>
-            <multiselect
-              :value="pageInfo.size"
-              :allowEmpty="false"
-              :showLabels="false"
-              :searchable="false"
-              :options="pageOptions"
-              @input="onRowSelect"
-              class="inline sm"
-            ></multiselect>
-            <label class="ml-sm-2">Row Per Page</label>
-          </b-form>
+    <section class="board-article d-flex justify-content-between">
+      <b-form inline>
+        <multiselect
+          :value="pageInfo.size"
+          :allowEmpty="false"
+          :showLabels="false"
+          :searchable="false"
+          :options="pageOptions"
+          @input="onRowSelect"
+          class="inline sm"
+        ></multiselect>
+        <label class="ml-sm-2">Row Per Page</label>
+      </b-form>
 
-          <b-pagination
-            :value="pageInfo.page"
-            :total-rows="pageInfo.totalCount"
-            :per-page="pageInfo.size"
-            @input="onPagination"
-            class="mt-2"
-          ></b-pagination>
-        </section>
-      </div>
-    </div><!--/.row-->
+      <b-pagination
+        :value="pageInfo.page"
+        :total-rows="pageInfo.totalCount"
+        :per-page="pageInfo.size"
+        @input="onPagination"
+        class="mt-2"
+      ></b-pagination>
+    </section>
   </div>
 </template>
 

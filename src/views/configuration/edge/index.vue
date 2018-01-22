@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
     <b-form class="searchBox" @reset="onReset">
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="검색어"
           class="inline"
@@ -34,7 +34,7 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="구분"
           :horizontal="true">
@@ -64,7 +64,7 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="사용여부"
           :horizontal="true">
@@ -94,7 +94,7 @@
         </b-form-fieldset>
       </div>
 
-      <div class="form-group">
+      <div class="form-row">
         <b-form-fieldset
           label="기간"
           class="inline date"

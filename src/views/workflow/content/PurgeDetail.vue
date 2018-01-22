@@ -1,20 +1,17 @@
 <template>
   <div class="animated fadeIn">
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
         기본정보
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
+
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <div class="formView">
         <!-- PID -->
         <b-form-fieldset
           label="PID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processId"
@@ -26,7 +23,6 @@
         <!-- CID -->
         <b-form-fieldset
           label="CID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.contentId"
@@ -38,7 +34,6 @@
         <!-- Content -->
         <b-form-fieldset
           label="Content"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.contentName"
@@ -50,7 +45,6 @@
         <!-- Genre -->
         <b-form-fieldset
           label="Genre"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.contentGenreName"
@@ -62,38 +56,28 @@
         <!-- File info -->
         <b-form-fieldset
           label="File Info"
-          :label-cols="3"
           :horizontal="true">
 
           <b-table
-            striped
-            bordered
+            class="sub"
             show-empty
             :items="items.fileList"
             :fields="fields"
           >
+            <template slot="contentFileSize" scope="row">{{ row.value }} MB</template>
           </b-table>
-
         </b-form-fieldset>
 
         <!-- Total_file_size -->
         <b-form-fieldset
           label="Total_file_size"
-          :label-cols="3"
           :horizontal="true">
-          <b-form-input
-            :value="items.contentTotalFileSize"
-            type="text"
-            class="inline"
-            style="width:60px"
-            plaintext
-          ></b-form-input> MB
+          <span class="form-text">{{ items.contentTotalFileSize }} MB</span>
         </b-form-fieldset>
 
         <!-- 요청일시 -->
         <b-form-fieldset
           label="요청일시"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processBeginDatetime"
@@ -105,7 +89,6 @@
         <!-- 처리일시 -->
         <b-form-fieldset
           label="처리일시"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processEndDatetime"
@@ -117,7 +100,6 @@
         <!-- 상태 -->
         <b-form-fieldset
           label="상태"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.processStateCodeName"
@@ -125,7 +107,7 @@
             plaintext
           ></b-form-input>
         </b-form-fieldset>
-      </b-card>
+      </div>
     </b-collapse>
 
 
