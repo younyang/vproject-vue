@@ -216,7 +216,7 @@
             plaintext
             type="text"></b-form-input>
         </b-form-fieldset>
-        <!-- 배포상태 -->
+        <!-- 배포상태
         <b-form-fieldset
           label="배포상태"
           :label-cols="3"
@@ -228,6 +228,8 @@
             type="text"></b-form-input>
           (<a href="#">{{ deploy.count }}</a>)
         </b-form-fieldset>
+        -->
+
       </b-card>
     </b-collapse>
 
@@ -235,6 +237,7 @@
       <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
+
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
       <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>

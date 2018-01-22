@@ -259,8 +259,16 @@ i, em {
   }
   &:hover {
     background: #ccc;
+    color: inherit;
   }
 }
+a.btn-in-table {
+  line-height: 17px;
+  &:after {
+    margin-top: 7px;
+  }
+}
+
 
 // Icon button
 .btn-only-icon {
@@ -926,13 +934,14 @@ section.board {
  * Detail View Component
  */
 // View Collapse
+.page-sub-title + .collapse-title,
+.collapse-title:first-child {
+  margin-top: 0;
+
+}
 .collapse-title {
   margin-bottom: 10px;
   margin-top: 30px;
-
-  &:first-child {
-    margin-top: 0;
-  }
 
   .btn-collapse {
     text-align: left;
@@ -1004,6 +1013,9 @@ section.board {
     textarea.form-control {
       display: block;
       max-width: 100%;
+    }
+    .v-switch.switch-text {
+      margin: 2px 0 0;
     }
   }
 

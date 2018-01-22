@@ -6,54 +6,52 @@
     </content-header>
 
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
-        IP Restriction
-        <i class="fa fa-angle-down"></i>
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
+        기본정보
       </b-button>
     </div>
+
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <b-form class="formView" :validated="inValidForm" novalidate>
         <!-- 사용여부 -->
         <b-form-fieldset
           label="사용여부"
-          :label-cols="3"
           :horizontal="true">
           <c-switch
             v-if="isEdit"
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
             v-model="items.ipRestrictUseYn"
-            :pill="true"
           ></c-switch>
-          <b-badge
+          <span
             v-else
-            pill
-            :variant="items.ipRestrictUseYn ? 'success' : 'secondary'">
-            {{ items.ipRestrictUseYn ? '사용' : '미사용' }}
-          </b-badge>
+            class="badge"
+            :class="{'primary' : items.ipRestrictUseYn }">
+          {{ items.ipRestrictUseYn ? '사용' : '미사용' }}
+        </span>
         </b-form-fieldset>
 
         <!-- 제한 IP(공통) -->
         <b-form-fieldset
           v-if="items.ipRestrictUseYn"
           label="제한 IP(공통)"
-          :label-cols="3"
           :horizontal="true">
-          <ul class="icons-list list-view">
-            <li v-for="(ip, index) in code.ipRestriction">
-              <i class="bg-primary">{{ ip.ipRestrictGlobalSeq }}</i>
-              <div class="desc">
-                <small>서버 IP 주소</small>
-                <div class="title">
-                  <span>{{ ip.ip }}</span>
-                </div>
-              </div>
-            </li>
-          </ul>
+
+          <b-table
+            class="sub"
+            show-empty
+            :items="code.ipRestriction"
+            :fields="{
+            index: {label: '번호', 'class': 'index'},
+            ip: {label: '서버 IP 주소', 'class': 'text-left'}
+          }">
+            <template slot="index" scope="row">
+              {{ row.index + 1 }}
+            </template>
+          </b-table>
         </b-form-fieldset>
 
         <!-- 제한 IP(serviceName) -->
@@ -61,141 +59,141 @@
           v-if="items.ipRestrictUseYn"
           description="※ 공통으로 제한되는 IP 주소는 Policy 메뉴에서 수정할 수 있습니다.<br>
           ※ 사용여부를 ‘미사용’으로 설정하시더라도 공통으로 설정된 IP주소는 제한됩니다."
-          :label-cols="3"
           :horizontal="true">
-          <template slot="label">제한 IP(<strong class="text-primary">{{ serviceName }}</strong>)</template>
-          <b-button
-            type="button"
-            size="sm"
-            class="mt-2 mb-2"
-            v-if="isEdit"
-            variant="outline-primary"
-            @click="onAddRestrict">
-            <i class="fa fa-plus"></i> 추가
-          </b-button>
-          <ul class="icons-list" :class="{'list-noIcon' : isCreate }">
-            <li v-for="(ip, index) in items.ipRestrictServiceList">
-              <i class="bg-primary" v-if="!isCreate">{{ ip.ipRestrictServiceSeq }}</i>
-              <div class="desc">
-                <small>서버 IP 주소</small>
-                <div class="title">
-                  <b-form-input
-                    v-model="ip.ip"
-                    type="text"
-                    :plaintext="!isEdit"
-                  ></b-form-input>
-                </div>
-              </div>
-              <div class="value" v-if="index > 0">
-                <div class="small text-muted">&nbsp;</div>
-                <b-button
-                  v-if="isEdit"
-                  type="button"
-                  size="sm"
-                  variant="outline-danger"
-                  class="list-del"
-                  @click="onDelRestrict(index)">
-                  <i class="fa fa-trash"></i>
-                </b-button>
-              </div>
-            </li>
-          </ul>
-        </b-form-fieldset>
-      </b-card>
+          <template slot="label">
+            제한 IP<i class="require" v-if="isEdit">*</i><br>
+            <small class="form-text">({{ serviceName }})</small>
+          </template>
 
-      <b-card v-if="isEdit && !isCreate">
+          <b-table
+            class="sub"
+            show-empty
+            :items="items.ipRestrictServiceList"
+            :fields="{
+            index: {label: '번호', 'class': 'index'},
+            ip: {label: '서버 IP 주소', 'class': 'text-left'}
+          }"
+          >
+            <template slot="index" scope="row">
+              {{ row.index + 1 }}
+            </template>
+            <template slot="ip" scope="row">
+            <span v-if="isEdit">
+              <b-form-input
+                v-model="row.item.ip"
+                type="text"
+                required
+              ></b-form-input>
+              <span class="ico">
+                <button type="button" v-if="row.index === 0" @click="onAddRow"><i class="fa fa-plus-circle"></i></button>
+                <button type="button" v-if="row.index > 0" @click="onDelRow(row.index)"><i class="fa fa-times-circle"></i></button>
+              </span>
+              <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+            </span>
+              <span v-else>{{ row.value }}</span>
+            </template>
+          </b-table>
+        </b-form-fieldset>
+
         <!-- 변경이력 -->
         <b-form-fieldset
-          label="변경이력"
-          :label-cols="3"
+          v-if="isEdit"
+          label="변경이력<i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <b-form-textarea
             v-model="items.modifyHistReason"
             :rows="6"
+            required
           ></b-form-textarea>
         </b-form-fieldset>
-      </b-card>
+      </b-form>
     </b-collapse>
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         처리이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" v-if="!isEdit">
-      <b-card>
-        <!-- 등록일 -->
-        <b-form-fieldset
-          label="등록일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 등록자 -->
-        <b-form-fieldset
-          label="등록자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정일 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정자 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
+    <b-collapse id="formHistory" visible v-if="!isEdit">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 등록일 -->
+          <b-form-fieldset
+            label="등록일시"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 등록자 -->
+          <b-form-fieldset
+            label="등록자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
+        <div class="form-row">
+          <!-- 수정일 -->
+          <b-form-fieldset
+            v-if="items.modifyDateTime"
+            label="수정일"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 수정자 -->
+          <b-form-fieldset
+            label="수정자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
         <!-- 배포상태 -->
         <b-form-fieldset
-          v-if="!isEdit"
           label="배포상태"
-          :label-cols="3"
           :horizontal="true">
-          <b-form-input
-            :value="deploy.status ? '성공' : '실패'"
-            style="width:30px"
-            plaintext
-            type="text"></b-form-input>
-          (<a href="#">{{ deploy.count }}</a>)
+          <input
+            type="text"
+            readonly="readonly"
+            class="form-control-plaintext"
+            style="width:50px"
+            :value="items.processStateCodeName"
+          >
+          <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
         </b-form-fieldset>
-      </b-card>
+      </b-form>
     </b-collapse>
 
-
-
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+      <b-button type="button" variant="outline-secondary" v-if="!isCreate" @click="onView">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
+      <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+      <b-button
+        v-if="items.processStateCode === 'PROCESS_STATE_02'"
+        type="button"
+        variant="primary"
+        @click="onEdit"
+      >수정</b-button>
     </div>
 
 
@@ -203,12 +201,12 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
@@ -216,8 +214,25 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
+      </div>
+    </b-modal>
+
+    <!-- Message Alert Modal -->
+    <b-modal title="Message" size="sm" v-model="modal.open">
+      <div class="d-block text-center">
+        <p>{{ modal.msg }}</p>
+      </div>
+      <div slot="modal-footer" class="mx-auto">
+        <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
       </div>
     </b-modal>
   </div>
@@ -238,15 +253,15 @@
       return {
         name: 'Service 상세',
         originItems: {},
+        submitItems: {},
         serviceName: '',
         items: {
           ipRestrictUseYn : false,
           ipRestrictServiceList: [{ ip: '' }],
-          createDateTime: "",
-          createId: "",
-          modifyDateTime: "",
-          modifyId: "",
-          modifyHistReason: "등록"
+          modifyHistReason: "등록",
+          processStateCodeName: null,
+          processStateCode: null,
+          processId: null
         },
         code: {
           ipRestriction: []
@@ -258,16 +273,23 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         isCreate: false,
         isEdit: false,
         isModalHistory: false,
 
-        // 배포상태 - 임시
-        deploy: {
-          status: true,
-          count: 11234
+        inValidForm: false,
+
+        modal: {
+          open: false,
+          msg: '',
+          action (){}
         }
       }
     },
@@ -316,36 +338,49 @@
         this.items = JSON.parse(JSON.stringify(this.originItems))
       },
 
-      onAddRestrict (){
+      onAddRow (){
         this.items.ipRestrictServiceList.push({
           ip: ''
         });
       },
 
-      onDelRestrict (index){
+      onDelRow (index){
         this.items.ipRestrictServiceList.splice(index, 1);
       },
 
       onSubmit (){
         const { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason } = this.items;
         const items = { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason };
-        if (this.isCreate){
-          this.$https.post(`/services/${this.id}/restriction`, items)
-            .then(() => {
-              this.$router.go(this.$router.currentRoute);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        } else {
-          this.$https.put(`/services/${this.id}/restriction`, items)
-            .then(() => {
-              this.$router.go(this.$router.currentRoute);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
+        const validate = this.$valid.all(items);
+        this.inValidForm = !validate;
+
+        if (validate) {
+          if (this.isCreate){
+            this.$https.post(`/services/${this.id}/restriction`, items)
+              .then(this.onSubmitComplete)
+              .catch((error) => {
+                console.log(error);
+              });
+          } else {
+            this.$https.put(`/services/${this.id}/restriction`, items)
+              .then(this.onSubmitComplete)
+              .catch((error) => {
+                console.log(error);
+              });
+          }
         }
+      },
+
+      onSubmitComplete (){
+        const router = this.$router;
+        const status = this.isCreate ? '저장' : '수정';
+        this.modal = {
+          open: true,
+          msg: `${status}이 완료되었습니다.`,
+          action (){
+            router.go(router.currentRoute);
+          }
+        };
       },
 
       getHistoryLink (rowId){

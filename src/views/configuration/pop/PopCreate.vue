@@ -1,137 +1,136 @@
 <template>
   <div class="animated fadeIn">
-    <b-form>
-      <b-card>
-        <!-- PoP Name -->
-        <b-form-fieldset
-          label="PoP Name *"
-          :label-cols="3"
-          :horizontal="true">
+    <b-form class="formView" :validated="inValidForm" novalidate>
+      <!-- PoP Name -->
+      <b-form-fieldset
+        label="PoP Name<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <b-form-input
+          v-model="items.popName"
+          type="text"
+          placeholder="Enter PoP name"
+          required
+        ></b-form-input>
+      </b-form-fieldset>
+
+      <!-- Host Name -->
+      <b-form-fieldset
+        label="Host Name(Prefix)<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <b-input-group>
           <b-form-input
-            v-model="items.popName"
+            v-model="items.popHostName"
             type="text"
-            placeholder="Enter PoP name">
-          </b-form-input>
-        </b-form-fieldset>
-
-        <!-- Host Name -->
-        <b-form-fieldset
-          label="Host Name(Prefix) *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-input-group>
-            <b-form-input
-              v-model="items.popHostName"
-              type="text"
-              placeholder="Enter PoP Host name">
-            </b-form-input>
-            <b-input-group-button slot="right" class="ml-2">
-              <b-button variant="outline-secondary" @click="fetchHostExists">중복확인</b-button>
-            </b-input-group-button>
-          </b-input-group>
-        </b-form-fieldset>
-
-        <!-- Domain -->
-        <b-form-fieldset
-          label="Domain *"
-          :label-cols="3"
-          :horizontal="true">
-
-          <b-button variant="outline-secondary" @click="fetchDomain">생성</b-button>
-          <span class="domain-text ml-2" v-if="isDomainName">
-            http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-          </span>
-        </b-form-fieldset>
-
-        <!-- 구분 -->
-        <b-form-fieldset
-          label="구분 *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
-          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
-        </b-form-fieldset>
-
-        <!-- 주소 -->
-        <b-form-fieldset
-          label="주소 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-model="popCtprvnCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popCtprvnCode"
-            :loading="isLoad.popCtprvnCode"
-            @select="onFirstAddress"
-            label="addressCodeName"
-            class="inline"
-            style="min-width:130px"
-            placeholder="선택"
-          ></multiselect>
-
-          <multiselect
-            v-if="popCtprvnCode"
-            v-model="popSigCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popSigCode"
-            :loading="isLoad.popSigCode"
-            label="addressCodeName"
-            placeholder="선택"
-            class="inline"
-            style="min-width: 130px"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="품질솔루션팀 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-model="qualitySolutionTeamCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.qualitySolutionTeamCode"
-            :loading="isLoad.qualitySolutionTeamCode"
-            label="codeName"
-            placeholder="선택"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <!-- Bandwidth -->
-        <b-form-fieldset
-          label="Bandwidth *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="items.bandwidth"
-            type="number"
-            class="w-25"
+            placeholder="Enter PoP Host name"
+            required
           ></b-form-input>
-        </b-form-fieldset>
+          <b-input-group-button slot="right" class="ml-2">
+            <b-button variant="outline-secondary" @click="fetchHostExists">중복확인</b-button>
+          </b-input-group-button>
+        </b-input-group>
+      </b-form-fieldset>
+
+      <!-- Domain -->
+      <b-form-fieldset
+        label="Domain<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+
+        <b-button variant="outline-secondary" @click="fetchDomain">생성</b-button>
+        <span class="domain-text ml-2" v-if="isDomainName">
+          http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+        </span>
+      </b-form-fieldset>
+
+      <!-- 구분 -->
+      <b-form-fieldset
+        label="구분<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.check"
+        :horizontal="true">
+        <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
+        <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
+      </b-form-fieldset>
+
+      <!-- 주소 -->
+      <b-form-fieldset
+        label="주소<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <multiselect
+          v-model="popCtprvnCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popCtprvnCode"
+          :loading="isLoad.popCtprvnCode"
+          @select="onFirstAddress"
+          label="addressCodeName"
+          class="inline"
+          style="min-width:130px"
+          placeholder="선택"
+        ></multiselect>
+
+        <multiselect
+          v-if="popCtprvnCode"
+          v-model="popSigCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popSigCode"
+          :loading="isLoad.popSigCode"
+          label="addressCodeName"
+          placeholder="선택"
+          class="inline"
+          style="min-width: 130px"
+        ></multiselect>
+      </b-form-fieldset>
+
+      <b-form-fieldset
+        label="품질솔루션팀<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <multiselect
+          v-model="qualitySolutionTeamCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.qualitySolutionTeamCode"
+          :loading="isLoad.qualitySolutionTeamCode"
+          label="codeName"
+          placeholder="선택"
+        ></multiselect>
+      </b-form-fieldset>
+
+      <!-- Bandwidth -->
+      <b-form-fieldset
+        label="Bandwidth<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <b-form-input
+          v-model="items.bandwidth"
+          type="number"
+          class="w-25"
+        ></b-form-input>
+      </b-form-fieldset>
 
 
-        <!-- 사용여부 -->
-        <b-form-fieldset
-          label="사용여부"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
-            v-model="items.popUseYn"
-          ></c-switch>
-        </b-form-fieldset>
-
-        <div slot="footer" class="form-btn">
-          <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-          <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-ban"></i> 취소</b-button>
-        </div>
-      </b-card>
+      <!-- 사용여부 -->
+      <b-form-fieldset
+        label="사용여부"
+        :horizontal="true">
+        <c-switch
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
+          v-model="items.popUseYn"
+        ></c-switch>
+      </b-form-fieldset>
     </b-form>
+
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Pop 관리' }">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+    </div>
 
     <b-modal ref="messageModalRef" hide-footer title="Message" size="sm" :class="state.popHostName ? 'modal-primary' : 'modal-danger'">
       <div class="d-block text-center">
@@ -178,7 +177,9 @@
         state: {
           popHostName: true
         },
-        hostmessage: ''
+        hostmessage: '',
+
+        inValidForm: false
       }
     },
 

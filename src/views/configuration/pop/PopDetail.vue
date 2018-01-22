@@ -6,21 +6,17 @@
     </content-header>
 
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
         기본정보
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <b-form class="formView" :validated="inValidForm" novalidate>
         <!-- PoP Id -->
         <b-form-fieldset
           v-if="!isEdit"
           label="PoP ID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="id"
@@ -32,7 +28,6 @@
         <!-- PoP Name -->
         <b-form-fieldset
           label="PoP Name"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.popName"
@@ -44,7 +39,6 @@
         <!-- Host Name -->
         <b-form-fieldset
           label="Host Name(Prefix)"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.popHostName"
@@ -56,28 +50,16 @@
         <!-- Domain -->
         <b-form-fieldset
           label="Domain"
-          :label-cols="3"
           :horizontal="true">
           <span class="domain-text">
             http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
           </span>
         </b-form-fieldset>
 
-        <!-- 구분
-        <b-form-fieldset
-          label="구분"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
-          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
-        </b-form-fieldset>
-        -->
-
         <!-- 주소 :: Edit -->
         <b-form-fieldset
           v-if="isEdit"
           label="주소"
-          :label-cols="3"
           :horizontal="true">
           <multiselect
             v-model="popCtprvnCode"
@@ -110,7 +92,6 @@
         <!-- 주소 :: View -->
         <b-form-fieldset
           label="주소"
-          :label-cols="3"
           :horizontal="true"
           v-else>
           <b-form-input
@@ -122,7 +103,6 @@
 
         <b-form-fieldset
           label="품질솔루션팀"
-          :label-cols="3"
           :horizontal="true">
           <multiselect
             v-if="isEdit"
@@ -147,7 +127,6 @@
         <b-form-fieldset
           v-if="!isEdit"
           label="Service"
-          :label-cols="3"
           :horizontal="true">
           <span class="badge badge-success badge-pill" v-for="name in serviceNames">
             {{ name }}
@@ -208,88 +187,99 @@
             :rows="6">
           </b-form-textarea>
         </b-form-fieldset>
-      </b-card>
+      </b-form>
     </b-collapse>
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         처리이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" v-if="!isEdit">
-      <b-card>
-        <!-- 등록일 -->
-        <b-form-fieldset
-          label="등록일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 등록자 -->
-        <b-form-fieldset
-          label="등록자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정일 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정자 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
+    <b-collapse id="formHistory" visible v-if="!isEdit">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 등록일 -->
+          <b-form-fieldset
+            label="등록일시"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 등록자 -->
+          <b-form-fieldset
+            label="등록자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
+        <div class="form-row">
+          <!-- 수정일 -->
+          <b-form-fieldset
+            v-if="items.modifyDateTime"
+            label="수정일"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 수정자 -->
+          <b-form-fieldset
+            label="수정자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
         <!-- 배포상태 -->
         <b-form-fieldset
           label="배포상태"
-          :label-cols="3"
           :horizontal="true">
-          <b-form-input
-            :value="deploy.status ? '성공' : '실패'"
-            style="width:30px"
-            plaintext
-            type="text"></b-form-input>
-          (<a href="#">{{ deploy.count }}</a>)
+          <input
+            type="text"
+            readonly="readonly"
+            class="form-control-plaintext"
+            style="width:50px"
+            :value="items.processStateCodeName"
+          >
+          <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
         </b-form-fieldset>
-      </b-card>
+      </b-form>
     </b-collapse>
 
+
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
+
     <div class="page-btn" v-else>
-      <b-button type="button" variant="danger" class="float-left" @click="onDelete"><i class="fa fa-times"></i> 삭제</b-button>
-      <b-button type="button" variant="outline-primary" @click="onDeploy">배포</b-button>
-      <b-button type="button" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
-      <b-button type="button" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <span v-if="items.processStateCode === 'PROCESS_STATE_02'">
+        <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
+        <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
+        <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+        <b-button type="button" variant="outline-secondary" :to="{ name: 'Pop 관리' }">목록</b-button>
+        <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
+      </span>
+      <span v-else>
+        <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+        <b-button type="button" variant="outline-secondary" :to="{ name: 'Pop 관리' }">목록</b-button>
+      </span>
     </div>
 
     <!-- History Modal -->
@@ -355,7 +345,10 @@
           popUseYn: true,
           serviceNames: "",
           lowReferrerList: [],
-          edgeList: []
+          edgeList: [],
+          processStateCodeName: null,
+          processStateCode: null,
+          processId: null
         },
         code: {
           popCtprvnCode: [],
@@ -384,7 +377,9 @@
         deploy: {
           status: true,
           count: 11234
-        }
+        },
+
+        inValidForm: false
       }
     },
 

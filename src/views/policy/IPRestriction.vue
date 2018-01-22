@@ -125,7 +125,6 @@
           </b-form-fieldset>
           <!-- 수정자 -->
           <b-form-fieldset
-            v-if="items.modifyId"
             label="수정자"
             :horizontal="true">
             <b-form-input
@@ -147,7 +146,7 @@
             style="width:50px"
             :value="items.processStateCodeName"
           >
-          <b-button type="button" variant="in-table">{{ items.processId }}</b-button>
+          <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
         </b-form-fieldset>
       </b-form>
     </b-collapse>
@@ -160,11 +159,11 @@
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
       <b-button
+        v-if="items.processStateCode === 'PROCESS_STATE_02'"
         type="button"
         variant="primary"
         @click="onEdit"
       >수정</b-button>
-      <!--        v-if="items.processStateCode === 'PROCESS_STATE_02'"-->
     </div>
 
 
@@ -229,6 +228,7 @@
           }],
           modifyHistReason: null,
           processStateCodeName: null,
+          processStateCode: null,
           processId: null
         },
         code: {

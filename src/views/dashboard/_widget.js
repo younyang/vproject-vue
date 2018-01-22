@@ -10,7 +10,7 @@ export default [
         serviceIdList: ['ALL'],
         serviceTypeList: ['ALL'],
         metricType: 'sum',
-        dataType: 'requestCount',
+        dataType: 'httpTraffic',
         intervalType: 'D',
         intervalValue: 1,
         targetType: 'TOTAL_EDGE',
@@ -32,15 +32,16 @@ export default [
         serviceIdList:['ALL'],
         serviceTypeList: ['ALL'],
         metricType: 'sum',
-        dataType: 'requestCount',
+        dataType: 'hits',
         intervalType: 'D',
         intervalValue: 1,
         targetType: 'TOTAL_EDGE',
         chartType: 'PIE',
         peakYn: false,
-        mainMode: 'TARGET',
+        mainMode: 'TYPE',
         subMode: '',
-        targetList: []
+        targetList: [],
+        typeField : 'cacheStatus'
       }
     }
   }, {
@@ -57,7 +58,7 @@ export default [
         dataType: 'requestCount',
         intervalType: 'D',
         intervalValue: 1,
-        targetType: 'EDGE',
+        targetType: 'TOTAL_EDGE',
         chartType: 'BAR',
         peakYn: false,
         mainMode: 'TARGET',
