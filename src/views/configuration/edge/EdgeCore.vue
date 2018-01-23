@@ -214,7 +214,7 @@
     </div>
 
     <div class="page-btn" v-else>
-      <span v-if="items.processStateCode === 'PROCESS_STATE_02'">
+      <span v-if="isProcessComplete">
         <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
         <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
         <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
@@ -316,6 +316,11 @@
         return this.items.coreConfigCompList
             .map(({diskMountSize}) => parseInt(diskMountSize))
             .reduce((p, n) => p + n)
+      },
+      isProcessComplete (){
+        return (this.items.processStateCode !== null &&
+        this.items.processStateCode !== '' &&
+        this.items.processStateCode === 'PROCESS_STATE_02')
       }
     },
 

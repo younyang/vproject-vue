@@ -21,6 +21,10 @@ i, em {
   font-style: normal;
 }
 
+.text-primary {
+  color: $primary-color;
+}
+
 /**
  * Header
  */
@@ -247,12 +251,13 @@ i, em {
   height: 20px;
   border: 1px solid $border-color;
   background: #eee;
+  line-height: 16px;
   &:after {
     float: right;
     content: '';
     display: block;
     height: 0;
-    margin: 5px 0 0 6px;
+    margin: 7px 0 0 6px;
     border-left: 2px solid #000;
     border-top: 2px solid transparent;
     border-bottom: 2px solid transparent;
@@ -260,12 +265,6 @@ i, em {
   &:hover {
     background: #ccc;
     color: inherit;
-  }
-}
-a.btn-in-table {
-  line-height: 17px;
-  &:after {
-    margin-top: 7px;
   }
 }
 
@@ -313,6 +312,11 @@ a.btn-in-table {
 
 // Check ICON
 span.ico {
+  display: inline-block;
+  &.mid {
+    vertical-align: middle;
+  }
+
   button {
     border: 0;
     line-height: 1;
@@ -564,6 +568,11 @@ textarea.form-control {
     display: none !important;
   }
 
+  &.protocol {
+    min-width: 85px;
+    width: 85px;
+  }
+
   &.pops {
     min-width: 100px;
     width: 100px;
@@ -768,6 +777,7 @@ section.board {
     padding: 0.55rem 0.65rem;
     box-shadow: none;
     border: 1px solid $line-color;
+    font-size: 12px;
   }
 
   .form-control,
@@ -984,7 +994,7 @@ section.board {
   }
   .form-group {
     margin: 0;
-    border-bottom: 1px solid #e4e4e4;
+    border-bottom: 1px solid $line-color;
   }
   .col-form-legend,
   .col-form-label {
@@ -1010,6 +1020,10 @@ section.board {
       display: inline-block;
       max-width: 320px;
     }
+    .multiselect.multiple {
+      max-width: 100%;
+    }
+
     textarea.form-control {
       display: block;
       max-width: 100%;
@@ -1026,11 +1040,11 @@ section.board {
       display: none !important;
     }
 
-    input.form-control:invalid ~ .invalid-feedback,
-    input.form-control.is-invalid + .invalid-feedback,
-    .multiselect + .invalid-feedback {
-      display: inline-block;
-      margin-left: 20px;
+    .multiselect.invalid .multiselect__tags {
+      border-color: #f86c6b
+    }
+    .multiselect.invalid + .invalid-feedback {
+      display: block;
     }
   }
 
@@ -1056,6 +1070,10 @@ section.board {
     font-size: .6rem;
   }
 
+  .form-text-alone {
+    line-height: 27px;
+  }
+
   .table.sub {
     margin: 5px 0;
     .form-control,
@@ -1065,7 +1083,24 @@ section.board {
   }
 }
 
+// formView in formView
+.form-in-view {
+  border-top: 1px solid $line-color;
+  border-left: 1px solid $line-color;
+  border-right: 1px solid $line-color;
 
+  .col-form-legend,
+  .col-form-label {
+    background: #f0f0f0;
+  }
+  .col-form-legend + div,
+  .col-form-label + div {
+    .form-control,
+    .multiselect {
+      max-width: 150px;
+    }
+  }
+}
 
 
 

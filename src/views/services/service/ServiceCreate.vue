@@ -1,57 +1,66 @@
 <template>
   <div class="animated fadeIn">
-    <b-form class="formView">
-      <!-- Account -->
+    <b-form class="formView" :validated="inValidForm" novalidate>
+      <!-- Company -->
       <b-form-fieldset
         :invalid-feedback="$valid.msg.select"
         :horizontal="true">
         <template slot="label">
           Company<i class="require">*</i>
         </template>
+
         <multiselect
-          v-model="accountId"
-          :options="code.accountId"
+          v-model="companyCode"
+          track-by="code"
+          label="codeName"
+          :class="{'invalid': !valid.companyCode }"
+          :options="code.companyCode"
           :showLabels="false"
-          :custom-label="getSelectLabel"
-          :loading="isLoad.accountId"
-          placeholder="Select account"
+          :loading="isLoad.companyCode"
+          placeholder="Select company"
         ></multiselect>
       </b-form-fieldset>
 
       <!-- Service Name -->
       <b-form-fieldset
         description="※ Service Name은 도메인에 포함되기 때문에 영문, 숫자만 입력 가능합니다."
+        :invalid-feedback="feedback.serviceName"
         :horizontal="true">
         <template slot="label">
           Service Name<i class="require">*</i>
         </template>
 
-        <b-input-group>
-          <b-form-input
-            v-model="items.serviceName"
-            type="text"
-            placeholder="Enter service name">
-          </b-form-input>
-          <b-input-group-button slot="right" class="ml-2">
-            <b-button variant="outline-secondary" @click="fetchNameExists">중복확인</b-button>
-          </b-input-group-button>
-        </b-input-group>
+        <b-form-input
+          v-model="items.serviceName"
+          type="text"
+          placeholder="Enter service name"
+          :state="serviceNameExists"
+          required
+        ></b-form-input>
+        <b-button variant="in-table" @click="fetchNameExists">중복확인</b-button>
+        <span class="ico ml-2 mid" v-if="serviceNameExists !== null">
+          <i v-if="serviceNameExists === true" class="fa fa-check-circle"></i>
+          <i v-if="serviceNameExists === false" class="fa fa-times-circle"></i>
+        </span>
       </b-form-fieldset>
 
       <!-- Service Type -->
       <b-form-fieldset
-        label="Service Type *"
-        :label-cols="3"
+        :invalid-feedback="$valid.msg.require"
         :horizontal="true">
+        <template slot="label">
+          Service Type<i class="require">*</i>
+        </template>
 
         <multiselect
           v-model="serviceTypeCode"
+          class="multiple"
+          track-by="code"
+          label="codeName"
           :multiple="true"
           :showLabels="false"
           :options="code.serviceTypeCode"
-          label="codeName"
           :loading="isLoad.serviceTypeCode"
-          track-by="code"
           @select="onSelectType"
           @remove="onRemoveType"
           placeholder="Select service type"
@@ -61,122 +70,137 @@
       <!-- Domain -->
       <b-form-fieldset
         label="Domain"
-        :label-cols="3"
         :horizontal="true">
-        <ul class="icons-list">
-          <li v-for="(domain, index) in serviceDomainList">
-            <i class="bg-primary" v-b-tooltip.hover :title="domain.serviceCodeName">{{ domain.serviceCodeVal }}</i>
-            <div class="desc">
-              <small>Domain</small>
-              <div class="title">
-                <multiselect
-                  label="codeName"
-                  v-model="domain.domainProtocolCode"
-                  class="inline sm protocol"
-                  :allowEmpty="true"
-                  :showLabels="false"
-                  :searchable="false"
-                  :options="code.domainProtocolCode"
-                  :loading="isLoad.domainProtocolCode"
-                  placeholder="://"
-                ></multiselect>
-                {{ domain.serviceCodeVal | lowercase }}.{{ items.serviceName }}.vessels.com
-              </div>
-            </div>
-            <div class="value">
-              <div class="small text-muted">Hashing Type</div>
-              <multiselect
-                v-model="domain.domainHashingTypeCode"
-                label="codeName"
-                class="inline sm"
-                :allowEmpty="true"
-                :showLabels="false"
-                :searchable="false"
-                :options="code.domainHashingTypeCode"
-                :loading="isLoad.domainHashingTypeCode"
-                placeholder="Select"
-              ></multiselect>
-            </div>
-          </li>
-        </ul>
+        <small class="form-text-alone text-muted" v-if="!items.serviceDomainList.length">※ Service Name, Service Type 선택 시, 자동 생성</small>
+
+        <!-- domain list -->
+        <b-table
+          v-if="items.serviceDomainList.length"
+          class="sub"
+          show-empty
+          :items="items.serviceDomainList"
+          :fields="{
+            serviceTypeCode: {label: '&nbsp;', 'class': 'index'},
+            domainProtocolCode: {label: 'Domain<i class=\'require\'>*</i>', 'class': 'text-left'},
+            domainHashingTypeCode: {label: 'Hasing type<i class=\'require\'>*</i>', 'class': 'w-25'}
+          }"
+        >
+          <template slot="serviceTypeCode" scope="row">
+            {{ row.value.codeValChar1 }}
+          </template>
+
+          <template slot="domainProtocolCode" scope="row">
+            <multiselect
+              label="codeName"
+              v-model="row.item.domainProtocolCode"
+              class="protocol noEmpty"
+              :allowEmpty="false"
+              :showLabels="false"
+              :searchable="false"
+              :options="code.domainProtocolCode"
+              :loading="isLoad.domainProtocolCode"
+              placeholder="://"
+            ></multiselect>
+            <span class="font-text-alone">
+              <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.vessels.com</span>
+          </template>
+
+          <template slot="domainHashingTypeCode" scope="row">
+            <multiselect
+              label="codeName"
+              v-model="row.item.domainHashingTypeCode"
+              class="noEmpty"
+              :allowEmpty="false"
+              :showLabels="false"
+              :searchable="false"
+              :options="code.domainHashingTypeCode"
+              :loading="isLoad.domainHashingTypeCode"
+            ></multiselect>
+          </template>
+        </b-table>
       </b-form-fieldset>
 
       <!-- CNAME -->
       <b-form-fieldset
         label="CNAME 사용여부"
-        :label-cols="3"
         :horizontal="true">
         <c-switch
-          type="icon"
-          variant="success"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
           v-model="items.cnameUseYn"
-          :pill="true"
         ></c-switch>
       </b-form-fieldset>
 
       <!-- CNAME Domain -->
       <b-form-fieldset
         v-if="items.cnameUseYn"
-        label="CNAME 도메인"
-        :label-cols="3"
+        label="CNAME 도메인<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
         :horizontal="true">
         <b-form-input
           v-model="items.cnameDomainName"
           type="text"
+          required
         ></b-form-input>
       </b-form-fieldset>
 
       <!-- SSL 인증서 -->
       <b-form-fieldset
         label="SSL 인증서"
-        :label-cols="3"
         :horizontal="true">
         <c-switch
-          type="icon"
-          variant="success"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
           v-model="items.sslCertUseYn"
-          :pill="true"
         ></c-switch>
       </b-form-fieldset>
 
       <!-- SSL 인증서 정보 입력-->
       <b-form-fieldset
         v-if="items.sslCertUseYn"
-        label="SSL 인증서"
-        :label-cols="3"
+        label="SSL 인증서<i class='require'>*</i>"
         :horizontal="true">
 
-        <div class="form-in-group">
+        <div class="form-in-view">
           <!-- Cert -->
           <b-form-fieldset
-            label="Cert"
-            :label-cols="2"
+            label="Cert<i class='require'>*</i>"
+            :invalid-feedback="$valid.msg.require"
             :horizontal="true">
             <b-form-textarea
               v-model="items.sslCert"
               :rows="2"
               placeholder="Cert"
+              required
             ></b-form-textarea>
           </b-form-fieldset>
+
+          <!-- Key -->
           <b-form-fieldset
-            label="Key"
-            :label-cols="2"
+            label="Key<i class='require'>*</i>"
+            :invalid-feedback="$valid.msg.require"
             :horizontal="true">
             <b-form-textarea
               v-model="items.sslCertKey"
               :rows="2"
               placeholder="Key"
+              required
             ></b-form-textarea>
           </b-form-fieldset>
+
+          <!-- 만료일 -->
           <b-form-fieldset
             label="만료일"
-            :label-cols="2"
+            :invalid-feedback="$valid.msg.require"
             :horizontal="true">
             <b-form-input
               type="date"
               v-model="items.sslCertExpireDate"
+              required
             ></b-form-input>
           </b-form-fieldset>
         </div>
@@ -185,14 +209,13 @@
       <!-- 사용여부 -->
       <b-form-fieldset
         label="사용여부"
-        :label-cols="3"
         :horizontal="true">
         <c-switch
-          type="icon"
-          variant="success"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
           v-model="items.serviceUseYn"
-          :pill="true"
         ></c-switch>
       </b-form-fieldset>
     </b-form>
@@ -201,13 +224,6 @@
       <b-button type="button" variant="outline-secondary" :to="{ name: 'Service 관리' }">취소</b-button>
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
-
-    <b-modal hide-footer title="Message" size="sm" v-model="isModalMessage" :class="state.serviceName ? 'modal-primary' : 'modal-danger'">
-      <div class="d-block text-center">
-        <h5>{{ modalMessage }}</h5>
-      </div>
-      <b-btn class="mt-4" :variant="state.serviceName ? 'outline-primary' : 'outline-danger'" block @click="isModalMessage = false">Close</b-btn>
-    </b-modal>
   </div>
 </template>
 
@@ -222,8 +238,8 @@
     data (){
       return {
         items: {
-          accountId: null,
-          serviceName: "",
+          companyCode: null,
+          serviceName: '',
           serviceTypeCode: [],
           serviceDomainList: [],
           cnameUseYn: true,
@@ -235,32 +251,30 @@
           serviceUseYn: true
         },
         code: {
-          accountId: [],
+          companyCode: [],
           serviceTypeCode: [],
           domainProtocolCode: [],
           domainHashingTypeCode: []
         },
         isLoad: {
-          accountId: true,
+          companyCode: true,
           serviceTypeCode: true,
           domainProtocolCode: true,
           domainHashingTypeCode: true
         },
-        isModalMessage: false,
-        modalMessage: '',
-        state: {
-          serviceName: true
-        }
+
+        serviceNameExists: null,
+        inValidForm: false
       }
     },
 
     computed: {
-      accountId: {
+      companyCode: {
         get () {
-          return this.code.accountId.find(obj => obj.accountId === this.items.accountId) || null;
+          return this.code.companyCode.find(({ code }) => code === this.items.companyCode) || null;
         },
         set (newValue) {
-          this.items.accountId = newValue !== null ? newValue.accountId : null;
+          this.items.companyCode = newValue !== null ? newValue.code : '';
         }
       },
       serviceTypeCode: {
@@ -275,27 +289,37 @@
             : [];
         }
       },
-      serviceDomainList (){
-        return this.items.serviceDomainList.length > 0
-          ? this.items.serviceDomainList.map(obj => {
-            const serviceCode = this.getCodeObj(obj.serviceTypeCode);
-            return Object.assign({}, obj, {
-              domainProtocolCode: this.code.domainProtocolCode.find(({code}) => code === obj.domainProtocolCode),
-              domainHashingTypeCode: this.code.domainHashingTypeCode.find(({code}) => code === obj.domainHashingTypeCode),
-              serviceCodeVal: serviceCode.codeValChar1,
-              serviceCodeName: serviceCode.codeName
-            })
-          })
-          : [];
+
+      // validation
+      valid (){
+        return {
+          companyCode: this.items.companyCode === null ?
+            this.items.companyCode :
+            this.items.companyCode.length > 0
+        }
+      },
+
+      // validation feedback
+      feedback (){
+        return {
+          serviceName: (this.serviceNameExists === false && this.items.serviceName.length === 0) ?
+            '입력된 항목이 없습니다.'
+            : (this.serviceNameExists === false && this.items.serviceName.length > 0) ?
+            '이미 등록된 Service Name이 있습니다'
+            : this.items.serviceName.length === 0 ?
+            this.$valid.msg.require : ''
+        }
       }
     },
 
     created (){
-      // Account Code
-      this.$https.get('/services/accounts')
+      // Company Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'COMPANY' }
+        })
         .then((res) => {
-          this.isLoad.accountId = false;
-          this.code.accountId = res.data.items;
+          this.isLoad.companyCode = false;
+          this.code.companyCode = res.data.items;
       });
       // Service Type Code
       this.$https.get('/system/commonCode', {
@@ -329,62 +353,81 @@
     methods: {
       onSubmit (){
         // Service Domain List
-        this.items.serviceDomainList = this.serviceDomainList.map(obj => {
-          return {
-            serviceTypeCode: obj.serviceTypeCode,
-            domainProtocolCode: obj.domainProtocolCode !== null ? obj.domainProtocolCode.code : null,
-            domainHashingTypeCode: obj.domainHashingTypeCode !== null ? obj.domainHashingTypeCode.code : null
-          }
-        });
+        this.items.serviceDomainList = this.items.serviceDomainList.length ?
+          this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
+            return {
+              serviceTypeCode: serviceTypeCode.code,
+              domainProtocolCode: domainProtocolCode.code,
+              domainHashingTypeCode: domainHashingTypeCode.code
+            }
+          }) : [];
         // History
         this.items.modifyHistReason = '등록';
 
-        this.$https.post('/services', this.items)
-          .then((res) => {
-            this.$router.push({ name: 'Service 상세', params: { id: res.data.items }})
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        if (this.validate()){
+          this.$https.post('/services', this.items)
+            .then((res) => {
+              this.$router.push({ name: 'Service 상세', params: { id: res.data.items }})
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
       fetchNameExists (){
+        if (!this.items.serviceName){
+          this.serviceNameExists = false;
+          return;
+        }
         this.$https.get('/services/name', {
             serviceName: this.items.serviceName
           })
           .then((res) => {
-            const isSuccess = res.data.result === 'Success';
-            this.state.serviceName = isSuccess;
-            this.modalMessage = isSuccess ? '사용하실 수 있습니다.' : 'Service Name 이 중복입니다.';
-            if (!isSuccess){
-              this.items.serviceName = '';
-            }
-            this.isModalMessage = true;
+            this.serviceNameExists = res.data.result === 'Success';
           });
       },
 
-      getCodeObj (code){
-        return this.code.serviceTypeCode.find(obj => obj.code === code) || {};
-      },
+      validate (){
+        const {
+          companyCode,
+          serviceName,
+          serviceTypeCode,
+          cnameDomainName,
+          sslCert,
+          sslCertKey,
+          sslCertExpireDate,
+        } = this.items;
 
-      getSelectLabel (option){
-        return `${option.accountName}/${option.companyName}`
+        let validateItems = { companyCode, serviceName, serviceTypeCode };
+        if (this.items.cnameUseYn){
+          validateItems = {...validateItems, cnameDomainName };
+        }
+        if (this.items.sslCertUseYn){
+          validateItems = {...validateItems, sslCert, sslCertKey, sslCertExpireDate };
+        }
+        const validate = this.$valid.all(validateItems);
+
+        this.inValidForm = !validate;
+        return validate;
       },
 
       onSelectType (item){
-        const isContain = this.serviceDomainList.find(({serviceCodeVal}) => serviceCodeVal === item.codeValChar1);
+        const isContain = this.items.serviceDomainList.length ?
+          this.items.serviceDomainList.find(({ serviceTypeCode }) => serviceTypeCode.codeValChar1 === item.codeValChar1)
+          : false;
         if (!isContain){
           this.items.serviceDomainList.push({
-            serviceTypeCode: item.code,
-            domainProtocolCode: this.code.domainProtocolCode[0].code,
-            domainHashingTypeCode: this.code.domainHashingTypeCode[0].code
+            serviceTypeCode: item,
+            domainProtocolCode: this.code.domainProtocolCode[0],
+            domainHashingTypeCode: this.code.domainHashingTypeCode[0]
           });
         }
       },
 
       onRemoveType (item){
-        this.items.serviceDomainList = this.item.serviceDomainList.filter(({serviceTypeCode}) => {
-          return serviceTypeCode !== item.code
+        this.items.serviceDomainList = this.items.serviceDomainList.filter(({serviceTypeCode}) => {
+          return serviceTypeCode.code !== item.code
         });
       }
     }

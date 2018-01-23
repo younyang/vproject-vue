@@ -189,7 +189,7 @@
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
       <b-button
-        v-if="items.processStateCode === 'PROCESS_STATE_02'"
+        v-if="isProcessComplete"
         type="button"
         variant="primary"
         @click="onEdit"
@@ -291,6 +291,14 @@
           msg: '',
           action (){}
         }
+      }
+    },
+
+    computed: {
+      isProcessComplete (){
+        return (this.items.processStateCode !== null &&
+        this.items.processStateCode !== '' &&
+        this.items.processStateCode === 'PROCESS_STATE_02')
       }
     },
 

@@ -174,7 +174,7 @@
           serviceId: {label: 'ID'},
           serviceName: {label: 'Service Name', 'class': 'text-left'},
           serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
-          accountName: {label: 'Account'},
+          companyName: {label: 'Company'},
           cnameUseYn: {label: 'CNAME'},
           sslCertUseYn: {label: 'SSL 인증서'},
           createDateTime: {label: '등록일'},
@@ -208,8 +208,8 @@
             code: 'service',
             codeName: 'Service Name'
           },{
-            code: 'account',
-            codeName: 'Account'
+            code: 'company',
+            codeName: 'Company'
           }],
           searchDateType: [{
             code: 'createDate',
