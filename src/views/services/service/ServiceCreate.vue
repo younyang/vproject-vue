@@ -34,19 +34,21 @@
           v-model="items.serviceName"
           type="text"
           placeholder="Enter service name"
-          :state="serviceNameExists"
+          :state="valid.serviceName"
+          @input="serviceNameExists = null"
+          :formatter="lowerFomatter"
           required
         ></b-form-input>
         <b-button variant="in-table" @click="fetchNameExists">중복확인</b-button>
         <span class="ico ml-2 mid" v-if="serviceNameExists !== null">
-          <i v-if="serviceNameExists === true" class="fa fa-check-circle"></i>
-          <i v-if="serviceNameExists === false" class="fa fa-times-circle"></i>
+          <i v-if="serviceNameExists === 'success'" class="fa fa-check-circle"></i>
+          <i v-if="serviceNameExists === 'fail'" class="fa fa-times-circle"></i>
         </span>
       </b-form-fieldset>
 
       <!-- Service Type -->
       <b-form-fieldset
-        :invalid-feedback="$valid.msg.require"
+        :invalid-feedback="$valid.msg.select"
         :horizontal="true">
         <template slot="label">
           Service Type<i class="require">*</i>
@@ -55,6 +57,7 @@
         <multiselect
           v-model="serviceTypeCode"
           class="multiple"
+          :class="{'invalid': !valid.serviceTypeCode }"
           track-by="code"
           label="codeName"
           :multiple="true"
@@ -102,7 +105,8 @@
               placeholder="://"
             ></multiselect>
             <span class="font-text-alone">
-              <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.vessels.com</span>
+              <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.vessels.com
+            </span>
           </template>
 
           <template slot="domainHashingTypeCode" scope="row">
@@ -174,7 +178,6 @@
             <b-form-textarea
               v-model="items.sslCert"
               :rows="2"
-              placeholder="Cert"
               required
             ></b-form-textarea>
           </b-form-fieldset>
@@ -187,7 +190,6 @@
             <b-form-textarea
               v-model="items.sslCertKey"
               :rows="2"
-              placeholder="Key"
               required
             ></b-form-textarea>
           </b-form-fieldset>
@@ -229,6 +231,7 @@
 
 <script>
   import cSwitch from '@/components/Switch'
+
   export default {
     name: 'services',
     components: {
@@ -253,6 +256,7 @@
         code: {
           companyCode: [],
           serviceTypeCode: [],
+          serviceTypeCodeAll: [],
           domainProtocolCode: [],
           domainHashingTypeCode: []
         },
@@ -293,19 +297,29 @@
       // validation
       valid (){
         return {
+          serviceName: (this.serviceNameExists === null && this.items.serviceName.length === 0) ?
+            this.serviceNameExists :
+            (this.items.serviceName.length > 0 &&
+            /^[A-Za-z0-9]*$/.test(this.items.serviceName) &&
+            this.serviceNameExists === 'success'),
           companyCode: this.items.companyCode === null ?
             this.items.companyCode :
-            this.items.companyCode.length > 0
+            this.items.companyCode.length > 0,
+          serviceTypeCode: this.items.serviceTypeCode.length
         }
       },
 
       // validation feedback
       feedback (){
         return {
-          serviceName: (this.serviceNameExists === false && this.items.serviceName.length === 0) ?
+          serviceName: (!(/^[A-Za-z0-9]*$/.test(this.items.serviceName)) && this.items.serviceName.length > 0) ?
+            '영문, 숫자만 입력하십시오.'
+            : (this.serviceNameExists === null && this.items.serviceName.length > 0) ?
+            '중복확인은 필수입니다.'
+            : (this.serviceNameExists === 'not') ?
             '입력된 항목이 없습니다.'
-            : (this.serviceNameExists === false && this.items.serviceName.length > 0) ?
-            '이미 등록된 Service Name이 있습니다'
+            : (this.serviceNameExists === 'fail') ?
+            '이미 등록된 Service Name이 있습니다.'
             : this.items.serviceName.length === 0 ?
             this.$valid.msg.require : ''
         }
@@ -327,9 +341,10 @@
         })
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items.filter(({code, codeName, codeValChar1}) => {
-            const number = code.split('_')[2];
-            return !(number.length === 4 && codeName === codeValChar1);
+          this.code.serviceTypeCodeAll = res.data.items;
+          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
+            const codeSplit = code.split('_')[2];
+            return codeSplit.length === 4;
           });
         });
       // Domain Protocol Code
@@ -352,43 +367,48 @@
 
     methods: {
       onSubmit (){
-        // Service Domain List
-        this.items.serviceDomainList = this.items.serviceDomainList.length ?
-          this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
-            return {
-              serviceTypeCode: serviceTypeCode.code,
-              domainProtocolCode: domainProtocolCode.code,
-              domainHashingTypeCode: domainHashingTypeCode.code
-            }
-          }) : [];
+        const submitItems = {
+          ...this.items,
+          serviceDomainList: this.items.serviceDomainList.length ?
+            this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
+              let code = serviceTypeCode.code;
+              let codeSplit = serviceTypeCode.code.split('_')[2];
+              return {
+                serviceTypeCode: codeSplit.length === 4 ? code.slice(0,code.length-2) : code,
+                domainProtocolCode: domainProtocolCode.code,
+                domainHashingTypeCode: domainHashingTypeCode.code
+              }
+            }) : []
+        };
         // History
         this.items.modifyHistReason = '등록';
 
-        if (this.validate()){
-          this.$https.post('/services', this.items)
+        if (this.validate(submitItems)){
+          this.$https.post('/services', submitItems)
             .then((res) => {
               this.$router.push({ name: 'Service 상세', params: { id: res.data.items }})
             })
             .catch((error) => {
               console.log(error);
             });
+
         }
       },
 
       fetchNameExists (){
         if (!this.items.serviceName){
-          this.serviceNameExists = false;
+          this.serviceNameExists = 'not';
           return;
         }
         this.$https.get('/services/name', {
             serviceName: this.items.serviceName
           })
           .then((res) => {
-            this.serviceNameExists = res.data.result === 'Success';
+            this.serviceNameExists = res.data.result === 'Success' ? 'success' : 'fail';
           });
       },
 
-      validate (){
+      validate (submitItems){
         const {
           companyCode,
           serviceName,
@@ -397,28 +417,29 @@
           sslCert,
           sslCertKey,
           sslCertExpireDate,
-        } = this.items;
+        } = submitItems;
 
-        let validateItems = { companyCode, serviceName, serviceTypeCode };
+        let validateItems = { companyCode, serviceName, ...serviceTypeCode };
         if (this.items.cnameUseYn){
           validateItems = {...validateItems, cnameDomainName };
         }
         if (this.items.sslCertUseYn){
           validateItems = {...validateItems, sslCert, sslCertKey, sslCertExpireDate };
         }
-        const validate = this.$valid.all(validateItems);
+        const validate = (this.$valid.all(validateItems) && this.serviceNameExists === 'success');
 
         this.inValidForm = !validate;
         return validate;
       },
 
       onSelectType (item){
+        const domain = this.getServiceDomain(item);
         const isContain = this.items.serviceDomainList.length ?
-          this.items.serviceDomainList.find(({ serviceTypeCode }) => serviceTypeCode.codeValChar1 === item.codeValChar1)
+          this.items.serviceDomainList.find(({ serviceTypeCode }) => serviceTypeCode.code === domain.code)
           : false;
         if (!isContain){
           this.items.serviceDomainList.push({
-            serviceTypeCode: item,
+            serviceTypeCode: domain,
             domainProtocolCode: this.code.domainProtocolCode[0],
             domainHashingTypeCode: this.code.domainHashingTypeCode[0]
           });
@@ -426,9 +447,27 @@
       },
 
       onRemoveType (item){
-        this.items.serviceDomainList = this.items.serviceDomainList.filter(({serviceTypeCode}) => {
-          return serviceTypeCode.code !== item.code
-        });
+        const domain = this.getServiceDomain(item);
+        const isContain = this.items.serviceTypeCode.filter(val => {
+          return domain.code === val.slice(0, val.length - 2);
+        }).length > 0;
+
+        if (!isContain){
+          this.items.serviceDomainList = this.items.serviceDomainList.filter(({serviceTypeCode}) => {
+            return serviceTypeCode.code !== domain.code
+          });
+        }
+      },
+
+      lowerFomatter (value) {
+        return value.toLowerCase()
+      },
+
+      getServiceDomain (item){
+        const codeSplit = item.code.split('_')[2];
+        return codeSplit.length === 4 ?
+          this.code.serviceTypeCodeAll.find(({ code }) => item.code.slice(0, item.code.length - 2) === code)
+          : code;
       }
     }
   }

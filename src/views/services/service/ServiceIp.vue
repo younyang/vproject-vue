@@ -29,9 +29,9 @@
           <span
             v-else
             class="badge"
-            :class="{'primary' : items.ipRestrictUseYn }">
-          {{ items.ipRestrictUseYn ? '사용' : '미사용' }}
-        </span>
+            :class="{'primary' : items.ipRestrictUseYn }"
+          >{{ items.ipRestrictUseYn ? '사용' : '미사용' }}
+          </span>
         </b-form-fieldset>
 
         <!-- 제한 IP(공통) -->
@@ -145,7 +145,6 @@
         <div class="form-row">
           <!-- 수정일 -->
           <b-form-fieldset
-            v-if="items.modifyDateTime"
             label="수정일"
             :horizontal="true">
             <b-form-input
@@ -225,16 +224,6 @@
         <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
-
-    <!-- Message Alert Modal -->
-    <b-modal title="Message" size="sm" v-model="modal.open">
-      <div class="d-block text-center">
-        <p>{{ modal.msg }}</p>
-      </div>
-      <div slot="modal-footer" class="mx-auto">
-        <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
-      </div>
-    </b-modal>
   </div>
 </template>
 
@@ -284,13 +273,7 @@
         isEdit: false,
         isModalHistory: false,
 
-        inValidForm: false,
-
-        modal: {
-          open: false,
-          msg: '',
-          action (){}
-        }
+        inValidForm: false
       }
     },
 
@@ -327,12 +310,16 @@
       // IP Restriction Data
       this.$https.get(detailUrl)
         .then((res) => {
-          this.items = res.data.items;
-          this.originItems = JSON.parse(JSON.stringify(this.items))
+          if (res.data.items === null){
+            this.isCreate = true;
+            this.isEdit = true;
+          }else{
+            this.items = res.data.items;
+            this.originItems = JSON.parse(JSON.stringify(this.items))
+          }
         })
         .catch((error) => {
-          this.isCreate = true;
-          this.isEdit = true;
+          console.log(error);
         })
     },
 
@@ -358,37 +345,24 @@
 
       onSubmit (){
         const { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason } = this.items;
-        const items = { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason };
-        const validate = this.$valid.all(items);
+        const submitItems = { ipRestrictUseYn, ipRestrictServiceList, modifyHistReason };
+        const validate = this.$valid.all(submitItems);
+        const submitAction = (this.isCreate) ?
+          () => this.$https.post(`/services/${this.id}/restriction`, submitItems) :
+          () => this.$https.put(`/services/${this.id}/restriction`, submitItems);
+
+
         this.inValidForm = !validate;
 
         if (validate) {
-          if (this.isCreate){
-            this.$https.post(`/services/${this.id}/restriction`, items)
-              .then(this.onSubmitComplete)
-              .catch((error) => {
-                console.log(error);
-              });
-          } else {
-            this.$https.put(`/services/${this.id}/restriction`, items)
-              .then(this.onSubmitComplete)
-              .catch((error) => {
-                console.log(error);
-              });
-          }
+          submitAction()
+            .then(() => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         }
-      },
-
-      onSubmitComplete (){
-        const router = this.$router;
-        const status = this.isCreate ? '저장' : '수정';
-        this.modal = {
-          open: true,
-          msg: `${status}이 완료되었습니다.`,
-          action (){
-            router.go(router.currentRoute);
-          }
-        };
       },
 
       getHistoryLink (rowId){

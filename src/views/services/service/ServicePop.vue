@@ -6,83 +6,74 @@
     </content-header>
 
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
         PoP
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
+
     <b-collapse id="formDefault" visible>
-      <b-card>
-        <section class="board">
-          <b-table
-            striped
-            bordered
-            hover
-            show-empty
-            :fields="popFields"
-            :items="popItems"
-          >
-          </b-table>
-        </section>
-      </b-card>
+      <section class="board">
+        <b-table
+          show-empty
+          :fields="popFields"
+          :items="popItems"
+        >
+        </b-table>
+      </section>
     </b-collapse>
 
     <!-- 배포이력 -->
     <div class="collapse-title" v-if="false">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         배포이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" visible v-if="false">
-      <b-card>
-        <!-- 배포일시 -->
-        <b-form-fieldset
-          label="배포일시"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="deploy.modifyDateTime"
-            plaintext
-            type="text"
-          ></b-form-input>
-        </b-form-fieldset>
-        <!-- 배포자 -->
-        <b-form-fieldset
-          label="배포자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="deploy.modifyId"
-            plaintext
-            type="text"
-          ></b-form-input>
-        </b-form-fieldset>
-        <!-- 배포상태 -->
-        <b-form-fieldset
-          label="배포상태"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="deploy.popDeployStateCodeName"
-            plaintext
-            class="inline"
-            type="text"
-          ></b-form-input>
-          <b-button
-            class="btn-in"
-            v-if="deploy.popDeployStateCode === 'FAIL'"
-            @click="isModalMessage = true"
-          >재실행</b-button>
-          <b-button class="btn-in" @click="showHistory">이력</b-button>
-        </b-form-fieldset>
-      </b-card>
+    <b-collapse id="formHistory" visible v-if="false">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 배포일시 -->
+          <b-form-fieldset
+            label="배포일시"
+            :horizontal="true">
+            <b-form-input
+              :value="deploy.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 배포자 -->
+          <b-form-fieldset
+            label="배포자"
+            :horizontal="true">
+            <b-form-input
+              :value="deploy.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+        <div class="form-row">
+          <!-- 배포상태 -->
+          <b-form-fieldset
+            label="배포상태"
+            :horizontal="true">
+            <input
+              type="text"
+              readonly="readonly"
+              class="form-control-plaintext"
+              style="width:50px"
+              :value="deploy.popDeployStateCodeName"
+            >
+            <b-button
+              variant="in-table"
+              @click="isModalMessage = true"
+            >재실행</b-button>
+            <b-button variant="in-table" @click="showHistory">이력</b-button>
+          </b-form-fieldset>
+        </div>
+      </b-form>
     </b-collapse>
 
 
@@ -97,9 +88,6 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
-          hover
           show-empty
           :items="history.items"
           :fields="history.fields"
@@ -194,14 +182,6 @@
     },
 
     created (){
-      // History
-      const historyId = this.$route.query.histories;
-      const detailUrl = historyId !== undefined ? `/services/${this.id}/restriction/histories/${historyId}` : `/services/${this.id}/restriction`;
-
-      if (historyId){
-        document.querySelector('body.app').classList.add('history-mode')
-      }
-
       // Service Name
       this.$https.get(`/services/${this.id}`)
         .then((res) => {

@@ -30,7 +30,12 @@ export default {
 
   isObject (obj, rule='require'){
     let valid = true;
-    Object.keys(obj).forEach(key => {
+    let itemKeys = Object.keys(obj);
+    if (itemKeys.length === 0){
+      return false;
+    }
+
+    itemKeys.forEach(key => {
       if (!this.is(obj[key], rule)){
         valid = false;
       }
@@ -40,6 +45,9 @@ export default {
 
   isArray (array, rule='require'){
     let valid = true;
+    if (array.length === 0){
+      return false;
+    }
     array.forEach(val => {
       if( typeof val === 'string' || typeof val === 'number' || val === null){
         if (!this.is(val, rule)){
@@ -50,7 +58,7 @@ export default {
           valid = false;
         }
       }
-    })
+    });
     return valid;
   },
 

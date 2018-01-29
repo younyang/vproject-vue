@@ -109,7 +109,7 @@
 
         <!-- Content -->
         <div class="process-content">
-          <h5><i class="fa fa-circle"></i> {{ activeItems.processTask.interlockTargetCodeName }}</h5>
+          <h3 class="content-title"><i class="fa fa-circle"></i> {{ activeItems.processTask.interlockTargetCodeName }}</h3>
 
           <div class="timeInfo">
             <span class="mr-2"><strong>시작</strong>: {{ activeItems.processTask.taskBeginDatetime }}</span> /
