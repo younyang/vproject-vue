@@ -456,18 +456,25 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>
       </section>
+
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
 
       <div slot="modal-footer">
         <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
@@ -531,7 +538,12 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
 
         serviceItems: {

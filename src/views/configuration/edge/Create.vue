@@ -1,120 +1,129 @@
 <template>
   <div class="animated fadeIn">
-    <b-form>
-      <b-card>
-        <!-- IP -->
-        <b-form-fieldset
-          label="IP"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            v-model="items.ip"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
+    <b-form class="formView" :validated="inValidForm" novalidate>
+      <!-- IP -->
+      <b-form-fieldset
+        label="IP"
+        :horizontal="true">
+        <b-form-input
+          v-model="items.ip"
+          type="text"
+          plaintext
+        ></b-form-input>
+      </b-form-fieldset>
 
-        <!-- Host Name -->
-        <b-form-fieldset
-          label="Host Name"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.hostName"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
+      <!-- Host Name -->
+      <b-form-fieldset
+        label="Host Name"
+        :horizontal="true">
+        <b-form-input
+          :value="items.hostName"
+          type="text"
+          plaintext
+        ></b-form-input>
+      </b-form-fieldset>
 
-        <!-- PoP 선택 -->
-        <b-form-fieldset
-          label="PoP 선택 *"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            v-model="popId"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popId"
-            :loading="isLoad.popId"
-            label="popName"
-            placeholder="선택"
-          ></multiselect>
-        </b-form-fieldset>
+      <!-- PoP 선택 -->
+      <b-form-fieldset
+        label="PoP 선택<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <multiselect
+          v-model="popId"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popId"
+          :loading="isLoad.popId"
+          :class="{'invalid': !valid.popId }"
+          track-by="popId"
+          label="popName"
+          placeholder="Select PoP"
+        ></multiselect>
+      </b-form-fieldset>
 
-        <!-- 구분 -->
-        <b-form-fieldset
-          label="구분 *"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-radio-group
-            :options="[{ text: 'Edge', value: 'Edge' },{ text: 'Relay', value: 'Relay' }]"
-            v-model="items.edgeRelayName"
-          ></b-form-radio-group>
-        </b-form-fieldset>
+      <!-- 구분 -->
+      <b-form-fieldset
+        label="구분<i class='require'>*</i>"
+        :horizontal="true">
+        <b-form-radio-group
+          :options="[{ text: 'Edge', value: 'Edge' },{ text: 'Relay', value: 'Relay' }]"
+          @change="onChangeEdgeRelay"
+          v-model="items.edgeRelayName"
+        ></b-form-radio-group>
+      </b-form-fieldset>
 
 
-        <!-- Service Type -->
-        <b-form-fieldset
-          label="Service Type *"
-          :label-cols="3"
-          :horizontal="true">
+      <!-- Service Type -->
+      <b-form-fieldset
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <template slot="label">
+          Service Type<i class="require">*</i>
+        </template>
 
-          <multiselect
-            v-model="serviceTypeCode"
-            :multiple="true"
-            :showLabels="false"
-            :options="code.serviceTypeCode"
-            label="codeName"
-            :loading="isLoad.serviceTypeCode"
-            track-by="code"
-            placeholder="Select service type"
-          ></multiselect>
-        </b-form-fieldset>
+        <multiselect
+          v-model="serviceTypeCode"
+          class="multiple"
+          :class="{'invalid': !valid.serviceTypeCode }"
+          track-by="code"
+          label="codeName"
+          :multiple="true"
+          :showLabels="false"
+          :options="code.serviceTypeCode"
+          :loading="isLoad.serviceTypeCode"
+          :disabled="items.edgeRelayName === 'Relay'"
+          @close="onSelectAfter"
+          placeholder="Select service type"
+        ></multiselect>
+      </b-form-fieldset>
 
-        <!-- Domain -->
-        <b-form-fieldset
-          label="Domain"
-          :label-cols="3"
-          :horizontal="true">
+      <!-- Domain -->
+      <b-form-fieldset
+        label="Domain"
+        :invalid-feedback="feedback.domain"
+        :horizontal="true">
 
-          <b-button variant="outline-secondary" size="sm" @click="fetchDomain">생성</b-button>
-          <strong class="text-danger ml-1">{{ items.edgeDomainName }}</strong>
+        <b-button variant="in-table" @click="fetchDomain">생성</b-button>
+        <small
+          class="form-text-alone text-primary ml-2"
+          :class="{'invalid': items.edgeDomainName === null }"
+        ><strong>{{ items.edgeDomainName }}</strong></small>
 
-          <ul class="icons-list edge mt-2">
-            <li v-for="(type, index) in serviceDomainList">
-              <i class="bg-primary">{{ type }}</i>
-              <div class="desc">
-                <div class="title">
-                  http(s)://<strong class="text-danger">{{ items.edgeDomainName }}</strong>.[city].[country].[service type].[service name].vessels.com
-                </div>
-              </div>
-            </li>
-          </ul>
-        </b-form-fieldset>
-
-        <!-- 사용여부 -->
-        <b-form-fieldset
-          label="사용여부"
-          :label-cols="3"
-          description="※ 미사용 선택 시, DNS(GTM) 설정 정보가 삭제됩니다."
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
-            v-model="items.edgeUseYn"
-          ></c-switch>
-        </b-form-fieldset>
-
-        <div slot="footer" class="form-btn">
-          <b-button type="button" variant="outline-secondary" :to="{ name: 'Edge 관리' }">취소</b-button>
-          <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+        <!-- domain View list -->
+        <div
+          v-if="serviceDomainList.length"
+          class="form-in-view mt-2">
+          <b-form-fieldset
+            v-for="(type, index) in serviceDomainList"
+            :label="type"
+            :key="index"
+            :horizontal="true">
+              <span class="font-text-alone">
+                http(s)://<strong class="text-primary">{{ items.edgeDomainName }}</strong>.[city].[country].[service type].[service name].vessels.com
+              </span>
+          </b-form-fieldset>
         </div>
-      </b-card>
+      </b-form-fieldset>
+
+      <!-- 사용여부 -->
+      <b-form-fieldset
+        label="사용여부"
+        description="※ 미사용 선택 시, DNS(GTM) 설정 정보가 삭제됩니다."
+        :horizontal="true">
+        <c-switch
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
+          v-model="items.edgeUseYn"
+        ></c-switch>
+      </b-form-fieldset>
     </b-form>
+
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Edge 관리' }">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+    </div>
   </div>
 </template>
 
@@ -143,7 +152,9 @@
         isLoad: {
           popId: true,
           serviceTypeCode: true
-        }
+        },
+
+        inValidForm: false
       }
     },
 
@@ -172,6 +183,21 @@
       serviceDomainList () {
         const serviceDomainList = this.serviceTypeCode.map(({ codeValChar1 }) => codeValChar1);
         return [...new Set(serviceDomainList)];
+      },
+
+      // validation
+      valid (){
+        return {
+          popId: this.items.popId !== null,
+          serviceTypeCode: this.items.serviceTypeCode.length
+        }
+      },
+
+      feedback (){
+        return {
+          domain: this.items.edgeDomainName === null ?
+            'Domain name 생성이 필요합니다.' : ''
+        }
       }
     },
 
@@ -195,9 +221,9 @@
         })
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items.filter(({code, codeName, codeValChar1}) => {
-            const number = code.split('_')[2];
-            return !(number.length === 4 && codeName === codeValChar1);
+          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
+            const codeSplit = code.split('_')[2];
+            return codeSplit.length === 4;
           });
         });
 
@@ -213,6 +239,8 @@
       onSubmit (){
         this.items.edgeRelayYn = (this.items.edgeRelayName === 'Relay');
         const { edgeId, popId, edgeDomainName, edgeRelayYn, edgeUseYn, serviceTypeCode } = this.items;
+        const validate = this.$valid.all({ popId, edgeDomainName, serviceTypeCode });
+        this.inValidForm = !validate;
 
         // POST
         this.$https.post('/edges', {
@@ -227,6 +255,21 @@
           .catch((error) => {
             console.log(error);
           });
+      },
+
+      onChangeEdgeRelay (value){
+        this.items.serviceTypeCode = [];
+        if (value === 'Relay'){
+          this.serviceTypeCode = this.code.serviceTypeCode.map(obj => ({...obj}));
+        }
+      },
+
+      onSelectAfter (array){
+        const rtsp = array.find(({ code }) => code === 'SERVICE_TYPE_0103');
+        if (rtsp){
+          this.items.serviceTypeCode = [];
+          this.serviceTypeCode = [rtsp];
+        }
       },
 
       fetchDomain (){

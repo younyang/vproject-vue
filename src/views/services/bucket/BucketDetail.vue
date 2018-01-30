@@ -1,20 +1,17 @@
 <template>
   <div class="animated fadeIn">
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
         기본정보
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
+
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <b-form class="formView" :validated="inValidForm" novalidate>
         <!-- Bucket Id -->
         <b-form-fieldset
           label="ID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="id"
@@ -25,26 +22,22 @@
 
         <!-- name -->
         <b-form-fieldset
-          label="Bucket Name *"
-          :label-cols="3"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
+          <template slot="label">
+            Bucket Name<i v-if="isEdit" class="require">*</i>
+          </template>
           <b-form-input
-            v-if="isEdit"
             v-model="items.name"
             type="text"
-          ></b-form-input>
-          <b-form-input
-            v-else
-            :value="items.name"
-            type="text"
-            plaintext
+            :plaintext="!isEdit"
+            required
           ></b-form-input>
         </b-form-fieldset>
 
         <!-- S3 Bucket Id-->
         <b-form-fieldset
           label="S3 Bucket ID"
-          :label-cols="3"
           :horizontal="true">
           <b-form-input
             :value="items.s3BucketId"
@@ -56,189 +49,166 @@
         <!-- Service Type -->
         <b-form-fieldset
           v-if="isEdit"
-          label="Service Type *"
-          :label-cols="3"
           :horizontal="true">
+          <template slot="label">
+            Service Type<i v-if="isEdit" class="require">*</i>
+          </template>
 
           <multiselect
+            v-if="isEdit"
             v-model="serviceTypeCode"
-            :multiple="false"
+            class="noEmpty"
+            track-by="code"
+            label="codeName"
             :showLabels="false"
             :allowEmpty="false"
             :options="code.serviceTypeCode"
-            label="codeName"
             :loading="isLoad.serviceTypeCode"
-            track-by="code"
             placeholder="Select service type"
           ></multiselect>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          v-else
-          label="Service Type"
-          :label-cols="3"
-          :horizontal="true">
-          <span class="badge badge-success badge-pill">
-            {{ items.serviceTypeName }}
+          <span
+            v-else
+            class="badge"
+          >{{ items.serviceTypeName }}
           </span>
         </b-form-fieldset>
 
         <!-- Description -->
         <b-form-fieldset
           label="Description"
-          :label-cols="3"
           :horizontal="true">
           <b-form-textarea
-            v-if="isEdit"
             v-model="items.description"
             :rows="6"
-          ></b-form-textarea>
-          <b-form-textarea
-            v-else
-            :value="items.description"
-            :rows="6"
+            :no-resize="!isEdit"
+            :disabled="!isEdit"
           ></b-form-textarea>
         </b-form-fieldset>
 
         <!-- 사용여부 -->
         <b-form-fieldset
-          label="사용 여부 *"
-          :label-cols="3"
           :horizontal="true">
+          <template slot="label">
+            사용 여부<i v-if="isEdit" class="require">*</i>
+          </template>
           <c-switch
             v-if="isEdit"
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
             v-model="items.useYn"
           ></c-switch>
-          <b-badge
+          <span
             v-else
-            pill
-            :variant="items.useYn ? 'success' : 'secondary'">
-            {{ items.useYn ? '사용' : '미사용' }}
-          </b-badge>
+            class="badge"
+            :class="{'primary' : items.useYn }"
+          >{{ items.useYn ? '사용' : '미사용' }}
+          </span>
         </b-form-fieldset>
-
 
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
-          label="변경 사유 *"
-          :label-cols="3"
+          label="변경이력<i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <b-form-textarea
             v-model="items.reason"
-            :rows="6">
-          </b-form-textarea>
+            :rows="6"
+            required
+          ></b-form-textarea>
         </b-form-fieldset>
-
-      </b-card>
+      </b-form>
     </b-collapse>
+
 
     <!-- Bucket 사용자 권한 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.authorize
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.authorize>
+        <i class="fa"></i>
         Bucket 사용자 권한
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="authorize" v-if="!isEdit" visible>
-      <b-card>
-        <section class="board">
-          <b-table
-            striped
-            bordered
-            hover
-            show-empty
-            :items="policies.items"
-            :fields="policies.fields">
-            <template slot="s3UserId" scope="row">
-              {{ row.value }} &nbsp;
-              <b-button
-                type="button"
-                size="sm"
-                variant="outline-danger"
-                class="list-del"
-                @click="removeModal(row.value)">
-                <i class="fa fa-trash"></i>
-              </b-button>
-            </template>
-          </b-table>
-        </section>
-        <section class="board-btn">
-          <b-button
-            type="button"
-            size="sm"
-            class="mt-2 mb-2"
-            variant="outline-primary"
-            @click="showUserFind">
-            Bucket 관리자 추가
-          </b-button>
 
-        </section>
-      </b-card>
+    <b-collapse id="authorize" v-if="!isEdit" visible>
+      <b-table
+        class="sub"
+        show-empty
+        :items="policies.items"
+        :fields="policies.fields"
+      >
+        <template slot="HEAD_index" scope="row">
+          <span class="ico">
+            <button type="button" @click="showUserFind" v-b-tooltip.hover :title="`관리자 추가`"><i class="fa fa-plus-circle"></i></button>
+          </span>
+        </template>
+
+        <template slot="index" scope="row">
+          <span class="ico">
+            <button type="button" @click="removeModal(row.item.s3UserId)" v-b-tooltip.hover :title="`관리자 삭제`"><i class="fa fa-times-circle"></i></button>
+          </span>
+        </template>
+      </b-table>
     </b-collapse>
 
-    <!-- 처리 이력 -->
+
+    <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         처리이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" v-if="!isEdit">
-      <b-card>
-        <!-- 등록일 -->
-        <b-form-fieldset
-          label="등록일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 등록자 -->
-        <b-form-fieldset
-          label="등록자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정일 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정자 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-      </b-card>
+    <b-collapse id="formHistory" visible v-if="!isEdit">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 등록일 -->
+          <b-form-fieldset
+            label="등록일시"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 등록자 -->
+          <b-form-fieldset
+            label="등록자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
+        <div class="form-row">
+          <!-- 수정일 -->
+          <b-form-fieldset
+            v-if="items.modifyDateTime"
+            label="수정일"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 수정자 -->
+          <b-form-fieldset
+            label="수정자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+      </b-form>
     </b-collapse>
 
 
@@ -256,60 +226,48 @@
 
     <!-- User Search Modal -->
     <b-modal size="lg" title="사용자 검색" v-model="isModalUserFind">
-      <b-form class="searchBox" @reset="onReset">
-        <div class="form-in-group">
-          <b-form-fieldset
-            label="검색어"
-            style="width:100%"
-            class="inline"
-            :horizontal="true">
-            <multiselect
-              v-model="companyCode"
-              label="codeName"
-              :showLabels="false"
-              :searchable="false"
-              :options="users.code.companyCode"
-              placeholder="전체"
-            ></multiselect>
-          </b-form-fieldset>
-          <b-form-fieldset
-            label="이름"
-            style="width:30%"
-            class="inline"
-            :horizontal="true">
-            <b-form-input type="text" class="keyword" v-model="users.searchItem.searchKeyword"
-                          placeholder="Enter Search text"></b-form-input>
-          </b-form-fieldset>
-        </div>
+      <b-form class="searchBox" @reset="onReset" inline>
+        <label>검색어</label>
+        <multiselect
+          v-model="companyCode"
+          label="codeName"
+          :showLabels="false"
+          :searchable="false"
+          :options="users.code.companyCode"
+          placeholder="전체"
+        ></multiselect>
+        <b-form-input
+          type="text"
+          class="keyword ml-1"
+          v-model="users.searchItem.searchKeyword"
+          placeholder="Enter Search text"
+        ></b-form-input>
+
         <div class="search-btn">
-          <b-button type="button" variant="primary" @click="onSearch"><i class="icon-magnifier"></i></b-button>
-          <b-button type="reset" variant="outline-secondary"><i class="icon-reload"></i></b-button>
+          <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
+          <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
         </div>
       </b-form>
 
       <section class="board">
         <b-table
-          striped
-          bordered
-          hover
           show-empty
           :items="users.items"
           :fields="users.fields"
+          :current-page="users.pageInfo.page"
+          :per-page="users.pageInfo.size"
           @row-clicked="addModal"
         >
         </b-table>
       </section>
-      <section class="board-article d-flex justify-content-between">
-        <b-pagination
-          :value="users.pageInfo.page"
-          :total-rows="users.pageInfo.totalCount"
-          :per-page="users.pageInfo.size"
-          @input="onPagination"
-          class="mt-2"
-        ></b-pagination>
-      </section>
-
+      <b-pagination
+        v-model="users.pageInfo.page"
+        :total-rows="users.pageInfo.totalCount"
+        :per-page="users.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
       <div slot="modal-footer">
+        <b-button type="button" variant="primary" @click="isModalUserFind = false">확인</b-button>
       </div>
     </b-modal>
 
@@ -318,12 +276,12 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
@@ -331,43 +289,39 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i
-          class="fa fa-dot-circle-o"></i> 확인
-        </b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
 
-
-    <!-- Message Modal -->
-    <b-modal title="Message" size="sm" v-model="users.isModalMessage" class="modal-danger">
+    <!-- Message Alert Modal -->
+    <b-modal title="Message" size="sm" v-model="users.isModalMessage" :class="{'modal-error': !isUserAdd}">
       <div class="d-block text-center">
-        <h5>{{ users.modalMessage }}</h5>
+        <p>{{ users.modalMessage }}</p>
       </div>
       <div slot="modal-footer">
-        <b-button v-if="isUserAdd"
-                  type="button" size="sm" variant="danger"><i class="fa fa-dot-circle-o" @click="addPolicy"></i> 추가
-        </b-button>
-        <b-button v-else
-                  type="button" size="sm" variant="danger"><i class="fa fa-dot-circle-o" @click="removePolicy"></i> 삭제
-        </b-button>
-        <b-button type="button" size="sm" variant="secondary" @click="closeModal"><i class="fa fa-ban"></i> 취소
-        </b-button>
+        <b-button v-if="isUserAdd" type="button" variant="primary" @click="addPolicy">추가</b-button>
+        <b-button v-else type="button" variant="danger" @click="removePolicy">삭제</b-button>
+        <b-button type="button" variant="outline-secondary" @click="closeModal">취소</b-button>
       </div>
     </b-modal>
-
-
 
     <!-- Delete Modal Message -->
-    <b-modal title="Message" size="sm" v-model="isModalMessage" class="modal-danger">
+    <b-modal title="Message" size="sm" v-model="isModalMessage" class="modal-error">
       <div class="d-block text-center">
-        <h5>정말 삭제 하시겠습니까?</h5>
+        <p>정말 삭제 하시겠습니까?</p>
       </div>
-      <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="danger"><i class="fa fa-dot-circle-o" @click="onDelete"></i> 삭제 </b-button>
-        <b-button type="button" size="sm" variant="secondary"><i class="fa fa-dot-circle-o" @click="isModalMessage = false"></i> 취소 </b-button>
+      <div slot="modal-footer" class="mx-auto">
+        <b-button type="button" variant="danger" @click="onDelete">삭제</b-button>
+        <b-button type="button" variant="outline-secondary" @click="isModalMessage = false">취소</b-button>
       </div>
-
     </b-modal>
 
   </div>
@@ -405,13 +359,19 @@
             modifyId: {label: '등록/수정자', 'class': 'text-left'},
             modifyDateTime: {label: '등록/수정일시'},
             description: {label: '변경 이력', 'class': 'text-left'},
-            reason: {label: '변경 사유', 'class': 'text-left'}
+            reason: {label: '변경 사유'}
             // histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         policies: {
           fields: {
+            index: {label: '&nbsp;' },
             s3UserId: {label: 'Login ID', 'class': 'text-left'},
             createId: {label: '등록/수정자', 'class': 'text-left'},
             createDateTime: {label: '등록/수정일시'}
@@ -463,7 +423,9 @@
         },
         state:{
           deleted: false
-        }
+        },
+
+        inValidForm: false
       }
     },
 
@@ -535,16 +497,19 @@
       },
       onSubmit() {
         const url = `/origin/bucket/${this.id}`;
-
         const { name, serviceTypeCode, description, reason, useYn } = this.items;
+        const validate = this.$valid.all({name, serviceTypeCode, description, reason, useYn});
+        this.inValidForm = !validate;
 
-        this.$https.put(url, { name, serviceTypeCode, description, reason, useYn })
-          .then(() => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        if (validate){
+          this.$https.put(url, { name, serviceTypeCode, description, reason, useYn })
+            .then(() => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
       onDelete() {
         const deleteUrl = `/origin/bucket/${this.id}`;
@@ -589,9 +554,6 @@
 
         this.userList({page: 1});
       },
-      onPagination(page) {
-        this.userList({page});
-      },
       onReset() {
         Object.keys(this.users.searchItem).forEach((key) => {
           this.users.searchItem[key] = null;
@@ -622,6 +584,7 @@
           });
       },
       removeModal(loginId) {
+        this.isUserAdd = false;
         this.users.modalMessage = '관리자를 삭제 하시겠습니까?';
         this.users.isModalMessage = true;
         this.users.queryParams.loginId = loginId;
