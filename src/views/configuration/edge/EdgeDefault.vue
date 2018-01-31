@@ -90,8 +90,8 @@
           label="Service Type"
           :horizontal="true">
 
-          <div class="badge-list" v-for="item in serviceTypeCode">
-            <span class="badge sm" v-if="item">
+          <div class="badge-list">
+            <span class="badge sm" v-for="item in serviceTypeCode">
               {{ item.codeName }}
             </span>
           </div>

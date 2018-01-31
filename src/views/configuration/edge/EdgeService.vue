@@ -7,132 +7,134 @@
     </content-header>
 
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.formDefault
-        :block="true">
-        Service
-        <i class="fa fa-angle-down"></i>
+      <b-button class="btn-collapse" v-b-toggle.formDefault>
+        <i class="fa"></i>
+        기본정보
       </b-button>
     </div>
     <b-collapse id="formDefault" visible>
-      <b-card>
+      <b-form class="formView" :validated="inValidForm" novalidate>
         <!-- Service Type -->
         <b-form-fieldset
-          label="Service Type"
-          :label-cols="3"
+          :invalid-feedback="$valid.msg.select"
           :horizontal="true">
+          <template slot="label">
+            Service 선택<i v-if="isEdit" class="require">*</i>
+          </template>
 
           <multiselect
             v-if="isEdit"
             v-model="items.serviceIdList"
+            track-by="serviceId"
+            label="serviceName"
+            :class="{'invalid': !valid.serviceIdList }"
             :multiple="true"
             :showLabels="false"
             :options="code.serviceIdList"
-            label="serviceName"
             :loading="isLoad.serviceIdList"
-            track-by="serviceId"
             placeholder="Select service"
           ></multiselect>
 
-          <span
-            class="badge badge-success badge-pill"
-            v-else
-            v-for="obj in items.serviceIdList"
-          >{{ obj.serviceName }}</span>
+          <div class="badge-list" v-else>
+            <span class="badge sm" v-for="item in items.serviceIdList">
+              {{ item.serviceName }}
+            </span>
+          </div>
         </b-form-fieldset>
 
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
-          label="변경이력"
-          :label-cols="3"
+          label="변경이력<i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <b-form-textarea
             v-model="items.modifyHistReason"
-            :rows="6">
-          </b-form-textarea>
+            :rows="6"
+            required
+          ></b-form-textarea>
         </b-form-fieldset>
-      </b-card>
+      </b-form>
     </b-collapse>
 
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         처리이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" v-if="!isEdit">
-      <b-card>
-        <!-- 등록일 -->
-        <b-form-fieldset
-          label="등록일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 등록자 -->
-        <b-form-fieldset
-          label="등록자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정일 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정자 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-      </b-card>
+    <b-collapse id="formHistory" visible v-if="!isEdit">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 등록일 -->
+          <b-form-fieldset
+            label="등록일시"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 등록자 -->
+          <b-form-fieldset
+            label="등록자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
+        <div class="form-row">
+          <!-- 수정일 -->
+          <b-form-fieldset
+            v-if="items.modifyDateTime"
+            label="수정일"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 수정자 -->
+          <b-form-fieldset
+            label="수정자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+      </b-form>
     </b-collapse>
 
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" size="sm" variant="primary" @click="onSubmit"><i class="fa fa-dot-circle-o"></i> 저장</b-button>
-      <b-button type="button" size="sm" variant="secondary" @click="onView"><i class="fa fa-ban"></i> 취소</b-button>
+      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" size="sm" variant="outline-primary" @click="showHistory">이력관리</b-button>
-      <b-button type="button" size="sm" variant="primary" @click="onEdit"><i class="fa fa-pencil"></i> 수정</b-button>
+      <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
+      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
 
     <!-- History Modal -->
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
@@ -140,8 +142,15 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
   </div>
@@ -178,18 +187,31 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         isLoad: {
           serviceIdList: true
         },
         isEdit: false,
         isCreate: false,
-        isModalHistory: false
+        isModalHistory: false,
+
+        inValidForm: false
       }
     },
 
     computed: {
+      // validation
+      valid (){
+        return {
+          serviceIdList: this.items.serviceIdList.length
+        }
+      }
     },
 
     created (){
@@ -220,13 +242,17 @@
 
       // Detail Data
       this.$https.get(detailUrl)
-        .then((res) => {
-          this.items = { ...this.items, ...res.data.items };
-          this.originItems = JSON.parse(JSON.stringify(this.items));
+        .then(res => {
+          if (res.data.items === null){
+            this.isCreate = true;
+            this.isEdit = true;
+          }else{
+            this.items = { ...this.items, ...res.data.items };
+            this.originItems = JSON.parse(JSON.stringify(this.items));
+          }
         })
-        .catch(() => {
-          this.isEdit = true;
-          this.isCreate = true;
+        .catch(error => {
+          console.log(error);
         });
     },
 
@@ -244,18 +270,16 @@
         const serviceId = this.items.serviceIdList.map(({ serviceId }) => serviceId);
         const { modifyHistReason } = this.items;
 
-        if (this.isCreate){
-          this.$https.post(`/edges/${this.id}/services`, { serviceId, modifyHistReason })
-            .then(() => {
-              this.isCreate = false;
-              this.isEdit = false;
-              this.$router.go(this.$router.currentRoute);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        }else{
-          this.$https.put(`/edges/${this.id}/services`, { serviceId, modifyHistReason })
+        const submitItems = { serviceId, modifyHistReason };
+        const validate = this.$valid.all(submitItems);
+        const submitAction = (this.isCreate) ?
+          () => this.$https.post(`/edges/${this.id}/services`, submitItems) :
+          () => this.$https.put(`/edges/${this.id}/services`, submitItems);
+
+        this.inValidForm = !validate;
+
+        if (validate){
+          submitAction()
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })

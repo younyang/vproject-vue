@@ -1,10 +1,9 @@
 <template>
   <div class="animated fadeIn">
-    <b-card>
+    <b-form class="formView">
       <!-- Service 선택 -->
       <b-form-fieldset
         label="Service"
-        :label-cols="3"
         :horizontal="true">
         <b-form-input
           :value="items.serviceName"
@@ -16,62 +15,60 @@
       <!-- PoP 선택 -->
       <b-form-fieldset
         label="PoP"
-        :label-cols="3"
         :horizontal="true">
         <b-form-input
           :value="items.popName"
           type="text"
           plaintext
         ></b-form-input>
-        <span v-if="items.bandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.bandwidth }} GB)</span>
+        <small class="form-text-alone text-muted">(Bandwidth : {{ items.bandwidth }} GB)</small>
       </b-form-fieldset>
 
       <!-- Set2 사용여부 -->
       <b-form-fieldset
-        label="Set2사용여부 <i class='require'>*</i>"
-        :label-cols="3"
+        label="Set2사용여부"
         :horizontal="true">
         <c-switch
           v-if="isEdit"
-          type="icon"
-          variant="success"
-          v-bind="{on: '\uf00c', off: '\uf00d'}"
-          :pill="true"
-          @change="onChangeSet2"
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
           v-model="items.setApplyYn"
+          @change="onChangeSet2"
         ></c-switch>
-        <b-badge
+        <span
           v-else
-          pill
-          :variant="items.setApplyYn ? 'success' : 'secondary'">
+          class="badge"
+          :class="{'primary' : items.setApplyYn }">
           {{ items.setApplyYn ? '사용' : '미사용' }}
-        </b-badge>
-        <span class="form-sub-text">(적용 시간 : 02:00:00 ~ 04:59:00)</span>
+        </span>
+        <small class="form-text-alone text-muted">(적용 시간 : 02:00:00 ~ 04:59:00)</small>
       </b-form-fieldset>
-    </b-card>
+    </b-form>
 
 
-    <b-card
+    <div
+      class="cache-content"
       v-if="items.cacheThrottlingCases.length > 0"
       v-for="(cache, index) in items.cacheThrottlingCases"
       :key="index"
     >
-      <div slot="header">
-        <i class='fa fa-angle-right'></i> <strong>CASE {{ cache.caseSeq }} :</strong> {{ cache.caseName }}
+      <h3 class="cache-title">
+        <i class="fa fa-arrow-right"></i>
+        <strong>CASE {{ cache.caseSeq }}/</strong>{{ cache.caseName }}
 
         <b-button
           v-if="!isEdit"
           type="button"
-          variant="outline-secondary"
+          variant="in-table"
           class="float-right"
           @click="showHistory(cache.caseSeq)"
         >이력관리</b-button>
-      </div>
+      </h3>
 
-      <section class="board" v-if="cache.cacheThrottlingComps.length > 0">
+      <section class="board" v-if="cache.cacheThrottlingComps.length">
         <b-table
-          striped
-          bordered
           show-empty
           foot-clone
           :items="cache.cacheThrottlingComps"
@@ -115,108 +112,117 @@
           </template>
 
           <template slot="FOOT_serviceTypeCodeName" scope="data">
-            Total
+            <span class="total-title">Total</span>
           </template>
           <template slot="FOOT_bandwidth1" scope="data">
-              <span
-                class="warning text-danger"
-                v-if="total[index].bandwidth1 > items.bandwidth"
-              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
-            <span :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }}</span>
+            <small
+              class="invalid"
+              v-if="total[index].bandwidth1 > items.bandwidth"
+            >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</small>
+            <span class="total-text" :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }} GB 제한</span>
           </template>
           <template slot="FOOT_bandwidth2" scope="data">
-              <span
-                class="warning text-danger"
-                v-if="total[index].bandwidth2 > items.bandwidth"
-              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
-            <span :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }}</span>
+            <small
+              class="invalid"
+              v-if="total[index].bandwidth2 > items.bandwidth"
+            >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</small>
+            <span class="total-text" :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }} GB 제한</span>
           </template>
         </b-table>
       </section>
-      <!-- 배포 일시 / 상태 -->
-      <b-form-fieldset
-        v-if="!isEdit"
-        label="배포 일시 / 상태"
-        :label-cols="3"
-        :horizontal="true">
-        {{ items.createDateTime }}
-        <b-form-input
-          :value="deploy.status ? '성공' : '실패'"
-          style="width:30px"
-          plaintext
-          type="text"></b-form-input>
-        (<a href="#">{{ deploy.count }}</a>)
-      </b-form-fieldset>
-    </b-card>
 
-    <b-card v-if="isEdit">
+      <!-- 배포 일시 / 상태 -->
+      <div class="formView" v-if="!isEdit">
+        <b-form-fieldset
+          label="배포 일시 / 상태"
+          :horizontal="true">
+          <small class="text-muted">{{ items.createDateTime }}</small>
+          <span class="ml-2 mr-2">/</span>
+          <input
+            type="text"
+            readonly="readonly"
+            class="form-control-plaintext"
+            style="width:50px"
+            :value="processStateCodeName"
+          >
+          <a :href="`#/workflow/service/${ processId }`" class="btn btn-in-table" target="_blank">{{ processId }}</a>
+        </b-form-fieldset>
+      </div>
+    </div>
+
+    <b-form
+      class="formView"
+      style="margin-top: 30px"
+      v-if="isEdit"
+      :validated="inValidForm" novalidate>
       <!-- 변경이력 -->
       <b-form-fieldset
-        label="변경이력"
-        :label-cols="3"
+        label="변경이력<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
         :horizontal="true">
         <b-form-textarea
           v-model="items.modifyHistReason"
+          required
           :rows="6">
         </b-form-textarea>
       </b-form-fieldset>
-    </b-card>
+    </b-form>
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
-      <b-button
-        variant="secondary"
-        v-b-toggle.history
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.formHistory>
+        <i class="fa"></i>
         처리이력
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
-    <b-collapse id="history" v-if="!isEdit">
-      <b-card>
-        <!-- 등록일 -->
-        <b-form-fieldset
-          label="등록일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 등록자 -->
-        <b-form-fieldset
-          label="등록자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.createId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정일 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정일"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyDateTime"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-        <!-- 수정자 -->
-        <b-form-fieldset
-          v-if="items.modifyDateTime"
-          label="수정자"
-          :label-cols="3"
-          :horizontal="true">
-          <b-form-input
-            :value="items.modifyId"
-            plaintext
-            type="text"></b-form-input>
-        </b-form-fieldset>
-      </b-card>
+    <b-collapse id="formHistory" visible v-if="!isEdit">
+      <b-form class="formView">
+        <div class="form-row">
+          <!-- 등록일 -->
+          <b-form-fieldset
+            label="등록일시"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 등록자 -->
+          <b-form-fieldset
+            label="등록자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.createId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+
+        <div class="form-row">
+          <!-- 수정일 -->
+          <b-form-fieldset
+            label="수정일"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyDateTime"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+          <!-- 수정자 -->
+          <b-form-fieldset
+            label="수정자"
+            :horizontal="true">
+            <b-form-input
+              :value="items.modifyId"
+              plaintext
+              type="text"
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
+      </b-form>
     </b-collapse>
 
     <div class="page-btn" v-if="isEdit">
@@ -233,12 +239,12 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value, row.item.caseSeq)" target="_blank">보기</a>
@@ -246,19 +252,26 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
 
-    <!-- Message Modal -->
-    <b-modal title="Message" size="sm" v-model="isModalMessage" class="modal-danger">
+    <!-- Message Alert Modal -->
+    <b-modal title="Message" size="sm" v-model="modal.open" :class="`modal-${modal.type}`">
       <div class="d-block text-center">
-        <h5>{{ modalMessage }}</h5>
+        <p>{{ modal.msg }}</p>
       </div>
-      <div slot="modal-footer">
-        <b-button type="button" variant="danger" @click="onDeleteData"><i class="fa fa-dot-circle-o"></i> 삭제</b-button>
-        <b-button type="button" variant="secondary" @click="isModalMessage = false"><i class="fa fa-ban"></i> 취소</b-button>
+      <div slot="modal-footer" class="mx-auto">
+        <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
+        <b-button type="button" variant="outline-secondary" @click="modal.open = false">취소</b-button>
       </div>
     </b-modal>
   </div>
@@ -289,9 +302,9 @@
         },
 
         caseFields: {
-          serviceTypeCodeName: {label: 'Service Type'},
-          bandwidth1: {label: 'Set1 (Basic)', 'class': 'text-right'},
-          bandwidth2: {label: 'Set2', 'class': 'text-right'}
+          serviceTypeCodeName: {label: 'Service Type', 'class': 'serviceType'},
+          bandwidth1: {label: 'Set1 (Basic)', 'class': 'bandwidth'},
+          bandwidth2: {label: 'Set2', 'class': 'bandwidth'}
         },
 
         history: {
@@ -301,18 +314,29 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
+
         isEdit: false,
         isModalHistory: false,
-        isModalMessage: false,
-        modalMessage: '',
+
+        modal: {
+          open: false,
+          type: 'done',
+          msg: '',
+          action (){}
+        },
 
         // 배포상태 - 임시
-        deploy: {
-          status: true,
-          count: 11234
-        }
+        processStateCodeName: '진행중',
+        processId: 12332,
+
+        inValidForm: false
       }
     },
 
@@ -391,7 +415,11 @@
           }
         });
 
-        this.$https.put(`/policy/cacheThrottlings/${this.id}`, {
+        const validate = this.$valid.all({ modifyHistReason });
+        this.inValidForm = !validate;
+
+        if (validate){
+          this.$https.put(`/policy/cacheThrottlings/${this.id}`, {
             popId,
             serviceId,
             bandwidth,
@@ -399,17 +427,22 @@
             cacheThrottlingCases: cacheCase,
             modifyHistReason
           })
-          .then(() => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+            .then(() => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
       onDelete (){
-        this.modalMessage = '정말 삭제하시겠습니까?';
-        this.isModalMessage = true;
+        this.modal = {
+          open: true,
+          type: 'error',
+          msg: '정말로 삭제하시겠습니까?',
+          action: this.onDeleteData
+        };
       },
 
       onDeleteData (){

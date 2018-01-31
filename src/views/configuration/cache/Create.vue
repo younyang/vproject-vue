@@ -1,139 +1,134 @@
 <template>
   <div class="animated fadeIn">
-    <b-form>
-      <b-card>
-        <!-- Service 선택 -->
-        <b-form-fieldset
-          label="Service 선택 <i class='require'>*</i>"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            id="serviceId"
-            v-model="serviceId"
-            class="noEmpty inline"
-            style="width: 50%"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.serviceId"
-            :loading="isLoad.serviceId"
-            label="serviceName"
-            placeholder="선택"
-            @select="onSearchPoP"
-          ></multiselect>
-        </b-form-fieldset>
+    <b-form class="formView">
+      <!-- Service 선택 -->
+      <b-form-fieldset
+        label="Service 선택<i class='require'>*</i>"
+        :horizontal="true">
+        <multiselect
+          id="serviceId"
+          v-model="serviceId"
+          class="noEmpty inline"
+          style="width: 50%"
+          :allowEmpty="false"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.serviceId"
+          :loading="isLoad.serviceId"
+          label="serviceName"
+          placeholder="선택"
+          @select="onSearchPoP"
+        ></multiselect>
+      </b-form-fieldset>
 
-        <!-- PoP 선택 -->
-        <b-form-fieldset
-          label="PoP 선택 <i class='require'>*</i>"
-          :label-cols="3"
-          :horizontal="true">
-          <multiselect
-            id="popId"
-            v-model="popId"
-            class="noEmpty inline"
-            style="width: 50%"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popId"
-            :loading="isLoad.popId"
-            label="popName"
-            placeholder="선택"
-            @select="onSearchBandwidth"
-          ></multiselect>
-          <span v-if="items.bandwidth !== null" class="form-sub-text">(Bandwidth : {{ items.bandwidth }} GB)</span>
-        </b-form-fieldset>
+      <!-- PoP 선택 -->
+      <b-form-fieldset
+        label="PoP 선택<i class='require'>*</i>"
+        :horizontal="true">
+        <multiselect
+          id="popId"
+          v-model="popId"
+          class="noEmpty inline"
+          style="width: 50%"
+          :allowEmpty="false"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popId"
+          :loading="isLoad.popId"
+          label="popName"
+          placeholder="선택"
+          @select="onSearchBandwidth"
+        ></multiselect>
+        <small class="form-text-alone text-muted">(Bandwidth : {{ items.bandwidth }} GB)</small>
+      </b-form-fieldset>
 
-        <!-- Set2 사용여부 -->
-        <b-form-fieldset
-          label="Set2사용여부 <i class='require'>*</i>"
-          :label-cols="3"
-          :horizontal="true">
-          <c-switch
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
-            v-model="items.setApplyYn"
-            @change="onChangeSet2"
-          ></c-switch>
-          <span class="form-sub-text">(적용 시간 : 02:00:00 ~ 04:59:00)</span>
-        </b-form-fieldset>
-      </b-card>
-
-      <b-card
-        v-if="items.cacheThrottlingCases.length > 0"
-        v-for="(cache, index) in items.cacheThrottlingCases"
-        :key="index"
-      >
-        <div slot="header">
-          <i class='fa fa-angle-right'></i> <strong>CASE {{ cache.caseSeq }} :</strong> {{ cache.caseName }}
-        </div>
-
-        <section class="board" v-if="cache.cacheThrottlingComps.length > 0">
-          <b-table
-            striped
-            bordered
-            show-empty
-            foot-clone
-            :items="cache.cacheThrottlingComps"
-            :fields="caseFields"
-          >
-            <template slot="bandwidth1" scope="row">
-              <b-form-checkbox
-                v-model="row.item.band1UseYn"
-                @change="onChecked(row.item, '1')"
-              ></b-form-checkbox>
-
-              <cleave
-                class="form-control"
-                style="width: 80px;"
-                v-model.number="row.item.bandwidth1"
-                :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
-                :disabled="!row.item.band1UseYn"
-                @input="setDefault(row.item, 'bandwidth1')"
-              ></cleave> GB 제한
-            </template>
-
-            <template slot="bandwidth2" scope="row">
-              <b-form-checkbox
-                v-model="row.item.band2UseYn"
-                :disabled="!items.setApplyYn"
-                @change="onChecked(row.item, '2')"
-              ></b-form-checkbox>
-
-              <cleave
-                class="form-control"
-                style="width: 80px;"
-                v-model.number="row.item.bandwidth2"
-                :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
-                :disabled="!row.item.band2UseYn"
-                @input="setDefault(row.item, 'bandwidth2')"
-              ></cleave> GB 제한
-            </template>
-
-            <template slot="FOOT_serviceTypeCodeName" scope="data">
-              Total
-            </template>
-            <template slot="FOOT_bandwidth1" scope="data">
-              <span
-                class="warning text-danger"
-                v-if="total[index].bandwidth1 > items.bandwidth"
-              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
-              <span :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }}</span>
-            </template>
-            <template slot="FOOT_bandwidth2" scope="data">
-              <span
-                class="warning text-danger"
-                v-if="total[index].bandwidth2 > items.bandwidth"
-              >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</span>
-              <span :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }}</span>
-            </template>
-          </b-table>
-        </section>
-      </b-card>
+      <!-- Set2 사용여부 -->
+      <b-form-fieldset
+        label="Set2사용여부<i class='require'>*</i>"
+        :horizontal="true">
+        <c-switch
+          type="text"
+          class="v-switch"
+          on="사용"
+          off="미사용"
+          v-model="items.setApplyYn"
+          @change="onChangeSet2"
+        ></c-switch>
+        <small class="form-text-alone text-muted">(적용 시간 : 02:00:00 ~ 04:59:00)</small>
+      </b-form-fieldset>
     </b-form>
+
+    <div
+      class="cache-content"
+      v-if="items.cacheThrottlingCases.length > 0"
+      v-for="(cache, index) in items.cacheThrottlingCases"
+      :key="index"
+    >
+      <h3 class="cache-title">
+        <i class="fa fa-arrow-right"></i>
+        <strong>CASE {{ cache.caseSeq }}/</strong>{{ cache.caseName }}
+      </h3>
+
+      <section class="board" v-if="cache.cacheThrottlingComps.length">
+        <b-table
+          show-empty
+          foot-clone
+          :items="cache.cacheThrottlingComps"
+          :fields="caseFields"
+        >
+          <template slot="bandwidth1" scope="row">
+            <b-form-checkbox
+              v-model="row.item.band1UseYn"
+              @change="onChecked(row.item, '1')"
+            ></b-form-checkbox>
+
+            <cleave
+              class="form-control"
+              style="width: 80px;"
+              v-model.number="row.item.bandwidth1"
+              :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+              :disabled="!row.item.band1UseYn"
+              @input="setDefault(row.item, 'bandwidth1')"
+            ></cleave> GB 제한
+          </template>
+
+          <template slot="bandwidth2" scope="row">
+            <b-form-checkbox
+              v-model="row.item.band2UseYn"
+              :disabled="!items.setApplyYn"
+              @change="onChecked(row.item, '2')"
+            ></b-form-checkbox>
+
+            <cleave
+              class="form-control"
+              style="width: 80px;"
+              v-model.number="row.item.bandwidth2"
+              :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+              :disabled="!row.item.band2UseYn"
+              @input="setDefault(row.item, 'bandwidth2')"
+            ></cleave> GB 제한
+          </template>
+
+          <template slot="FOOT_serviceTypeCodeName" scope="data">
+            <span class="total-title">Total</span>
+          </template>
+          <template slot="FOOT_bandwidth1" scope="data">
+            <small
+              class="invalid"
+              v-if="total[index].bandwidth1 > items.bandwidth"
+            >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</small>
+            <span class="total-text" :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }} GB 제한</span>
+          </template>
+          <template slot="FOOT_bandwidth2" scope="data">
+            <small
+              class="invalid"
+              v-if="total[index].bandwidth2 > items.bandwidth"
+            >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</small>
+            <span class="total-text" :class="{'text-danger' : total[index].bandwidth2 > items.bandwidth }">{{ total[index].bandwidth2 }} GB 제한</span>
+          </template>
+        </b-table>
+      </section>
+    </div>
 
 
     <div class="page-btn">
@@ -164,9 +159,9 @@
         },
 
         caseFields: {
-          serviceTypeCodeName: {label: 'Service Type'},
-          bandwidth1: {label: 'Set1 (Basic)', 'class': 'text-right'},
-          bandwidth2: {label: 'Set2', 'class': 'text-right'}
+          serviceTypeCodeName: {label: 'Service Type', 'class': 'serviceType'},
+          bandwidth1: {label: 'Set1 (Basic)', 'class': 'bandwidth'},
+          bandwidth2: {label: 'Set2', 'class': 'bandwidth'}
         },
 
         code: {
@@ -176,7 +171,9 @@
         isLoad: {
           popId: false,
           serviceId: true
-        }
+        },
+
+        inValidForm: false
       }
     },
 

@@ -17,31 +17,36 @@
       <!-- Host Name -->
       <b-form-fieldset
         label="Host Name(Prefix)<i class='require'>*</i>"
-        :invalid-feedback="$valid.msg.require"
+        :invalid-feedback="feedback.popHostName"
         :horizontal="true">
-        <b-input-group>
-          <b-form-input
-            v-model="items.popHostName"
-            type="text"
-            placeholder="Enter PoP Host name"
-            required
-          ></b-form-input>
-          <b-input-group-button slot="right" class="ml-2">
-            <b-button variant="outline-secondary" @click="fetchHostExists">중복확인</b-button>
-          </b-input-group-button>
-        </b-input-group>
+
+        <b-form-input
+          v-model="items.popHostName"
+          type="text"
+          placeholder="Enter PoP Host name"
+          :state="valid.popHostName"
+          @input="popHostNameExists = null"
+          required
+        ></b-form-input>
+        <b-button variant="in-table" @click="fetchNameExists">중복확인</b-button>
+        <span class="ico ml-2 mid" v-if="popHostNameExists !== null">
+          <i v-if="popHostNameExists === 'success'" class="fa fa-check-circle"></i>
+          <i v-if="popHostNameExists === 'fail'" class="fa fa-times-circle"></i>
+        </span>
       </b-form-fieldset>
 
       <!-- Domain -->
       <b-form-fieldset
         label="Domain<i class='require'>*</i>"
-        :invalid-feedback="$valid.msg.require"
+        :invalid-feedback="feedback.domain"
         :horizontal="true">
 
-        <b-button variant="outline-secondary" @click="fetchDomain">생성</b-button>
-        <span class="domain-text ml-2" v-if="isDomainName">
-          http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-        </span>
+        <b-button variant="in-table" @click="fetchDomain">생성</b-button>
+        <small
+          class="form-text-alone ml-2"
+          :class="{'invalid': items.popDomainName === null }">
+          http(s)://[edge].[content type].<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+        </small>
       </b-form-fieldset>
 
       <!-- 구분 -->
@@ -49,8 +54,11 @@
         label="구분<i class='require'>*</i>"
         :invalid-feedback="$valid.msg.check"
         :horizontal="true">
-        <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
-        <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
+
+        <span :class="{'invalid' : !valid.referrer }">
+          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
+          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
+        </span>
       </b-form-fieldset>
 
       <!-- 주소 -->
@@ -64,10 +72,12 @@
           :searchable="false"
           :options="code.popCtprvnCode"
           :loading="isLoad.popCtprvnCode"
+          :class="{'invalid': !valid.popCtprvnCode }"
           @select="onFirstAddress"
+          track-by="addressCode"
           label="addressCodeName"
           class="inline"
-          style="min-width:130px"
+          style="width:156px"
           placeholder="선택"
         ></multiselect>
 
@@ -78,10 +88,12 @@
           :searchable="false"
           :options="code.popSigCode"
           :loading="isLoad.popSigCode"
+          :class="{'invalid': !valid.popSigCode }"
+          track-by="addressCode"
           label="addressCodeName"
           placeholder="선택"
           class="inline"
-          style="min-width: 130px"
+          style="width: 160px"
         ></multiselect>
       </b-form-fieldset>
 
@@ -92,9 +104,10 @@
         <multiselect
           v-model="qualitySolutionTeamCode"
           :showLabels="false"
-          :searchable="false"
           :options="code.qualitySolutionTeamCode"
           :loading="isLoad.qualitySolutionTeamCode"
+          :class="{'invalid': !valid.qualitySolutionTeamCode }"
+          track-by="code"
           label="codeName"
           placeholder="선택"
         ></multiselect>
@@ -105,11 +118,13 @@
         label="Bandwidth<i class='require'>*</i>"
         :invalid-feedback="$valid.msg.require"
         :horizontal="true">
-        <b-form-input
-          v-model="items.bandwidth"
-          type="number"
-          class="w-25"
-        ></b-form-input>
+        <cleave
+          :value.sync="items.bandwidth"
+          style="width: 156px;"
+          class="form-control"
+          :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+          required
+        ></cleave>
       </b-form-fieldset>
 
 
@@ -132,12 +147,6 @@
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
 
-    <b-modal ref="messageModalRef" hide-footer title="Message" size="sm" :class="state.popHostName ? 'modal-primary' : 'modal-danger'">
-      <div class="d-block text-center">
-        <h5>{{ hostmessage }}</h5>
-      </div>
-      <b-btn class="mt-4" :variant="state.popHostName ? 'outline-primary' : 'outline-danger'" block @click="hideMessage">Close</b-btn>
-    </b-modal>
   </div>
 </template>
 
@@ -152,12 +161,12 @@
     data (){
       return {
         items: {
-          popName: "",
-          popHostName: "",
-          popDomainName: "",
-          popCtprvnCode : "",
-          popSigCode : "",
-          qualitySolutionTeamCode : "",
+          popName: '',
+          popHostName: '',
+          popDomainName: null,
+          popCtprvnCode : null,
+          popSigCode : null,
+          qualitySolutionTeamCode : null,
           referrerYn : false,
           highReferrerYn : false,
           bandwidth : 0,
@@ -173,12 +182,8 @@
           popSigCode: true,
           qualitySolutionTeamCode: true
         },
-        isDomainName: false,
-        state: {
-          popHostName: true
-        },
-        hostmessage: '',
 
+        popHostNameExists: null,
         inValidForm: false
       }
     },
@@ -207,6 +212,38 @@
         set (newValue) {
           this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
+      },
+      // validation
+      valid (){
+        return {
+          popHostName: (this.popHostNameExists === null && this.items.popHostName.length === 0) ?
+            this.popHostNameExists :
+            (this.items.popHostName.length > 0 &&
+            /^[A-Za-z0-9]*$/.test(this.items.popHostName) &&
+            this.popHostNameExists === 'success'),
+          referrer: !(!this.items.referrerYn && !this.items.highReferrerYn),
+          popCtprvnCode: this.items.popCtprvnCode !== null,
+          popSigCode: this.items.popSigCode !== null,
+          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null
+        }
+      },
+
+      // validation feedback
+      feedback (){
+        return {
+          popHostName: (!(/^[A-Za-z0-9]*$/.test(this.items.popHostName)) && this.items.popHostName.length > 0) ?
+            '영문, 숫자만 입력하십시오.'
+            : (this.popHostNameExists === null && this.items.popHostName.length > 0) ?
+            '중복확인은 필수입니다.'
+            : (this.popHostNameExists === 'not') ?
+            '입력된 항목이 없습니다.'
+            : (this.popHostNameExists === 'fail') ?
+            '이미 등록된 Host Name이 있습니다.'
+            : this.items.popHostName.length === 0 ?
+            this.$valid.msg.require : '',
+          domain: this.items.popDomainName === null ?
+            'Domain name 생성이 필요합니다.' : ''
+        }
       }
     },
 
@@ -227,35 +264,37 @@
       onSubmit (){
         // History
         this.items.modifyHistReason = '등록';
+        const validate = (this.$valid.all(this.items) && this.popHostNameExists === 'success');
+        this.inValidForm = !validate;
+
         // POST
-        this.$https.post('/pops', this.items)
-          .then((res) => {
-            this.$router.push({ name: 'Pop 상세', params: { id: res.data.items }})
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        if (validate){
+          this.$https.post('/pops', this.items)
+            .then((res) => {
+              this.$router.push({ name: 'Pop 상세', params: { id: res.data.items }})
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
-      fetchHostExists (){
+      fetchNameExists (){
+        if (!this.items.popHostName){
+          this.popHostNameExists = 'not';
+          return;
+        }
         this.$https.get('/pops/hostName/exists', {
             hostName: this.items.popHostName
           })
           .then((res) => {
-            const isSuccess = res.data.result === 'Success';
-            this.state.popHostName = isSuccess;
-            this.hostmessage = isSuccess ? '사용하실 수 있습니다.' : 'Host Name 이 중복입니다.';
-            if (!isSuccess){
-              this.items.popHostName = '';
-            }
-            this.showMessage();
+            this.popHostNameExists = res.data.result === 'Success' ? 'success' : 'fail';
           });
       },
 
       fetchDomain (){
         this.$https.get('/pops/domain')
           .then((res) => {
-            this.isDomainName = true;
             this.items.popDomainName = res.data.items.domain;
           });
       },
@@ -277,13 +316,6 @@
 
       onFirstAddress (obj){
         this.fetchAddress(obj.addressCode)
-      },
-
-      showMessage () {
-        this.$refs.messageModalRef.show()
-      },
-      hideMessage () {
-        this.$refs.messageModalRef.hide()
       }
     }
   }

@@ -82,6 +82,7 @@
             :rows="6"
             :no-resize="!isEdit"
             :disabled="!isEdit"
+            :plaintext="!isEdit"
           ></b-form-textarea>
         </b-form-fieldset>
 

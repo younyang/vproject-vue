@@ -51,30 +51,35 @@
         <b-form-fieldset
           label="Domain"
           :horizontal="true">
-          <span class="domain-text">
-            http(s)://[edge].[content type].<strong class="text-danger">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-          </span>
+          <small class="form-text-alone">
+            http(s)://[edge].[content type].<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+          </small>
         </b-form-fieldset>
 
         <!-- 주소 :: Edit -->
         <b-form-fieldset
           v-if="isEdit"
-          label="주소"
+          :invalid-feedback="$valid.msg.select"
           :horizontal="true">
+          <template slot="label">
+            주소<i class="require">*</i>
+          </template>
+
           <multiselect
             v-model="popCtprvnCode"
-            class="inline"
             :showLabels="false"
             :searchable="false"
             :options="code.popCtprvnCode"
             :loading="isLoad.popCtprvnCode"
-            :disabled="!isEdit"
-            :class="{'view-type': !isEdit}"
+            :class="{'invalid': !valid.popCtprvnCode }"
+            @select="onFirstAddress"
+            track-by="addressCode"
             label="addressCodeName"
-            style="min-width:130px"
+            class="inline"
+            style="width:156px"
             placeholder="선택"
-            @input="onFirstAddress"
           ></multiselect>
+
           <multiselect
             v-if="popCtprvnCode"
             v-model="popSigCode"
@@ -82,10 +87,12 @@
             :searchable="false"
             :options="code.popSigCode"
             :loading="isLoad.popSigCode"
+            :class="{'invalid': !valid.popSigCode }"
+            track-by="addressCode"
             label="addressCodeName"
             placeholder="선택"
             class="inline"
-            style="min-width: 130px"
+            style="width: 160px"
           ></multiselect>
         </b-form-fieldset>
 
@@ -102,15 +109,19 @@
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="품질솔루션팀"
+          :invalid-feedback="$valid.msg.select"
           :horizontal="true">
+          <template slot="label">
+            품질솔루션팀<i v-if="isEdit" class="require">*</i>
+          </template>
           <multiselect
             v-if="isEdit"
             v-model="qualitySolutionTeamCode"
             :showLabels="false"
-            :searchable="false"
             :options="code.qualitySolutionTeamCode"
             :loading="isLoad.qualitySolutionTeamCode"
+            :class="{'invalid': !valid.qualitySolutionTeamCode }"
+            track-by="code"
             label="codeName"
             placeholder="선택"
           ></multiselect>
@@ -122,73 +133,76 @@
           ></b-form-input>
         </b-form-fieldset>
 
-
         <!-- Service Name -->
         <b-form-fieldset
           v-if="!isEdit"
           label="Service"
           :horizontal="true">
-          <span class="badge badge-success badge-pill" v-for="name in serviceNames">
-            {{ name }}
-          </span>
+          <div class="badge-list">
+            <span class="badge sm" v-for="item in serviceNames">
+              {{ item }}
+            </span>
+          </div>
         </b-form-fieldset>
-
 
         <!-- Bandwidth -->
         <b-form-fieldset
-          label="Bandwidth"
-          :label-cols="3"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
-          <b-form-input
+          <template slot="label">
+            Bandwidth<i v-if="isEdit" class="require">*</i>
+          </template>
+          <cleave
             v-if="isEdit"
-            v-model="items.bandwidth"
-            type="text"
-            class="w-25"
-          ></b-form-input>
+            :value.sync="items.bandwidth"
+            style="width: 156px;"
+            class="form-control"
+            :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+            required
+          ></cleave>
           <b-form-input
             v-else
             :value="items.bandwidth"
             type="text"
-            class="w-25"
             plaintext
           ></b-form-input>
         </b-form-fieldset>
 
-
         <!-- 사용여부 -->
         <b-form-fieldset
           label="사용여부"
-          :label-cols="3"
           :horizontal="true">
           <c-switch
             v-if="isEdit"
-            type="icon"
-            variant="success"
-            v-bind="{on: '\uf00c', off: '\uf00d'}"
-            :pill="true"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
             v-model="items.popUseYn"
           ></c-switch>
-          <b-badge
+          <span
             v-else
-            pill
-            :variant="items.popUseYn ? 'success' : 'secondary'">
-            {{ items.popUseYn ? '사용' : '미사용' }}
-          </b-badge>
+            class="badge"
+            :class="{'primary' : items.popUseYn }"
+          >{{ items.popUseYn ? '사용' : '미사용' }}
+          </span>
         </b-form-fieldset>
 
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
-          label="변경이력"
-          :label-cols="3"
+          label="변경이력<i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <b-form-textarea
             v-model="items.modifyHistReason"
-            :rows="6">
-          </b-form-textarea>
+            :rows="6"
+            required
+          ></b-form-textarea>
         </b-form-fieldset>
       </b-form>
     </b-collapse>
+
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
@@ -225,7 +239,6 @@
         <div class="form-row">
           <!-- 수정일 -->
           <b-form-fieldset
-            v-if="items.modifyDateTime"
             label="수정일"
             :horizontal="true">
             <b-form-input
@@ -269,7 +282,7 @@
     </div>
 
     <div class="page-btn" v-else>
-      <span v-if="isProcessComplete">
+      <span v-if="!isProcessComplete">
         <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
         <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
         <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
@@ -286,12 +299,12 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
@@ -299,19 +312,26 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
 
-    <!-- Message Modal -->
-    <b-modal ref="messageModalRef" title="Message" size="sm" class="modal-danger">
+    <!-- Message Alert Modal -->
+    <b-modal title="Message" size="sm" v-model="modal.open" :class="`modal-${modal.type}`">
       <div class="d-block text-center">
-        <h5>{{ modalMessage }}</h5>
+        <p>{{ modal.msg }}</p>
       </div>
-      <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="danger" @click="onDeleteData"><i class="fa fa-dot-circle-o"></i> 삭제</b-button>
-        <b-button type="button" size="sm" variant="secondary" @click="hideMessage"><i class="fa fa-ban"></i> 취소</b-button>
+      <div slot="modal-footer" class="mx-auto">
+        <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
+        <b-button type="button" variant="outline-secondary" @click="modal.open = false">취소</b-button>
       </div>
     </b-modal>
   </div>
@@ -333,17 +353,17 @@
         name: 'Pop 상세',
         originItems: {},
         items: {
-          popName: "",
-          popHostName: "",
-          popDomainName: "",
-          popCtprvnCode: "",
-          popSigCode: "11230",
-          popAddress: "",
-          qualitySolutionTeamCode: "",
-          qualitySolutionTeamCodeName: "",
+          popName: '',
+          popHostName: '',
+          popDomainName: null,
+          popCtprvnCode: null,
+          popSigCode: null,
+          popAddress: '',
+          qualitySolutionTeamCode: null,
+          qualitySolutionTeamCodeName: '',
           bandwidth: 0,
           popUseYn: true,
-          serviceNames: "",
+          serviceNames: null,
           lowReferrerList: [],
           edgeList: [],
           processStateCodeName: null,
@@ -362,7 +382,12 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         isLoad: {
           popCtprvnCode: true,
@@ -371,12 +396,12 @@
         },
         isEdit: false,
         isModalHistory: false,
-        modalMessage: '',
 
-        // 배포상태 - 임시
-        deploy: {
-          status: true,
-          count: 11234
+        modal: {
+          open: false,
+          type: 'done',
+          msg: '',
+          action (){}
         },
 
         inValidForm: false
@@ -415,6 +440,15 @@
         return (this.items.processStateCode !== null &&
                 this.items.processStateCode !== '' &&
                 this.items.processStateCode === 'PROCESS_STATE_02')
+      },
+
+      // validation
+      valid (){
+        return {
+          popCtprvnCode: this.items.popCtprvnCode !== null,
+          popSigCode: this.items.popSigCode !== null,
+          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null
+        }
       }
     },
 
@@ -463,13 +497,18 @@
       },
 
       onSubmit (){
-        this.$https.put(`/pops/${this.id}`, this.items)
-          .then((res) => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        const validate = this.$valid.all(this.items);
+        this.inValidForm = !validate;
+
+        if (validate){
+          this.$https.put(`/pops/${this.id}`, this.items)
+            .then((res) => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
       onDeploy (){
@@ -483,8 +522,12 @@
       },
 
       onDelete (){
-        this.modalMessage = '정말 삭제하시겠습니까?';
-        this.showMessage();
+        this.modal = {
+          open: true,
+          type: 'error',
+          msg: '정말로 삭제하시겠습니까?',
+          action: this.onDeleteData
+        };
       },
 
       onDeleteData (){
@@ -526,13 +569,6 @@
           .then((res) => {
             this.history.items = res.data.items;
           });
-      },
-
-      showMessage () {
-        this.$refs.messageModalRef.show()
-      },
-      hideMessage () {
-        this.$refs.messageModalRef.hide()
       }
     }
   }

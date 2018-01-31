@@ -17,117 +17,100 @@
         <!-- Disk size -->
         <b-form-fieldset
           label="Disk size"
-          :label-cols="3"
           :horizontal="true">
-          <b-form-input
-            v-model="items.diskSize"
-            type="text"
-            class="inline"
-            style="width: 80px"
-            plaintext
-          ></b-form-input>
-          GB
+          <span class="form-text-alone">{{ items.diskSize }}</span> GB
         </b-form-fieldset>
 
         <!-- List -->
         <b-form-fieldset
           label="&nbsp;"
-          :label-cols="3"
           :horizontal="true">
 
-          <b-button
-            type="button"
-            size="sm"
-            class="mt-2 mb-2"
-            v-if="isEdit"
-            variant="outline-primary"
-            @click="onAddList">
-            <i class="fa fa-plus"></i> 추가
-          </b-button>
+          <b-table
+            class="sub"
+            show-empty
+            :foot-clone="isEdit"
+            :items="items.coreConfigCompList"
+            :fields="{
+            index: {label: '번호', 'class': 'index'},
+            diskMountPath: {label: 'Disk mounts path<i class=\'require\'>*</i>', 'class': 'text-left'},
+            diskMountSize: {label: 'Disk Size<i class=\'require\'>*</i>', 'class': 'text-right', 'thStyle': 'width: 200px'}
+          }"
+          >
+            <template slot="index" scope="row">
+              {{ row.index + 1 }}
+            </template>
+            <template slot="diskMountPath" scope="row">
+              <span v-if="isEdit">
+                <b-form-input
+                  v-model="row.item.diskMountPath"
+                  type="text"
+                  required
+                ></b-form-input>
+                <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+              </span>
+              <span v-else>{{ row.value }}</span>
+            </template>
+            <template slot="diskMountSize" scope="row">
+              <span v-if="isEdit">
+                <cleave
+                  class="form-control"
+                  style="width: 100px;"
+                  v-model.number="row.item.diskMountSize"
+                  :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+                  @input="setDefault(row.item, 'diskMountSize')"
+                ></cleave>
+                GB
+                <span class="ico">
+                  <button type="button" v-if="row.index === 0" @click="onAddRow"><i class="fa fa-plus-circle"></i></button>
+                  <button type="button" v-if="row.index > 0" @click="onDelRow(row.index)"><i class="fa fa-times-circle"></i></button>
+                </span>
+                <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+              </span>
+              <span v-else>{{ row.value }} GB</span>
+            </template>
 
-          <ul class="icons-list">
-            <li v-for="(comp, index) in items.coreConfigCompList">
-              <i class="bg-primary">{{ comp.edgeCoreConfigCompSeq }}</i>
-              <div class="desc edge">
-                <small>Disk mounts path</small>
-                <div class="title">
-                  <b-form-input
-                    v-model="comp.diskMountPath"
-                    type="text"
-                    class="sm"
-                    :plaintext="!isEdit"
-                  ></b-form-input>
-                </div>
-              </div>
-              <div class="value text-left" style="width: 145px">
-                <div class="small text-muted">Disk Size</div>
-                <b-form-input
-                  v-model="comp.diskMountSize"
-                  type="text"
-                  class="inline sm"
-                  style="width: 80px"
-                  :plaintext="!isEdit"
-                ></b-form-input>
-                GB
-                <b-button
-                  v-if="isEdit && index > 0"
-                  type="button"
-                  size="sm"
-                  variant="outline-danger"
-                  class="list-del"
-                  @click="onDelList(index)">
-                  <i class="fa fa-trash"></i>
-                </b-button>
-              </div>
-            </li>
-            <li style="min-height: 59px">
-              <div class="value text-left" style="width: 145px">
-                <div class="small text-muted">Total</div>
-                <b-form-input
-                  :value="total"
-                  type="text"
-                  class="inline sm"
-                  style="width: 80px"
-                  plaintext
-                ></b-form-input>
-                GB
-              </div>
-            </li>
-          </ul>
+            <template slot="FOOT_index" scope="data">
+              &nbsp;
+            </template>
+            <template slot="FOOT_diskMountPath" scope="data">
+              <span class="total-title">total</span>
+            </template>
+            <template slot="FOOT_diskMountSize" scope="data">
+              <span class="total-text"><strong class="text-danger">{{ total }}</strong> GB</span>
+            </template>
+          </b-table>
         </b-form-fieldset>
 
         <!-- 적용여부 -->
         <b-form-fieldset
           v-if="!isEdit"
           label="적용여부"
-          :label-cols="3"
           :horizontal="true">
-          <b-badge
-            pill
-            :variant="items.edgeCoreConfigApplyYn ? 'success' : 'secondary'">
-            {{ items.edgeCoreConfigApplyYn ? '적용' : '미적용' }}
-          </b-badge>
+          <span
+            class="badge"
+            :class="{'primary' : items.edgeCoreConfigApplyYn }">
+            {{ items.edgeCoreConfigApplyYn ? '사용' : '미사용' }}
+          </span>
         </b-form-fieldset>
 
         <!-- JSON -->
         <b-form-fieldset
           v-if="!isEdit"
           label="JSON"
-          :label-cols="3"
           :horizontal="true">
-          <pre class="code" style="height:200px">{{ items.edgeCoreConfigRequestData }}</pre>
+          <pre class="code" style="height:150px">{{ items.edgeCoreConfigRequestData }}</pre>
         </b-form-fieldset>
-
-
 
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
-          label="변경이력"
-          :label-cols="3"
+          label="변경이력<i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <b-form-textarea
             v-model="items.modifyHistReason"
+            required
             :rows="6">
           </b-form-textarea>
         </b-form-fieldset>
@@ -169,7 +152,6 @@
         <div class="form-row">
           <!-- 수정일 -->
           <b-form-fieldset
-            v-if="items.modifyDateTime"
             label="수정일"
             :horizontal="true">
             <b-form-input
@@ -228,12 +210,12 @@
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
       <section class="board">
         <b-table
-          striped
-          bordered
           hover
           show-empty
           :items="history.items"
           :fields="history.fields"
+          :current-page="history.pageInfo.page"
+          :per-page="history.pageInfo.size"
         >
           <template slot="histMgmtId" scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
@@ -241,8 +223,15 @@
         </b-table>
       </section>
 
+      <b-pagination
+        v-model="history.pageInfo.page"
+        :total-rows="history.pageInfo.totalCount"
+        :per-page="history.pageInfo.size"
+        class="mt-2"
+      ></b-pagination>
+
       <div slot="modal-footer">
-        <b-button type="button" size="sm" variant="primary" @click="isModalHistory = false"><i class="fa fa-dot-circle-o"></i> 확인</b-button>
+        <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
 
@@ -291,7 +280,12 @@
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
-          items: []
+          items: [],
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         isLoad: {
           popId: true,
@@ -300,12 +294,6 @@
         isEdit: false,
         isCreate: false,
         isModalHistory: false,
-
-        // 배포상태 - 임시
-        deploy: {
-          status: true,
-          count: 11234
-        },
 
         inValidForm: false
       }
@@ -343,18 +331,22 @@
 
       // Detail Data
       this.$https.get(detailUrl)
-        .then((res) => {
-          const json = JSON.parse(res.data.items.edgeCoreConfigRequestData);
-          this.items = {
-            ...this.items,
-            ...res.data.items,
-            edgeCoreConfigRequestData: JSON.stringify(json, null, 4)
-          };
-          this.originItems = JSON.parse(JSON.stringify(this.items));
+        .then(res => {
+          if (res.data.items === null){
+            this.isCreate = true;
+            this.isEdit = true;
+          }else{
+            const json = JSON.parse(res.data.items.edgeCoreConfigRequestData);
+            this.items = {
+              ...this.items,
+              ...res.data.items,
+              edgeCoreConfigRequestData: JSON.stringify(json, null, 4)
+            };
+            this.originItems = JSON.parse(JSON.stringify(this.items));
+          }
         })
-        .catch(() => {
-          this.isCreate = true;
-          this.isEdit = true
+        .catch(error => {
+          console.log(error);
         });
     },
 
@@ -375,16 +367,17 @@
         }));
         const { modifyHistReason } = this.items;
 
-        if (this.isCreate){
-          this.$https.post(`/edges/${this.id}/cores`, { coreConfigCompList, modifyHistReason })
-            .then(() => {
-              this.$router.go(this.$router.currentRoute);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        }else{
-          this.$https.put(`/edges/${this.id}/cores`, { coreConfigCompList, modifyHistReason })
+        const submitItems = { coreConfigCompList, modifyHistReason };
+        const validate = this.$valid.all(submitItems);
+        const submitAction = (this.isCreate) ?
+          () => this.$https.post(`/edges/${this.id}/cores`, submitItems) :
+          () => this.$https.put(`/edges/${this.id}/cores`, submitItems);
+
+        this.inValidForm = !validate;
+
+
+        if (validate){
+          submitAction()
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -404,7 +397,7 @@
           });
       },
 
-      onAddList (){
+      onAddRow (){
         this.items.coreConfigCompList.push({
           edgeCoreConfigCompSeq: this.items.coreConfigCompList.length,
           diskMountPath: '',
@@ -412,8 +405,12 @@
         });
       },
 
-      onDelList (index){
+      onDelRow (index){
         this.items.coreConfigCompList.splice(index, 1);
+      },
+
+      setDefault (item, key) {
+        item[key] = item[key] !== '' ? parseInt(item[key]) : 0;
       },
 
       getHistoryLink (rowId){

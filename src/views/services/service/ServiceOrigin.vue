@@ -375,9 +375,10 @@
         } : this.originList.find(obj => obj.serviceTypeCode === serviceTypeCode);
 
         const buckets = this.code.bucket[serviceTypeName];
-        const originSectionCodeName = this.code.originSectionCode.find(({code}) => {
+        const originSectionCode = this.code.originSectionCode.find(({code}) => {
           return code === originItems.originSectionCode
-        }).codeName;
+        });
+        const originSectionCodeName = originSectionCode ? originSectionCode.codeName : '';
         const originBucketId = originItems.originBucketId
             ? buckets.find(({originBucketId}) => {
                 return originBucketId === originItems.originBucketId
@@ -398,45 +399,6 @@
       onView (){
         this.isEdit = false;
         this.items = JSON.parse(JSON.stringify(this.originItems))
-      },
-
-      onLoadCreate (){
-        this.isCreate = true;
-        this.isEdit = true;
-
-        this.onLoadDetail();
-        this.items.originList = this.code.serviceTypeList.map(({ serviceTypeCode, serviceTypeName }) => ({
-          serviceTypeCode,
-          serviceTypeName,
-          originSectionCode: 'ORIGIN_SECTION_01',
-          originSectionCodeName: '',
-          originBucketId: null,
-          originBucketName: '',
-          operatorName: '',
-          operatorTeamName: '',
-          originDomainName: null,
-          originPort: null
-        }))
-      },
-
-      onLoadDetail (items){
-        this.items = {...items};
-        this.items.originList = items.originList.map(obj => {
-          const originSectionCode = this.code.originSectionCode.find(({code}) => {
-            return code === obj.originSectionCode
-          });
-          const originSectionCodeName = originSectionCode ? originSectionCode.codeName : '';
-          return {
-            ...obj,
-            originBucketId: obj.originBucketId
-              ? this.code.originBucketId.find(({originBucketId}) => {
-                  return originBucketId === obj.originBucketId
-                })
-              : null,
-            originSectionCodeName
-          }
-        });
-        this.originItems = JSON.parse(JSON.stringify(this.items))
       },
 
       onSubmit (){

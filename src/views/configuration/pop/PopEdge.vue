@@ -6,20 +6,14 @@
     </content-header>
 
     <div class="collapse-title">
-      <b-button
-        variant="secondary"
-        v-b-toggle.lowReferrer
-        :block="true">
+      <b-button class="btn-collapse" v-b-toggle.lowReferrer>
+        <i class="fa"></i>
         Low Referrer
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="lowReferrer" visible>
       <section class="board">
         <b-table
-          striped
-          bordered
-          hover
           show-empty
           :items="items.lowReferrerList"
           :fields="fields.lowReferrerList"
@@ -30,17 +24,15 @@
     </b-collapse>
 
     <!-- Edge -->
-    <div class="collapse-title mt-5">
-      <b-button
-        variant="secondary"
-        v-b-toggle.edge
-        :block="true">
+    <div class="collapse-title">
+      <b-button class="btn-collapse" v-b-toggle.edge>
+        <i class="fa"></i>
         Edge
-        <i class="fa fa-angle-down"></i>
       </b-button>
     </div>
     <b-collapse id="edge" visible>
-      <div class="board-btn">
+      <b-form class="searchBox" inline>
+        <label>Service</label>
         <multiselect
           class="inline"
           :showLabels="false"
@@ -52,13 +44,10 @@
           placeholder="전체"
           @input="onServiceSelect"
         ></multiselect>
-      </div>
+      </b-form>
 
       <section class="board">
         <b-table
-          striped
-          bordered
-          hover
           show-empty
           :items="items.edgeList"
           :fields="fields.edgeList"
@@ -70,7 +59,7 @@
     </b-collapse>
 
     <div class="page-btn">
-      <b-button type="button" size="sm" variant="secondary" :to="{ name: 'Pop 관리' }"><i class="fa fa-list"></i> 목록</b-button>
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Pop 관리' }">목록</b-button>
     </div>
   </div>
 </template>
@@ -89,18 +78,18 @@
         name: 'Pop 상세',
         fields: {
           lowReferrerList: {
-            rowReferrerId: {label: 'ID'},
-            referrerIp: {label: 'IP', 'class': 'text-left'},
+            rowReferrerId: {label: 'ID', thStyle:'width:100px'},
+            referrerIp: {label: 'IP', thStyle:'width:200px', 'class': 'text-left'},
             referrerHostName: {label: 'Host Name', 'class': 'text-left'},
-            referrerUseYn: {label: '상태'}
+            referrerUseYn: {label: '상태', thStyle:'width:120px'}
           },
           edgeList: {
-            edgeId: {label: 'ID'},
-            edgeIp: {label: 'IP', 'class': 'text-left'},
+            edgeId: {label: 'ID', thStyle:'width:100px'},
+            edgeIp: {label: 'IP', thStyle:'width:200px', 'class': 'text-left'},
             edgeHostName: {label: 'Host Name', 'class': 'text-left'},
-            edgeDomainName: {label: 'Domain', 'class': 'text-left'},
-            edgeRelayYn: {label: 'Type'},
-            edgeUseYn: {label: '상태'}
+            edgeDomainName: {label: 'Domain', thStyle:'width:150px', 'class': 'text-left'},
+            edgeRelayYn: {label: 'Type', thStyle:'width:120px'},
+            edgeUseYn: {label: '상태', thStyle:'width:120px'}
           }
         },
         items: {

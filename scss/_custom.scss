@@ -5,6 +5,21 @@ $border-color: #d8d8d8;
 $primary-color: #0088cc;
 $app-min-width: 1300px;
 
+%title-icon{
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 1.4;
+  margin-right: 4px;
+  border: 1px solid #dadada;
+  border-radius: 2px;
+  background: #fff;
+  background: linear-gradient(to bottom, #f7f7f7 65%,#f7f7f7 65%,#fff 100%);
+  color: $primary-color;
+  vertical-align: middle;
+}
+
+
 html,
 body,
 body > .app {
@@ -482,24 +497,49 @@ input.form-control-plaintext {
 
 // Custom Control
 .custom-control {
-  margin: 3px 1rem 3px 0;
-}
-// Custom Control - radio
-.custom-radio {
+  margin: 0 1rem 0 0;
+  min-height: 26px;
+  vertical-align: middle;
+
   .custom-control-indicator {
     border: 1px solid $border-color;
-    background: #fff !important;
+    background: #fff;
     box-shadow: none !important;
   }
-  .custom-control-input:checked ~ .custom-control-indicator {
-    background: #fff;
+
+  .custom-control-input {
+    &:checked ~ .custom-control-indicator {
+      background: #fff;
+      &:after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: block;
+        color: $primary-color;
+      }
+    }
+    &:disabled ~ .custom-control-indicator {
+      border: 1px solid $border-color;
+      background-color: #fafafa;
+    }
+  }
+
+  // checkbox checked
+  &.custom-checkbox .custom-control-input:checked ~ .custom-control-indicator {
     &:after {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      margin: -7px 0 0 -7px;
+      font: normal normal normal 14px/1 FontAwesome;
+      font-size: inherit;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      content: '\f00c';
+    }
+  }
+  // radio checked
+  &.custom-radio .custom-control-input:checked ~ .custom-control-indicator {
+    &:after {
       margin: -3px 0 0 -3px;
       content: '';
-      display: block;
       width: 6px;
       height: 6px;
       border-radius: 50% 50%;
@@ -507,6 +547,7 @@ input.form-control-plaintext {
     }
   }
 }
+
 
 
 // Multiselect
@@ -735,6 +776,7 @@ pre.code {
   border: 1px solid #ddd;
   background: #f0f0f0;
   overflow: auto;
+  margin: 0;
 }
 
 // Board
@@ -798,7 +840,7 @@ section.board {
     display: inline-block;
     height: 26px;
     min-height: 26px;
-    margin: -0.45rem 0;
+    margin: -0.2rem 0;
   }
 
   .multiselect {
@@ -841,6 +883,27 @@ section.board {
     box-shadow: none;
     border: 1px solid $line-color;
     font-size: 12px;
+  }
+
+  tfoot th {
+    font-size: 12px;
+    padding: 0.65rem;
+    font-weight: normal;
+
+    &:first-child {
+      border-left: 1px solid $line-color;
+    }
+    &:last-child {
+      border: 1px solid $line-color;
+    }
+
+    .total-title {
+      float: right;
+      font-weight: 700;
+    }
+    .total-text {
+
+    }
   }
 
   .form-control,
@@ -1012,8 +1075,9 @@ section.board {
 
 }
 .collapse-title {
-  margin-bottom: 10px;
+  padding-bottom: 10px;
   margin-top: 30px;
+  border-bottom: 1px solid $line-color;
 
   .btn-collapse {
     text-align: left;
@@ -1024,17 +1088,7 @@ section.board {
     font-weight: bold;
 
     i.fa {
-      width: 20px;
-      height: 20px;
-      text-align: center;
-      line-height: 1.4;
-      margin-right: 4px;
-      border: 1px solid #dadada;
-      border-radius: 2px;
-      background: #fff;
-      background: linear-gradient(to bottom, #f7f7f7 65%,#f7f7f7 65%,#fff 100%);
-      color: $primary-color;
-      vertical-align: middle;
+      @extend %title-icon;
     }
     i.fa:before {
       content: "\F068";
@@ -1045,6 +1099,10 @@ section.board {
     }
   }
 }
+.collapse-title + div {
+  margin-top: -1px;
+}
+
 
 // Form View
 .formView {
@@ -1090,8 +1148,13 @@ section.board {
       display: block;
       max-width: 100%;
     }
+    .btn-in-table,
     .v-switch.switch-text {
       margin: 2px 0 0;
+    }
+    .form-text-alone {
+      line-height: 1;
+      vertical-align: middle;
     }
   }
 
@@ -1105,6 +1168,14 @@ section.board {
     .invalid ~ .invalid-feedback {
       display: block;
     }
+    .invalid .custom-control-indicator {
+      border-color: #f86c6b;
+      background: #fff !important;
+    }
+    .custom-control-input:valid ~ .custom-control-indicator {
+      background: #fff;
+    }
+
 
     .multiselect.invalid .multiselect__tags {
       border-color: #f86c6b
@@ -1154,13 +1225,12 @@ section.board {
   }
 
   .invalid-tooltip {
+    position: static;
+    color: #f86c6b;
     top: auto;
-    padding: .2rem;
+    padding: .2rem 0 0;
     font-size: .6rem;
-  }
-
-  .form-text-alone {
-    line-height: 27px;
+    background: transparent;
   }
 
   .table.sub {
@@ -1203,6 +1273,9 @@ section.board {
       min-height: 26px;
       height: 26px;
       margin: -0.2rem 0;
+    }
+    .badge {
+      margin: 0;
     }
   }
 }
@@ -1496,6 +1569,81 @@ body.dark > .app {
   }
 }
 
+
+
+
+/**
+ * Configration > Cache Throttling Detail
+ */
+.cache-content {
+  margin-top: 30px;
+
+  h3.cache-title {
+    font-size: 0.825rem;
+    font-weight: 200;
+
+    i.fa {
+      @extend %title-icon;
+      margin-top: -1px;
+    }
+  }
+
+  .custom-control {
+    margin: 0;
+  }
+
+  .table {
+    tbody tr > td {
+      &.serviceType {
+        text-align: left;
+        width: 180px;
+      }
+      &.bandwidth {
+        text-align: right;
+        width: calc(50% - 90px);
+      }
+    }
+
+    tfoot th {
+      border-top: 1px solid $line-color;
+      box-shadow: 1px 0 $line-color inset;
+      font-size: 0.8rem;
+      padding: 0.65rem;
+
+      &:first-child {
+        box-shadow: none;
+      }
+      .total-text {
+        float: right;
+      }
+      .invalid {
+        color: #f86c6b;
+        float: left;
+        line-height: 20px;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .formView {
+    margin-top: 10px;
+  }
+}
+
+
+
+/**
+ * Configration > Referrer Detail
+ */
+.referrer-content {
+  position: relative;
+
+  .link-list {
+    position: absolute;
+    top: -35px;
+    right: 0;
+  }
+}
 
 
 

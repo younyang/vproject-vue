@@ -41,8 +41,8 @@
           label="Service Type"
           :horizontal="true">
 
-          <div class="badge-list" v-for="item in items.serviceTypeList">
-            <span class="badge sm" v-if="item">
+          <div class="badge-list">
+            <span class="badge sm" v-for="item in items.serviceTypeList">
               {{ item.serviceTypeName }}
             </span>
           </div>
@@ -308,7 +308,6 @@
         <div class="form-row">
           <!-- 수정일 -->
           <b-form-fieldset
-            v-if="items.modifyDateTime"
             label="수정일"
             :horizontal="true">
             <b-form-input
@@ -523,7 +522,8 @@
           sslCertKey: "",
           sslCertExpireDate: "",
           serviceUseYn: false,
-          modifyHistReason: ''
+          modifyHistReason: '',
+          processStateCode: null
         },
         code: {
           serviceTypeCode: [],
@@ -718,7 +718,7 @@
           type: 'error',
           msg: '정말로 삭제하시겠습니까?',
           action: this.onDeleteData
-        }
+        };
       },
 
       onDeleteData (){
