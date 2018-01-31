@@ -4,8 +4,8 @@ export default [
     title: 'Edge Data Transfer',
     types: ['AREA','LINE'],
     searchItems: {
-      fromDate: '2017-12-18 00:00',
-      toDate: '2017-12-29 23:59',
+      fromDate: '2018-01-23 00:00',
+      toDate: '2018-01-30 23:59',
       q: {
         serviceIdList: ['ALL'],
         serviceTypeList: ['ALL'],
@@ -26,8 +26,8 @@ export default [
     title: 'Cache Status',
     types: ['PIE'],
     searchItems: {
-      fromDate: '2017-12-18 00:00',
-      toDate: '2017-12-29 23:59',
+      fromDate: '2018-01-23 00:00',
+      toDate: '2018-01-30 23:59',
       q: {
         serviceIdList:['ALL'],
         serviceTypeList: ['ALL'],
@@ -49,8 +49,8 @@ export default [
     title: 'Service Type 별 Request',
     types: ['BAR'],
     searchItems: {
-      fromDate: '2017-12-18 00:00',
-      toDate: '2017-12-29 23:59',
+      fromDate: '2018-01-23 00:00',
+      toDate: '2018-01-30 23:59',
       q: {
         serviceIdList:['ALL'],
         serviceTypeList: ['ALL'],
@@ -71,8 +71,8 @@ export default [
     title: 'Request Count',
     types: ['LINE', 'AREA'],
     searchItems: {
-      fromDate: '2017-12-18 00:00',
-      toDate: '2017-12-29 23:59',
+      fromDate: '2018-01-23 00:00',
+      toDate: '2018-01-30 23:59',
       q: {
         serviceIdList:['ALL'],
         serviceTypeList: ['ALL'],
@@ -93,8 +93,8 @@ export default [
     title: '지역별 Data Transfer 현황',
     types: ['MAP'],
     searchItems: {
-      fromDate: '2017-12-18 00:00',
-      toDate: '2017-12-29 23:59',
+      fromDate: '2018-01-23 00:00',
+      toDate: '2018-01-30 23:59',
       q: {
         serviceIdList:['ALL'],
         serviceTypeList: ['ALL'],

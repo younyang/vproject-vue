@@ -274,6 +274,7 @@
 
 
 <script>
+  import moment from 'moment'
   // import Container and Box components
   import { Container, Box } from '@dattn/dnd-grid'
   // minimal css for the components to work properly
@@ -465,11 +466,14 @@
 
     created () {
       this.modalItems = this.widget[0];
-
-      this.widget = widgetFake.map(obj => ({
-        ...this.widget[0],
-        ...obj
-      }));
+      this.widget = widgetFake.map(obj => {
+        obj.searchItems.fromDate = moment().subtract(7, 'day').format('YYYY-MM-DD HH:MM');
+        obj.searchItems.toDate = moment().format('YYYY-MM-DD HH:MM');
+        return {
+          ...this.widget[0],
+          ...obj
+        }
+      });
 
       // Service Id
       this.$https.get('/services', {

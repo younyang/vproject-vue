@@ -443,7 +443,9 @@ i.require {
   &:disabled {
     background-color: #fafafa;
   }
-
+  &:focus {
+    border-color: #8ad4ee;  // focus 됬을때 컬러
+  }
 
 }
 
@@ -453,15 +455,15 @@ textarea.form-control {
 
 .was-validated .form-control:valid,
 .form-control.is-valid {
-  border-color: $border-color;
+  border-color: $border-color;   // normal 회색 컬러
   &:focus {
-    border-color: #8ad4ee;
+    border-color: #8ad4ee;  // focus 됬을때 파랑컬러
   }
 }
 .was-validated .form-control:invalid,
 .was-validated .form-control.is-invalid,
 .was-validated .form-control.is-invalid:focus {
-  border-color: #f86c6b;
+  border-color: #f86c6b; // invalid 된 빨간색
 }
 
 .was-validated .custom-control-description {
@@ -852,6 +854,7 @@ section.board {
  * List View Component
  */
 // Search Form Box
+
 .searchBox {
   position: relative;
   margin-bottom: 10px;
@@ -948,9 +951,7 @@ section.board {
     border: 1px solid $border-color;
     background: #fff;
 
-    &:hover,
-    &:focus,
-    &:active {
+    &:hover{
       color: #fff;
       background: #00476a;
     }
@@ -1294,7 +1295,9 @@ section.board {
   header,
   .sidebar,
   .breadcrumb,
-  .page-btn {
+  .page-btn,
+  .btn-in-table,
+  .btn-in-table-icon{
     display: none;
   }
   .main {
