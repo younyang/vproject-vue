@@ -397,6 +397,7 @@
             :multiple="true"
             :searchable="false"
             :showLabels="false"
+            :closeOnSelect="false"
             :options="code.serviceTypeCode"
             :loading="isLoad.serviceTypeCode"
             @select="onSelectType"

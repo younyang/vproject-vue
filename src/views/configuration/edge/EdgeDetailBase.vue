@@ -96,7 +96,7 @@
             </span>
           </div>
           <b-button
-            v-if="!isEdit && items.edgeRelayName !== 'Relay'"
+            v-if="isEditableServiceType"
             variant="in-table-icon"
             v-b-tooltip.hover
             :title="`Service Type 수정`"
@@ -283,11 +283,11 @@
             :multiple="true"
             :searchable="false"
             :showLabels="false"
+            :closeOnSelect="false"
             :options="code.serviceTypeCode"
             :loading="isLoad.serviceTypeCode"
             @select="onSelectType"
             @remove="onRemoveType"
-            @close="onSelectAfter"
           ></multiselect>
         </b-form-fieldset>
         <b-form-fieldset
@@ -382,7 +382,8 @@
         },
         code: {
           popId: [],
-          serviceTypeCode: []
+          serviceTypeCode: [],
+          serviceTypeCodeAll: []
         },
         history: {
           fields: {
@@ -432,7 +433,7 @@
       serviceTypeCode: {
         get () {
           return this.items.serviceTypeCode.length > 0
-            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.code === val))
+            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCodeAll.find(obj => obj.code === val))
             : [];
         },
         set (newValue) {
@@ -445,6 +446,11 @@
       serviceDomainList () {
         const serviceDomainList = this.serviceTypeCode.map(({ codeValChar1 }) => codeValChar1);
         return [...new Set(serviceDomainList)];
+      },
+
+      isEditableServiceType (){
+        return !this.isEdit && this.items.edgeRelayName !== 'Relay' &&
+          !this.items.serviceTypeCode.find(code => code === 'SERVICE_TYPE_0103');
       },
 
       // validate
@@ -481,9 +487,10 @@
       const fetchCode = () => this.$https.get('/system/commonCode', { q: { groupCode: 'SERVICE_TYPE' } });
       const fetchCodeService = (res) => {
         this.isLoad.serviceTypeCode = false;
+        this.code.serviceTypeCodeAll = res.data.items;
         this.code.serviceTypeCode = res.data.items.filter(({code}) => {
           const number = code.split('_')[2];
-          return number.length === 4;
+          return number.length === 4 && code !== 'SERVICE_TYPE_0103';
         });
         return this.$https.get('/pops');
       };
@@ -609,14 +616,6 @@
               this.serviceItems.serviceTypeCode.push(item.code);
             }
           });
-      },
-
-      onSelectAfter (array){
-        const rtsp = array.find(({ code }) => code === 'SERVICE_TYPE_0103');
-        if (rtsp){
-          this.items.serviceTypeCode = [];
-          this.serviceTypeCode = [rtsp];
-        }
       }
     }
   }
