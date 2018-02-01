@@ -9,6 +9,8 @@
           <multiselect
             v-model="searchType"
             label="codeName"
+            class="noEmpty"
+            :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
             :options="code.searchType"
@@ -56,6 +58,8 @@
           <multiselect
             v-model="searchDateType"
             label="codeName"
+            class="noEmpty"
+            :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
             :options="code.searchDateType"
@@ -80,6 +84,9 @@
 
 
     <section class="board-btn">
+      <b-button type="button" variant="primary">
+        엑셀 다운로드
+      </b-button>
       <b-button type="button" variant="primary" :to="{ name: 'Bucket 등록' }">
         등록
       </b-button>
@@ -88,6 +95,7 @@
     <section class="board">
       <b-table
         hover
+        show-empty
         :items="items"
         :fields="fields"
         @row-clicked="details"
@@ -155,11 +163,11 @@
         queryParams: {},
 
         searchItem: {
-          searchType: null,
+          searchType: 's3bucketId',
           searchKeyword: null,
           serviceTypeCode: null,
           useYn: null,
-          searchDateType: null,
+          searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
@@ -295,9 +303,9 @@
       onReset() {
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType') {
-            this.searchItem[key] = null;
+            this.searchItem[key] = 's3bucketId';
           } else if (key === 'searchDateType') {
-            this.searchItem[key] = null;
+            this.searchItem[key] = 'createDate';
           } else {
             this.searchItem[key] = null;
           }

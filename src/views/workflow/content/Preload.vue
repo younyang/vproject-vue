@@ -306,7 +306,12 @@
       },
 
       onSearch (){
-        this.queryParams = {...this.searchItem};
+        this.queryParams = {};
+        Object.keys(this.searchItem).forEach(key => {
+          if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
+            this.queryParams[key] = this.searchItem[key];
+          }
+        });
         this.fetchList({ page: 1 });
       },
 
