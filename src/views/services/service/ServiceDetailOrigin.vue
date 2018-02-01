@@ -179,7 +179,7 @@
 
         <!-- 배포상태 -->
         <b-form-fieldset
-          v-if="items.processStateCode"
+          v-if="items.processId !== null"
           label="배포상태"
           :horizontal="true">
           <input
@@ -260,7 +260,9 @@
         serviceName: '',
         items: {
           originList: [],
-          modifyHistReason: null
+          modifyHistReason: null,
+          processStateCode: null,
+          processId: null
         },
 
         code: {
@@ -296,7 +298,7 @@
 
     computed: {
       isProcessComplete (){
-        return (this.items.processStateCode !== null &&
+        return this.items.processId === null || (this.items.processStateCode !== null &&
         this.items.processStateCode !== '' &&
         this.items.processStateCode === 'PROCESS_STATE_02')
       }

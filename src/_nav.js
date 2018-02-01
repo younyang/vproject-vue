@@ -27,7 +27,7 @@ export default {
       children: [
         {
           name: 'Edge',
-          url: '/configuration',
+          url: '/configuration/edge',
           children: [
             {
               name: 'Edge 관리',
@@ -41,7 +41,7 @@ export default {
         },
         {
           name: 'Referrer',
-          url: '/configuration',
+          url: '/configuration/referrer',
           children: [
             {
               name: 'Referrer 관리',
@@ -73,7 +73,7 @@ export default {
         },
         {
           name: 'DNS',
-          url: '/configuration',
+ //         url: '/configuration/dns',
           children: [
             {
               name: 'GTM 등록 관리',

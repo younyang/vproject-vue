@@ -96,7 +96,7 @@
             </span>
           </div>
           <b-button
-            v-if="!isEdit"
+            v-if="!isEdit && items.edgeRelayName !== 'Relay'"
             variant="in-table-icon"
             v-b-tooltip.hover
             :title="`Service Type 수정`"
@@ -283,11 +283,11 @@
             :multiple="true"
             :searchable="false"
             :showLabels="false"
-            :closeOnSelect="false"
             :options="code.serviceTypeCode"
             :loading="isLoad.serviceTypeCode"
             @select="onSelectType"
             @remove="onRemoveType"
+            @close="onSelectAfter"
           ></multiselect>
         </b-form-fieldset>
         <b-form-fieldset
@@ -555,7 +555,7 @@
         this.inValidServiceForm = !validate;
 
         if (validate){
-          this.$https.put(`/services/${this.id}/types`, this.serviceItems)
+          this.$https.put(`/edges/${this.id}/types`, this.serviceItems)
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -609,6 +609,14 @@
               this.serviceItems.serviceTypeCode.push(item.code);
             }
           });
+      },
+
+      onSelectAfter (array){
+        const rtsp = array.find(({ code }) => code === 'SERVICE_TYPE_0103');
+        if (rtsp){
+          this.items.serviceTypeCode = [];
+          this.serviceTypeCode = [rtsp];
+        }
       }
     }
   }

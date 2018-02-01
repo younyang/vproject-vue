@@ -25,7 +25,8 @@
     },
     methods: {
       handleClick (e) {
-        e.preventDefault()
+        e.preventDefault();
+        console.log(e.target.parentElement)
         e.target.parentElement.classList.toggle('open')
       }
     }

@@ -331,6 +331,7 @@
         <!-- 배포상태 -->
         <b-form-fieldset
           label="배포상태"
+          v-if="items.processId !== null"
           :horizontal="true">
           <input
             type="text"
@@ -396,7 +397,6 @@
             :multiple="true"
             :searchable="false"
             :showLabels="false"
-            :closeOnSelect="false"
             :options="code.serviceTypeCode"
             :loading="isLoad.serviceTypeCode"
             @select="onSelectType"
@@ -523,7 +523,8 @@
           sslCertExpireDate: "",
           serviceUseYn: false,
           modifyHistReason: '',
-          processStateCode: null
+          processStateCode: null,
+          processId: null
         },
         code: {
           serviceTypeCode: [],
@@ -595,7 +596,7 @@
       },
 
       isProcessComplete (){
-        return (this.items.processStateCode !== null &&
+        return this.items.processId === null || (this.items.processStateCode !== null &&
         this.items.processStateCode !== '' &&
         this.items.processStateCode === 'PROCESS_STATE_02')
       },
