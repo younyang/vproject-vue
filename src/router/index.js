@@ -5,10 +5,6 @@ import lazyLoading from './lazyLoading'
 
 // Containers
 import Full from '@/containers/Full'
-import Process from '@/views/Process'
-import Map from '@/views/Map'
-import GridUI from '@/views/GridUI'
-
 Vue.use(Router)
 
 const requireAuth = (to, from, next) => {
@@ -39,7 +35,7 @@ export default new Router({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: lazyLoading('dashboard', true)
+          component: lazyLoading('dashboard/Dashboard')
         },
         {
           path: 'service',
@@ -51,7 +47,7 @@ export default new Router({
           children: [
             { path: 'service',
               name: 'Service 관리',
-              component: lazyLoading('services/service', true)
+              component: lazyLoading('services/service/Service')
             },
             {
               path: 'service/create',
@@ -62,7 +58,6 @@ export default new Router({
               path: 'service/:id',
               name: 'Service 상세',
               redirect: '/service/service/:id/default',
-              //component: lazyLoading('services/service/ServiceDetail'),
               component: {
                 render (c) { return c('router-view') }
               },
@@ -70,29 +65,29 @@ export default new Router({
                 { path: 'default',
                   title: '기본정보',
                   props: true,
-                  component: lazyLoading('services/service/ServiceDefault')
+                  component: lazyLoading('services/service/ServiceDetailBase')
                 },
                 { path: 'origin',
                   title: 'Origin',
                   props: true,
-                  component: lazyLoading('services/service/ServiceOrigin')
+                  component: lazyLoading('services/service/ServiceDetailOrigin')
                 },
                 { path: 'pop',
                   title: 'PoP',
                   props: true,
-                  component: lazyLoading('services/service/ServicePop')
+                  component: lazyLoading('services/service/ServiceDetailPop')
                 },
                 { path: 'ip',
                   title: 'IP Restriction',
                   props: true,
-                  component: lazyLoading('services/service/ServiceIp')
+                  component: lazyLoading('services/service/ServiceDetailIpRestriction')
                 }
               ]
             },
             {
               path: 'bucket',
               name: 'Bucket 관리',
-              component: lazyLoading('services/bucket', true)
+              component: lazyLoading('services/bucket/Bucket')
             },
             {
               path: 'bucket/create',
@@ -118,12 +113,12 @@ export default new Router({
             {
               path: 'edge',
               name: 'Edge 관리',
-              component: lazyLoading('configuration/edge', true)
+              component: lazyLoading('configuration/edge/Edge')
             },
             {
               path: 'edge/create',
               name: 'Edge 등록',
-              component: lazyLoading('configuration/edge/Create')
+              component: lazyLoading('configuration/edge/EdgeCreate')
             },
             {
               path: 'edge/:id',
@@ -136,55 +131,76 @@ export default new Router({
                 { path: 'default',
                   title: '기본정보',
                   props: true,
-                  component: lazyLoading('configuration/edge/EdgeDefault')
+                  component: lazyLoading('configuration/edge/EdgeDetailBase')
                 },
                 { path: 'core',
                   title: 'Core Config',
                   props: true,
-                  component: lazyLoading('configuration/edge/EdgeCore')
+                  component: lazyLoading('configuration/edge/EdgeDetailCoreConfig')
                 },
                 { path: 'service',
                   title: 'Service',
                   props: true,
-                  component: lazyLoading('configuration/edge/EdgeService')
+                  component: lazyLoading('configuration/edge/EdgeDetailService')
                 }
               ]
             },
             {
               path: 'cache',
               name: 'Cache Throttling 관리',
-              component: lazyLoading('configuration/cache', true)
+              component: lazyLoading('configuration/edge/CacheThrottling')
             },
             {
               path: 'cache/create',
               name: 'Cache Throttling 등록',
-              component: lazyLoading('configuration/cache/Create')
+              component: lazyLoading('configuration/edge/CacheThrottlingCreate')
             },
             {
               path: 'cache/:id',
               name: 'Cache Throttling 상세',
               props: true,
-              component: lazyLoading('configuration/cache/Detail')
+              component: lazyLoading('configuration/edge/CacheThrottlingDetail')
             },
             {
               path: 'referrer',
               name: 'Referrer 관리',
-              component: lazyLoading('configuration/referrer', true)
+              component: lazyLoading('configuration/referrer/Referrer')
             },
             {
               path: 'referrer/create',
               name: 'Referrer 등록',
-              component: lazyLoading('configuration/referrer/Create')
+              component: lazyLoading('configuration/referrer/ReferrerCreate')
             },
             {
               path: 'referrer/:id',
               name: 'Referrer 상세',
               props: true,
-              component: lazyLoading('configuration/referrer/Detail')
+              component: lazyLoading('configuration/referrer/ReferrerDetail')
             },
+            {
+              path: 'popPreference',
+              name: 'PoP Preference',
+              component: lazyLoading('configuration/referrer/PopPreference')
+            },
+            {
+              path: 'ipRestriction',
+              name: 'IP Restriction',
+              component: lazyLoading('configuration/referrer/IpRestriction')
+            },
+            {
+              path: 'geoIp',
+              name: 'GEO IP',
+              component: lazyLoading('configuration/referrer/GEOip')
+            },
+            {
+              path: 'onetime',
+              name: 'One-Time URL',
+              component: lazyLoading('configuration/referrer/OnetimeUrl')
+            },
+
             { path: 'pop',
               name: 'Pop 관리',
-              component: lazyLoading('configuration/pop', true)
+              component: lazyLoading('configuration/pop/Pop')
             },
             {
               path: 'pop/create',
@@ -202,51 +218,19 @@ export default new Router({
                 { path: 'default',
                   title: '기본정보',
                   props: true,
-                  component: lazyLoading('configuration/pop/PopDetail')
+                  component: lazyLoading('configuration/pop/PopDetailBase')
                 },
                 { path: 'edge',
                   title: 'L/R, Edge',
                   props: true,
-                  component: lazyLoading('configuration/pop/PopEdge')
+                  component: lazyLoading('configuration/pop/PopDetailEdge')
                 }
               ]
-            }
-          ]
-        },
-        {
-          path: 'policy',
-          redirect: '/policy/onetime',
-          name: 'Policy',
-          component: {
-            render (c) {
-              return c('router-view')
-            }
-          },
-          children: [
-            {
-              path: 'onetime',
-              name: 'One-Time URL',
-              component: lazyLoading('policy/Onetime')
-            },
-            {
-              path: 'popPreference',
-              name: 'PoP Preference',
-              component: lazyLoading('policy/PopPreference')
             },
             {
               path: 'gtm',
               name: 'GTM 관리',
-              component: lazyLoading('policy/GTM')
-            },
-            {
-              path: 'geoIp',
-              name: 'GEO IP',
-              component: lazyLoading('policy/GEOip')
-            },
-            {
-              path: 'ipRestriction',
-              name: 'IP Restriction',
-              component: lazyLoading('policy/IPRestriction')
+              component: lazyLoading('configuration/dns/GTM')
             }
           ]
         },
@@ -263,18 +247,18 @@ export default new Router({
             {
               path: 'service',
               name: 'Service Processing 관리',
-              component: lazyLoading('workflow/service', true)
+              component: lazyLoading('workflow/service/ServiceProcess')
             },
             {
               path: 'service/:id',
               name: 'Service Processing 상세',
               props: true,
-              component: lazyLoading('workflow/service/Detail')
+              component: lazyLoading('workflow/service/ServiceProcessDetail')
             },
             {
               path: 'domain',
               name: 'Domain Processing 관리',
-              component: lazyLoading('workflow/domain', true)
+              component: lazyLoading('workflow/domain/DomainProcess')
             },
             {
               path: 'contPreload',
@@ -299,24 +283,10 @@ export default new Router({
               component: lazyLoading('workflow/content/PurgeDetail')
             }
           ]
-        },
-        {
-          path: 'process',
-          name: 'Process',
-          component: Process
-        },
-        {
-          path: 'map',
-          name: 'Map',
-          component: Map
-        },
-        {
-          path: 'gridUI',
-          name: 'Grid UI',
-          component: GridUI
         }
       ]
     },
+
     {
       path: '/login',
       name: 'Login',

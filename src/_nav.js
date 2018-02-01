@@ -26,49 +26,60 @@ export default {
       icon: 'icon-puzzle',
       children: [
         {
-          name: 'Edge 관리',
-          url: '/configuration/edge'
+          name: 'Edge',
+          url: '/configuration',
+          children: [
+            {
+              name: 'Edge 관리',
+              url: '/configuration/edge'
+            },
+            {
+              name: 'Cache Throttling 관리',
+              url: '/configuration/cache'
+            }
+          ]
         },
         {
-          name: 'Cache Throttling 관리',
-          url: '/configuration/cache'
-        },
-        {
-          name: 'Referrer 관리',
-          url: '/configuration/referrer'
+          name: 'Referrer',
+          url: '/configuration',
+          children: [
+            {
+              name: 'Referrer 관리',
+              url: '/configuration/referrer'
+            },
+            {
+              name: 'PoP Preference',
+              url: '/configuration/popPreference'
+            },
+            {
+              name: 'IP Restriction',
+              url: '/configuration/ipRestriction'
+            },
+            /*
+             {
+             name: 'GEO IP',
+             url: '/configuration/geoIp'
+             },
+             */
+            {
+              name: 'One-Time URL',
+              url: '/configuration/onetime'
+            }
+          ]
         },
         {
           name: 'Pop 관리',
           url: '/configuration/pop'
-        }
-      ]
-    },
-    {
-      name: 'Policy',
-      url: '/policy',
-      icon: 'icon-equalizer',
-      children: [
-        {
-          name: 'One-Time URL',
-          url: '/policy/onetime'
         },
         {
-          name: 'PoP Preference',
-          url: '/policy/popPreference'
-        },
-        {
-          name: 'GTM 관리',
-          url: '/policy/gtm'
-        },
-        /*
-        {
-          name: 'GEO IP',
-          url: '/policy/geoIp'
-        },
-        */
-        {
-          name: 'IP Restriction',
-          url: '/policy/ipRestriction'
+          name: 'DNS',
+          url: '/configuration',
+          children: [
+            {
+              name: 'GTM 등록 관리',
+              url: '/configuration/gtm'
+            }
+          ]
         }
       ]
     },
@@ -88,12 +99,18 @@ export default {
         },
         */
         {
-          name: 'Preload',
-          url: '/workflow/contPreload'
-        },
-        {
-          name: 'Purge',
-          url: '/workflow/contPurge'
+          name: 'Content Processing 관리',
+          url: '/workflow',
+          children: [
+            {
+              name: 'Preload',
+              url: '/workflow/contPreload'
+            },
+            {
+              name: 'Purge',
+              url: '/workflow/contPurge'
+            }
+          ]
         }
       ]
     }
