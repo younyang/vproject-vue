@@ -126,8 +126,8 @@
       <!-- High Referrer -->
       <div class="referrer-content" v-if="isReferrerType === 'high'">
         <div class="link-list">
-          <a href="#/policy/ipRestriction" class="btn btn-in-table" target="_blank">IP Restriction 설정</a>
-          <a href="#/policy/popPreference" class="btn btn-in-table" target="_blank">PoP Preference 설정</a>
+          <a href="#/configuration/ipRestriction" class="btn btn-in-table" target="_blank">IP Restriction 설정</a>
+          <a href="#/configuration/popPreference" class="btn btn-in-table" target="_blank">PoP Preference 설정</a>
         </div>
 
         <div class="formView">
@@ -168,7 +168,7 @@
       <!-- Low Referrer -->
       <div class="referrer-content" v-if="isReferrerType === 'low'">
         <div class="link-list">
-          <a href="#/policy/onetime" class="btn btn-in-table" target="_blank">One-Time URL 설정</a>
+          <a href="#/configuration/onetime" class="btn btn-in-table" target="_blank">One-Time URL 설정</a>
         </div>
 
         <div class="formView">
