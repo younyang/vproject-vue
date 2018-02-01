@@ -227,7 +227,7 @@
 
     <div class="page-btn" v-if="isEdit">
       <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
-      <b-button type="button" variant="primary" @click="onSubmit" :disabled="!onCheckBandwidth()">저장</b-button>
+      <b-button type="button" variant="primary" @click="onSubmit" :disabled="!onCheckBandwidth()">저장 및 배포</b-button>
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
