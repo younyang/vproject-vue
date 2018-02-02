@@ -222,6 +222,7 @@
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode')
       }
+      console.log(this.$route)
 
       // Service List
       this.$https.get('/services', {
@@ -290,7 +291,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/edge/${this.id}/service?histories=${rowId}`
+        return `#/configuration/edges/edge/${this.id}/service?histories=${rowId}`
       },
 
       showHistory () {

@@ -104,101 +104,121 @@ export default new Router({
         },
         {
           path: 'configuration',
-          redirect: '/configuration/edge',
+          redirect: '/configuration/edges/edge',
           name: 'Configuration',
           component: {
             render (c) { return c('router-view') }
           },
           children: [
             {
-              path: 'edge',
-              name: 'Edge 관리',
-              component: lazyLoading('configuration/edge/Edge')
-            },
-            {
-              path: 'edge/create',
-              name: 'Edge 등록',
-              component: lazyLoading('configuration/edge/EdgeCreate')
-            },
-            {
-              path: 'edge/:id',
-              redirect: '/configuration/edge/:id/default',
-              name: 'Edge 상세',
+              path: 'edges',
+              redirect: '/configuration/edges/edge',
+              name: 'Edge',
               component: {
                 render (c) { return c('router-view') }
               },
               children: [
-                { path: 'default',
-                  title: '기본정보',
-                  props: true,
-                  component: lazyLoading('configuration/edge/EdgeDetailBase')
+                {
+                  path: 'edge',
+                  name: 'Edge 관리',
+                  component: lazyLoading('configuration/edge/Edge')
                 },
-                { path: 'core',
-                  title: 'Core Config',
-                  props: true,
-                  component: lazyLoading('configuration/edge/EdgeDetailCoreConfig')
+                {
+                  path: 'edge/create',
+                  name: 'Edge 등록',
+                  component: lazyLoading('configuration/edge/EdgeCreate')
                 },
-                { path: 'service',
-                  title: 'Service',
+                {
+                  path: 'edge/:id',
+                  redirect: '/configuration/edges/edge/:id/default',
+                  name: 'Edge 상세',
+                  component: {
+                    render (c) { return c('router-view') }
+                  },
+                  children: [
+                    { path: 'default',
+                      title: '기본정보',
+                      props: true,
+                      component: lazyLoading('configuration/edge/EdgeDetailBase')
+                    },
+                    { path: 'core',
+                      title: 'Core Config',
+                      props: true,
+                      component: lazyLoading('configuration/edge/EdgeDetailCoreConfig')
+                    },
+                    { path: 'service',
+                      title: 'Service',
+                      props: true,
+                      component: lazyLoading('configuration/edge/EdgeDetailService')
+                    }
+                  ]
+                },
+                {
+                  path: 'cache',
+                  name: 'Cache Throttling 관리',
+                  component: lazyLoading('configuration/edge/CacheThrottling')
+                },
+                {
+                  path: 'cache/create',
+                  name: 'Cache Throttling 등록',
+                  component: lazyLoading('configuration/edge/CacheThrottlingCreate')
+                },
+                {
+                  path: 'cache/:id',
+                  name: 'Cache Throttling 상세',
                   props: true,
-                  component: lazyLoading('configuration/edge/EdgeDetailService')
+                  component: lazyLoading('configuration/edge/CacheThrottlingDetail')
                 }
               ]
             },
             {
-              path: 'cache',
-              name: 'Cache Throttling 관리',
-              component: lazyLoading('configuration/edge/CacheThrottling')
+              path: 'referrers',
+              redirect: '/configuration/referrers/referrer',
+              name: 'Referrer',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                {
+                  path: 'referrer',
+                  name: 'Referrer 관리',
+                  component: lazyLoading('configuration/referrer/Referrer')
+                },
+                {
+                  path: 'referrer/create',
+                  name: 'Referrer 등록',
+                  component: lazyLoading('configuration/referrer/ReferrerCreate')
+                },
+                {
+                  path: 'referrer/:id',
+                  name: 'Referrer 상세',
+                  props: true,
+                  component: lazyLoading('configuration/referrer/ReferrerDetail')
+                },
+                {
+                  path: 'popPreference',
+                  name: 'PoP Preference',
+                  component: lazyLoading('configuration/referrer/PopPreference')
+                },
+                {
+                  path: 'ipRestriction',
+                  name: 'IP Restriction',
+                  component: lazyLoading('configuration/referrer/IpRestriction')
+                },
+                {
+                  path: 'geoIp',
+                  name: 'GEO IP',
+                  component: lazyLoading('configuration/referrer/GEOip')
+                },
+                {
+                  path: 'onetime',
+                  name: 'One-Time URL',
+                  component: lazyLoading('configuration/referrer/OnetimeUrl')
+                }
+              ]
             },
             {
-              path: 'cache/create',
-              name: 'Cache Throttling 등록',
-              component: lazyLoading('configuration/edge/CacheThrottlingCreate')
-            },
-            {
-              path: 'cache/:id',
-              name: 'Cache Throttling 상세',
-              props: true,
-              component: lazyLoading('configuration/edge/CacheThrottlingDetail')
-            },
-            {
-              path: 'referrer',
-              name: 'Referrer 관리',
-              component: lazyLoading('configuration/referrer/Referrer')
-            },
-            {
-              path: 'referrer/create',
-              name: 'Referrer 등록',
-              component: lazyLoading('configuration/referrer/ReferrerCreate')
-            },
-            {
-              path: 'referrer/:id',
-              name: 'Referrer 상세',
-              props: true,
-              component: lazyLoading('configuration/referrer/ReferrerDetail')
-            },
-            {
-              path: 'popPreference',
-              name: 'PoP Preference',
-              component: lazyLoading('configuration/referrer/PopPreference')
-            },
-            {
-              path: 'ipRestriction',
-              name: 'IP Restriction',
-              component: lazyLoading('configuration/referrer/IpRestriction')
-            },
-            {
-              path: 'geoIp',
-              name: 'GEO IP',
-              component: lazyLoading('configuration/referrer/GEOip')
-            },
-            {
-              path: 'onetime',
-              name: 'One-Time URL',
-              component: lazyLoading('configuration/referrer/OnetimeUrl')
-            },
-
-            { path: 'pop',
+              path: 'pop',
               name: 'Pop 관리',
               component: lazyLoading('configuration/pop/Pop')
             },
@@ -228,9 +248,21 @@ export default new Router({
               ]
             },
             {
-              path: 'gtm',
-              name: 'GTM 관리',
-              component: lazyLoading('configuration/dns/GTM')
+              path: 'dns',
+              redirect: '/configuration/dns/gtm',
+              name: 'DNS',
+              component: {
+                render (c) {
+                  return c('router-view')
+                }
+              },
+              children: [
+                {
+                  path: 'gtm',
+                  name: 'GTM 관리',
+                  component: lazyLoading('configuration/dns/GTM')
+                }
+              ]
             }
           ]
         },
@@ -261,26 +293,38 @@ export default new Router({
               component: lazyLoading('workflow/domain/DomainProcess')
             },
             {
-              path: 'contPreload',
-              name: 'Preload',
-              component: lazyLoading('workflow/content/Preload')
-            },
-            {
-              path: 'contPreload/:id',
-              name: 'Preload 상세',
-              props: true,
-              component: lazyLoading('workflow/content/PreloadDetail')
-            },
-            {
-              path: 'contPurge',
-              name: 'Purge',
-              component: lazyLoading('workflow/content/Purge')
-            },
-            {
-              path: 'contPurge/:id',
-              name: 'Purge 상세',
-              props: true,
-              component: lazyLoading('workflow/content/PurgeDetail')
+              path: 'content',
+              redirect: '/workflow/content/preload',
+              name: 'Content Processing 관리',
+              component: {
+                render (c) {
+                  return c('router-view')
+                }
+              },
+              children: [
+                {
+                  path: 'preload',
+                  name: 'Preload',
+                  component: lazyLoading('workflow/content/Preload')
+                },
+                {
+                  path: 'preload/:id',
+                  name: 'Preload 상세',
+                  props: true,
+                  component: lazyLoading('workflow/content/PreloadDetail')
+                },
+                {
+                  path: 'purge',
+                  name: 'Purge',
+                  component: lazyLoading('workflow/content/Purge')
+                },
+                {
+                  path: 'purge/:id',
+                  name: 'Purge 상세',
+                  props: true,
+                  component: lazyLoading('workflow/content/PurgeDetail')
+                }
+              ]
             }
           ]
         }

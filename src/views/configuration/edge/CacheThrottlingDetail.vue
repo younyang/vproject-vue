@@ -509,7 +509,7 @@
       },
 
       getHistoryLink (rowId, caseSeq){
-        return `#/configuration/cache/${this.id}?histories=${rowId}&caseSeq=${caseSeq}`
+        return `#/configuration/edges/cache/${this.id}?histories=${rowId}&caseSeq=${caseSeq}`
       },
 
       showHistory (caseSeq) {

@@ -414,7 +414,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/edge/${this.id}/core?histories=${rowId}`
+        return `#/configuration/edges/edge/${this.id}/core?histories=${rowId}`
       },
 
       showHistory () {

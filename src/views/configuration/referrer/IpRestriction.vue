@@ -334,7 +334,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/policy/ipRestriction?histories=${rowId}`
+        return `#/configuration/referrers/ipRestriction?histories=${rowId}`
       },
 
       showHistory () {

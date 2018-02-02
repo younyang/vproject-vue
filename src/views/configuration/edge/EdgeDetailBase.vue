@@ -589,7 +589,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/edge/${this.id}?histories=${rowId}`
+        return `#/configuration/edges/edge/${this.id}?histories=${rowId}`
       },
 
       showHistory () {

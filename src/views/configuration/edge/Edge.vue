@@ -77,6 +77,7 @@
           ></multiselect>
         </b-form-fieldset>
 
+        <!--
         <b-form-fieldset
           label="배포상태"
           class="label-lg"
@@ -92,6 +93,7 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
+        -->
       </div>
 
       <div class="form-row">
@@ -233,7 +235,7 @@
           serviceTypeCode: null,
           popId: null,
           edgeUseYn: null,
-          edgeCoreConfigApplyYn: null,
+          //edgeCoreConfigApplyYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null

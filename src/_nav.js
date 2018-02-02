@@ -27,43 +27,43 @@ export default {
       children: [
         {
           name: 'Edge',
-          url: '/configuration/edge',
+          url: '/configuration/edges',
           children: [
             {
               name: 'Edge 관리',
-              url: '/configuration/edge'
+              url: '/configuration/edges/edge'
             },
             {
               name: 'Cache Throttling 관리',
-              url: '/configuration/cache'
+              url: '/configuration/edges/cache'
             }
           ]
         },
         {
           name: 'Referrer',
-          url: '/configuration/referrer',
+          url: '/configuration/referrers',
           children: [
             {
               name: 'Referrer 관리',
-              url: '/configuration/referrer'
+              url: '/configuration/referrers/referrer'
             },
             {
               name: 'PoP Preference',
-              url: '/configuration/popPreference'
+              url: '/configuration/referrers/popPreference'
             },
             {
               name: 'IP Restriction',
-              url: '/configuration/ipRestriction'
+              url: '/configuration/referrers/ipRestriction'
             },
             /*
              {
              name: 'GEO IP',
-             url: '/configuration/geoIp'
+             url: '/configuration/referrers/geoIp'
              },
              */
             {
               name: 'One-Time URL',
-              url: '/configuration/onetime'
+              url: '/configuration/referrers/onetime'
             }
           ]
         },
@@ -73,11 +73,11 @@ export default {
         },
         {
           name: 'DNS',
- //         url: '/configuration/dns',
+          url: '/configuration/dns',
           children: [
             {
               name: 'GTM 등록 관리',
-              url: '/configuration/gtm'
+              url: '/configuration/dns/gtm'
             }
           ]
         }
@@ -100,15 +100,15 @@ export default {
         */
         {
           name: 'Content Processing 관리',
-          url: '/workflow',
+          url: '/workflow/content',
           children: [
             {
               name: 'Preload',
-              url: '/workflow/contPreload'
+              url: '/workflow/content/preload'
             },
             {
               name: 'Purge',
-              url: '/workflow/contPurge'
+              url: '/workflow/content/Purge'
             }
           ]
         }
