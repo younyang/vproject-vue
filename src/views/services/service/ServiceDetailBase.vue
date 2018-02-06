@@ -308,7 +308,7 @@
         <div class="form-row">
           <!-- 수정일 -->
           <b-form-fieldset
-            label="수정일"
+            label="수정일시"
             :horizontal="true">
             <b-form-input
               :value="items.modifyDateTime"
