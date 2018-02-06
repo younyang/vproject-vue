@@ -1,6 +1,6 @@
 <template>
   <div class="page-sub-title">
-    <h2><i class="fa fa-circle-o"></i> {{ title }} <small v-if="small !== ''">{{ small }}</small></h2>
+    <h2><i></i> {{ title }} <small v-if="small !== ''">{{ small }}</small></h2>
 
     <b-nav pills v-if="navList.isNav" class="sub-navs">
       <b-nav-item v-for="nav in navList.list" :key="nav.path" :to="nav.path">
