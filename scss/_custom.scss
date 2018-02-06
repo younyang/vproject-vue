@@ -372,10 +372,21 @@ h3.content-title {
 }
 // Secondary button
 .btn-outline-secondary {
-  color: #626262;
+  color: #000;
   border-color: #ccc;
   background: #fff;
 }
+.btn-outline-secondary.active{
+  color: #000;
+  border-color: #ccc;
+  background: #fff;
+}
+.btn-outline-secondary.active:hover{
+  color:#fff;
+  background-color:#a4b7c1;
+  border-color:#a4b7c1;
+}
+
 // In Table button
 .btn-in-table,
 .btn-in-table-icon {
