@@ -1691,6 +1691,22 @@ body.dark > .app {
   .highcharts-yaxis-grid .highcharts-grid-line {
     stroke: #555;
   }
+
+  .modal-dialog{
+    .multiselect__tags{
+      border-color:#d8d8d8;
+      background:#fff;
+      color:#35495e;
+    }
+    .multiselect__content-wrapper{
+      border-color:#d8d8d8;
+      background:#fff;
+      color:#35495e;
+    }
+    .multiselect__option--highlight{
+      color:#fff;
+    }
+  }
 }
 
 
