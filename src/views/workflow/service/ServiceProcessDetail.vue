@@ -54,7 +54,7 @@
 
         <!-- 시작 -->
         <b-form-fieldset
-          label="시작"
+          label="시작일시"
           :horizontal="true">
           <b-form-input
             :value="items.processBeginDatetime"
@@ -65,7 +65,7 @@
 
         <!-- 종료 -->
         <b-form-fieldset
-          label="종료"
+          label="종료일시"
           :horizontal="true">
           <b-form-input
             :value="items.processEndDatetime"

@@ -115,7 +115,7 @@
           <!-- 수정일 -->
           <b-form-fieldset
             v-if="items.modifyDateTime"
-            label="수정일"
+            label="수정일시"
             :horizontal="true">
             <b-form-input
               :value="items.modifyDateTime"

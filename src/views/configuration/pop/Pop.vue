@@ -169,8 +169,8 @@
           popHostName: {label: 'Host Name(Prefix)', 'class': 'text-left'},
           popAddress: {label: '주소', 'class': 'text-left'},
           qualitySolutionTeamCodeName: {label: '품솔팀'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'},
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'},
           popUseYn: {label: '사용여부'}
         },
         items: [],

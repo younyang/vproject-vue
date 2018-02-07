@@ -178,8 +178,8 @@
           componentIp: {label: 'IP', 'class': 'text-left'},
           componentHostName: {label: 'Host Name', 'class': 'text-left'},
           popName: {label: 'PoP'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'},
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'},
           referrerUseYn: {label: '사용여부'}
         },
         items: [],
