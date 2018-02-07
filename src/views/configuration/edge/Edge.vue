@@ -213,8 +213,8 @@
           serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
           edgeDomainName: {label: 'Domain'},
           popName: {label: 'PoP'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'},
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'},
           edgeUseYn: {label: '사용여부'}
         },
         items: [],

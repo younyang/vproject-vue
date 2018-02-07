@@ -177,8 +177,8 @@
           companyName: {label: 'Company'},
           cnameUseYn: {label: 'CNAME'},
           sslCertUseYn: {label: 'SSL 인증서'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'},
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'},
           serviceUseYn: {label: '사용여부'}
         },
         items: [],

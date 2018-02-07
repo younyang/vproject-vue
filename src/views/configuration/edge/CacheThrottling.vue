@@ -147,8 +147,8 @@
           popName: {label: 'PoP'},
           popBandwidth: {label: 'Bandwidth(PoP)', 'class': 'text-right'},
           setApplyYn: {label: 'Set2사용'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'}
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'}
         },
         items: [],
         pageInfo: {

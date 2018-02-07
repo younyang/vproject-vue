@@ -147,8 +147,8 @@
           s3BucketId: {label: 'S3 Bucket', 'class': 'text-left'},
           name: {label: 'Bucket Name', 'class': 'text-left'},
           serviceTypeName: {label: 'Service Type'},
-          createDateTime: {label: '등록일'},
-          modifyDateTime: {label: '수정일'},
+          createDateTime: {label: '등록일시'},
+          modifyDateTime: {label: '수정일시'},
           useYn: {label: '사용여부'}
         },
         items: [],
