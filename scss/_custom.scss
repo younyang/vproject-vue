@@ -1587,8 +1587,8 @@ $dnd-function: ease-out;
   .map-box .info {
     padding: 6px 8px;
     background: #fff;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    background: rgba(61,61,61,0.5);
+    //box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
   }
   .map-box .info h4 {
@@ -1598,7 +1598,7 @@ $dnd-function: ease-out;
   .map-box .legend {
     text-align: left;
     line-height: 18px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8);
   }
   .map-box .legend i {
     width: 18px;
