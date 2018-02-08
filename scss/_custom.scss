@@ -1532,11 +1532,11 @@ $dnd-function: ease-out;
   }
 
   .map-box .info {
-    padding: 6px 8px;
-    background: #fff;
+    padding: 3px;
     background: rgba(61,61,61,0.5);
     //box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
+    color:rgba(255, 255, 255, 0.9);
   }
   .map-box .info h4 {
     margin: 0 0 5px;
@@ -1546,6 +1546,11 @@ $dnd-function: ease-out;
     text-align: left;
     line-height: 18px;
     color: rgba(255, 255, 255, 0.8);
+    padding: 6px 8px;
+    background: #fff;
+    background: rgba(61,61,61,0.5);
+    //box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
   }
   .map-box .legend i {
     width: 18px;
@@ -1556,6 +1561,9 @@ $dnd-function: ease-out;
   }
   .leaflet-container {
     background: transparent;
+  }
+  .leaflet-bottom .leaflet-control{
+    margin-bottom:20px;
   }
 }
 
@@ -2118,4 +2126,123 @@ body.dark > .app {
  */
 .text-muted{
   color:#777 !important;
+}
+
+
+
+/**
+ * highcharts
+ */
+
+.highcharts-color-0 {
+  fill: #0088cc;
+  stroke: #0088cc;
+}
+
+.highcharts-color-1 {
+  fill: #734ba9;
+  stroke: #734ba9;
+}
+
+.highcharts-color-2 {
+  fill: #2baab1;
+  stroke: #2baab1;
+}
+
+.highcharts-color-3 {
+  fill: #e36159;
+  stroke: #e36159;
+}
+
+.highcharts-color-4 {
+  fill: #eb8bc7;
+  stroke: #eb8bc7;
+}
+
+.highcharts-color-5 {
+  fill: #5fb700;
+  stroke: #5fb700;
+}
+
+.highcharts-color-6 {
+  fill: #ff9c41;
+  stroke: #ff9c41;
+}
+
+.highcharts-color-7 {
+  fill: #47a447;
+  stroke: #47a447;
+}
+
+.highcharts-color-8 {
+  fill: #e92c81;
+  stroke: #e92c81;
+}
+
+.highcharts-color-9 {
+  fill: #ffd515;
+  stroke: #ffd515;
+}
+
+.highcharts-area{
+  fill:inherit;
+  opacity: 0.4;
+}
+.highcharts-markers path{
+  fill:inherit;
+  stroke:inherit;
+}
+.highcharts-legend-item > .highcharts-point{
+  fill:inherit;
+}
+.highcharts-legend-item > .highcharts-graph,
+.highcharts-color-0 > .highcharts-graph,
+.highcharts-color-1 > .highcharts-graph,
+.highcharts-color-2 > .highcharts-graph,
+.highcharts-color-3 > .highcharts-graph,
+.highcharts-color-4 > .highcharts-graph,
+.highcharts-color-5 > .highcharts-graph,
+.highcharts-color-6 > .highcharts-graph,
+.highcharts-color-7 > .highcharts-graph,
+.highcharts-color-8 > .highcharts-graph,
+.highcharts-color-9 > .highcharts-graph,{
+  stroke:inherit;
+}
+
+.highcharts-legend-item-hidden>.highcharts-point, 
+.highcharts-legend-item-hidden>.highcharts-graph{
+  fill: #ccc !important;
+  stroke: rgba(204,204,204,0.1) !important;
+} 
+
+.highcharts-legend-item text{
+  color:transparent !important;
+  font-weight:normal !important;
+  font-size:11px !important;
+  fill:#333 !important;
+  stroke:transparent !important;
+}
+.highcharts-title{
+  color:#333;
+  fill:#333;
+}
+.highcharts-text-outline{
+  color:#333;
+  font-weight:normal !important;
+  fill: transparent !important;
+  stroke: none;
+  stroke-width: 0;
+  stroke-linejoin: none;
+}
+.highcharts-data-label > text, .highcharts-label > text{
+  color:transparent !important;
+  font-weight:normal !important;
+  fill:#333 !important;
+  stroke:transparent !important;
+}
+body.dark .highcharts-data-label > text{
+  color:transparent !important;
+  font-weight:normal !important;
+  fill:rgba(255,255,255, 0.8) !important;
+  stroke:transparent !important;
 }
