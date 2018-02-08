@@ -2191,6 +2191,7 @@ body.dark > .app {
 .highcharts-markers path{
   fill:inherit;
   stroke:inherit;
+  stroke-opacity:0.2;
 }
 .highcharts-legend-item > .highcharts-point{
   fill:inherit;
@@ -2239,6 +2240,10 @@ body.dark > .app {
   font-weight:normal !important;
   fill:#333 !important;
   stroke:transparent !important;
+}
+.highcharts-pie-series > .highcharts-color-0{
+  stroke-opacity:0.2;
+  
 }
 body.dark .highcharts-data-label > text{
   color:transparent !important;
