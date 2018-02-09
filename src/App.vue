@@ -20,6 +20,9 @@ export default {
 
   @import "~leaflet/dist/leaflet.css";
 
+  @import "~highcharts/css/highcharts";
+
+
   // Import Main styles for this application
   @import "./scss/style";
 </style>

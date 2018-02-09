@@ -58,6 +58,12 @@ const axChart = axios.create({
 });
 
 
+// axios file instance
+const axFile = axios.create({
+  baseURL: '/api'
+});
+
+
 let errorCheck = false;
 const errorAuth = (error) => {
   if (error.response.status === 403) {
@@ -74,6 +80,7 @@ const errorAuth = (error) => {
 
 ax.interceptors.response.use((res) => { return res }, errorAuth);
 axChart.interceptors.response.use((res) => { return res }, errorAuth);
+axFile.interceptors.response.use((res) => { return res }, errorAuth);
 
 Vue.prototype.$valid = validate;
 
@@ -96,6 +103,13 @@ Vue.prototype.$https = {
   // Dashboard
   getChart (url = '', params = {}){
     return axChart.get(url, {
+      params: params
+    })
+  },
+
+  // File
+  getFile (url = '', params = {}){
+    return axFile.get(url, {
       params: params
     })
   }

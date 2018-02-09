@@ -37,16 +37,6 @@
       '#b6f0f5';
   };
 
-  // Map feature Style
-  const getMapStyle = feature => ({
-    fillColor: getMapColor(feature.properties.dataValue.value),
-    weight: 2,
-    opacity: 1,
-    color: '#fff',
-    dashArray: '3',
-    fillOpacity: 0.7
-  });
-
 
   export default{
     props: {
@@ -73,6 +63,11 @@
       minHeight: {
         type: Number,
         default: 587
+      },
+
+      isDark: {
+        type: Boolean,
+        default: false
       }
     },
 
@@ -85,7 +80,9 @@
     },
 
     computed: {
-
+      lineColor (){
+        return (this.isDark) ? '#282d36' : '#ffffff';
+      }
     },
 
     mounted (){
@@ -101,16 +98,25 @@
       },
 
       initGeoLayer (){
+        const self = this;
         this.geojson = this.addDataValue();
 
         // GeoJSON Layer
         const geoLayer = L.geoJSON(this.geojson, {
-          style: getMapStyle,
+          style (feature) {
+            return {
+              fillColor: getMapColor(feature.properties.dataValue.value),
+              weight: 2,
+              opacity: 1,
+              color: self.lineColor,
+              fillOpacity: 0.7
+            }
+          },
           onEachFeature (feature, layer){
             layer.on({
               mouseover (e){
                 const layer = e.target;
-                layer.setStyle({ color: '#fff', dashArray: '', fillOpacity: 1 });
+                layer.setStyle({ color: self.lineColor, fillOpacity: 1 });
 
                 if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
                   layer.bringToFront();
@@ -202,6 +208,14 @@
         }else{
           this.initGeoLayer();
         }
+      },
+
+      lineColor (color){
+        this.geoLayer.setStyle(() => {
+          return {
+            color: color
+          };
+        });
       }
     }
   }

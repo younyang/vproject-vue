@@ -5,7 +5,7 @@
 
 
 <script>
-  import Highcharts from 'highcharts'
+  import Highcharts from 'highcharts/js/highcharts'
 
   export default{
     props: {

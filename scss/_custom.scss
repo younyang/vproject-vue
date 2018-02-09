@@ -230,7 +230,7 @@ h3.content-title {
     display: block;
     clear: both;
   }
-  
+
   h2 {
     float: left;
     font-size: 16px;
@@ -263,7 +263,7 @@ h3.content-title {
       &:before {
         content: '';
         display: block;
-        width: 1px; 
+        width: 1px;
         height:14px;
         background:#dbdbdb;
         position:absolute;
@@ -289,7 +289,7 @@ h3.content-title {
       &:before {
         content: '';
         display: block;
-        width: 1px; 
+        width: 1px;
         height:14px;
         background:$primary-color;
         position:absolute;
@@ -337,7 +337,7 @@ h3.content-title {
     color:#fff;
     background-color:#c1c1c1;
     border-color:#c1c1c1;
-  }  
+  }
 }
 .btn-outline-secondary.active{
   color: #000;
@@ -348,7 +348,7 @@ h3.content-title {
     color:#fff;
     background-color:#c1c1c1;
     border-color:#c1c1c1;
-  }  
+  }
 }
 
 // In Table button
@@ -1636,17 +1636,6 @@ body.dark > .app {
     }
   }
 
-  .highcharts-background {
-    fill: #282d36;
-  }
-  .highcharts-axis-labels text,
-  .highcharts-legend-item text {
-    fill: #777 !important;
-  }
-  .highcharts-yaxis-grid .highcharts-grid-line {
-    stroke: #555;
-  }
-
   .modal-dialog{
     .multiselect__tags{
       border-color:#d8d8d8;
@@ -2133,44 +2122,43 @@ body.dark > .app {
 /**
  * highcharts
  */
-
 .highcharts-color-0 {
-  fill: #0088cc;
-  stroke: #0088cc;
+  fill: #0088cc !important;
+  stroke: #0088cc !important;
 }
 
 .highcharts-color-1 {
-  fill: #734ba9;
-  stroke: #734ba9;
+  fill: #734ba9 !important;
+  stroke: #734ba9 !important;
 }
 
 .highcharts-color-2 {
-  fill: #2baab1;
-  stroke: #2baab1;
+  fill: #2baab1 !important;
+  stroke: #2baab1 !important;
 }
 
 .highcharts-color-3 {
-  fill: #e36159;
-  stroke: #e36159;
+  fill: #e36159 !important;
+  stroke: #e36159 !important;
 }
 
 .highcharts-color-4 {
-  fill: #eb8bc7;
-  stroke: #eb8bc7;
+  fill: #eb8bc7 !important;
+  stroke: #eb8bc7 !important;
 }
 
 .highcharts-color-5 {
-  fill: #5fb700;
-  stroke: #5fb700;
+  fill: #5fb700 !important;
+  stroke: #5fb700 !important;
 }
 
 .highcharts-color-6 {
-  fill: #ff9c41;
-  stroke: #ff9c41;
+  fill: #ff9c41 !important;
+  stroke: #ff9c41 !important;
 }
 
 .highcharts-color-7 {
-  fill: #47a447;
+  fill: #47a447 ;
   stroke: #47a447;
 }
 
@@ -2210,11 +2198,11 @@ body.dark > .app {
   stroke:inherit;
 }
 
-.highcharts-legend-item-hidden>.highcharts-point, 
+.highcharts-legend-item-hidden>.highcharts-point,
 .highcharts-legend-item-hidden>.highcharts-graph{
   fill: #ccc !important;
   stroke: rgba(204,204,204,0.1) !important;
-} 
+}
 
 .highcharts-legend-item text{
   color:transparent !important;
@@ -2243,11 +2231,24 @@ body.dark > .app {
 }
 .highcharts-pie-series > .highcharts-color-0{
   stroke-opacity:0.2;
-  
+
 }
-body.dark .highcharts-data-label > text{
-  color:transparent !important;
-  font-weight:normal !important;
-  fill:rgba(255,255,255, 0.8) !important;
-  stroke:transparent !important;
+body.dark {
+  .highcharts-background {
+    fill: #282d36;
+  }
+  .highcharts-axis-labels text,
+  .highcharts-legend-item text {
+    fill: #777 !important;
+  }
+  .highcharts-yaxis-grid .highcharts-grid-line {
+    stroke: #555;
+  }
+  .highcharts-data-label > text {
+    color:transparent !important;
+    font-weight:normal !important;
+    fill:rgba(255,255,255, 0.8) !important;
+    stroke:transparent !important;
+  }
+
 }

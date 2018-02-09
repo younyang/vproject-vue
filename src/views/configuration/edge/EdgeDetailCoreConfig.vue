@@ -90,7 +90,7 @@
           <span
             class="badge"
             :class="{'primary' : items.edgeCoreConfigApplyYn }">
-            {{ items.edgeCoreConfigApplyYn ? '사용' : '미사용' }}
+            {{ items.edgeCoreConfigApplyYn ? '적용' : '미적용' }}
           </span>
         </b-form-fieldset>
 

@@ -90,6 +90,7 @@
             ></v-chart>
             <v-map
               v-if="searchItems.q.chartType === 'MAP'"
+              :isDark="isDarkTheme"
               :items="items"
             ></v-map>
           </div>
