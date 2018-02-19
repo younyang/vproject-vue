@@ -10,28 +10,7 @@ import Cleave from 'vue-cleave-component';
 import auth from './auth'
 import validate from './validate'
 
-/*
-import VeeValidate from 'vee-validate'
-import ko from 'vee-validate/dist/locale/ko.js'
 
-const validateConfig = {
-  locale: 'ko',
-  dictionary: {
-    ko
-  }
-};
-
-const validateDictionary = {
-  ko: {
-    messages: {
-      email: () => `올바른 이메일 형식이 아닙니다.`,
-      required: (field) => `필수 입력란입니다.`,
-      confirmed: (field, confirmedField) => `${confirmedField}와 일치하지 않습니다.`,
-      url: () => `올바른 URL 형식이 아닙니다.`
-    }
-  }
-}
-*/
 
 Vue.component('multiselect', Multiselect);
 Vue.use(BootstrapVue);
@@ -63,7 +42,6 @@ const axFile = axios.create({
   baseURL: '/api'
 });
 
-
 let errorCheck = false;
 const errorAuth = (error) => {
   if (error.response.status === 403) {
@@ -72,6 +50,9 @@ const errorAuth = (error) => {
       alert(error.response.data.error.message);
       auth.logout(() => {
         window.location = '/#/login';
+        errorCheck = false;
+
+        window.location.reload();
       });
     }
   }
