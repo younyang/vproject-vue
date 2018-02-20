@@ -50,8 +50,6 @@ const errorAuth = (error) => {
       alert(error.response.data.error.message);
       auth.logout(() => {
         window.location = '/#/login';
-        errorCheck = false;
-
         window.location.reload();
       });
     }
