@@ -21,7 +21,7 @@
         :items="items"
         :fields="fields"
       >
-        <template slot="targetPopId1" scope="row">
+        <template slot="targetPopId1" slot-scope="row">
           <span v-if="row.item.isEdit">
             <select-box
               label="popName"
@@ -39,7 +39,7 @@
           <span v-else>{{ row.value ? row.value.popName : '' }}</span>
         </template>
 
-        <template slot="targetPopId2" scope="row">
+        <template slot="targetPopId2" slot-scope="row">
           <span v-if="row.item.isEdit">
             <select-box
               label="popName"
@@ -57,7 +57,7 @@
           <span v-else>{{ row.value ? row.value.popName : '' }}</span>
         </template>
 
-        <template slot="targetPopId3" scope="row">
+        <template slot="targetPopId3" slot-scope="row">
           <span v-if="row.item.isEdit">
             <select-box
               label="popName"
@@ -75,7 +75,7 @@
           <span v-else>{{ row.value ? row.value.popName : '' }}</span>
         </template>
 
-        <template slot="targetPopId4" scope="row">
+        <template slot="targetPopId4" slot-scope="row">
           <span v-if="row.item.isEdit">
             <select-box
               label="popName"
@@ -93,7 +93,7 @@
           <span v-else>{{ row.value ? row.value.popName : '' }}</span>
         </template>
 
-        <template slot="targetPopId5" scope="row">
+        <template slot="targetPopId5" slot-scope="row">
           <span v-if="row.item.isEdit">
             <select-box
               label="popName"
@@ -111,7 +111,7 @@
           <span v-else>{{ row.value ? row.value.popName : '' }}</span>
         </template>
 
-        <template slot="popPreferenceUseYn" scope="row">
+        <template slot="popPreferenceUseYn" slot-scope="row">
           <c-switch
             v-if="row.item.isEdit"
             type="text"
@@ -128,7 +128,7 @@
           </span>
         </template>
 
-        <template slot="action" scope="row">
+        <template slot="action" slot-scope="row">
           <span v-if="row.item.isEdit">
             <b-button type="button" variant="in-table" @click="onView(row)">취소</b-button>
             <b-button type="button" variant="in-table" @click="onSubmit(row)">저장</b-button>
@@ -152,7 +152,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="preference" scope="row">
+          <template slot="preference" slot-scope="row">
             <span class="badge" style="min-width: 30px"
             >{{ row.item.targetPopIdName1 || `&nbsp;` }}</span> -
             <span class="badge" style="min-width: 30px"
@@ -164,7 +164,7 @@
             <span class="badge" style="min-width: 30px"
             >{{ row.item.targetPopIdName5 || `&nbsp;` }}</span>
           </template>
-          <template slot="popPreferenceUseYn" scope="row">
+          <template slot="popPreferenceUseYn" slot-scope="row">
             {{ row.value ? '사용' : '미사용' }}
           </template>
         </b-table>

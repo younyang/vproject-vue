@@ -37,10 +37,10 @@
             diskMountSize: {label: 'Disk Size<i class=\'require\'>*</i>', 'class': 'text-right', 'thStyle': 'width: 200px'}
           }"
           >
-            <template slot="index" scope="row">
+            <template slot="index" slot-scope="row">
               {{ row.index + 1 }}
             </template>
-            <template slot="diskMountPath" scope="row">
+            <template slot="diskMountPath" slot-scope="row">
               <span v-if="isEdit">
                 <b-form-input
                   v-model="row.item.diskMountPath"
@@ -51,7 +51,7 @@
               </span>
               <span v-else>{{ row.value }}</span>
             </template>
-            <template slot="diskMountSize" scope="row">
+            <template slot="diskMountSize" slot-scope="row">
               <span v-if="isEdit">
                 <cleave
                   class="form-control"
@@ -70,13 +70,13 @@
               <span v-else>{{ row.value }} GB</span>
             </template>
 
-            <template slot="FOOT_index" scope="data">
+            <template slot="FOOT_index" slot-scope="data">
               &nbsp;
             </template>
-            <template slot="FOOT_diskMountPath" scope="data">
+            <template slot="FOOT_diskMountPath" slot-scope="data">
               <span class="total-title">total</span>
             </template>
-            <template slot="FOOT_diskMountSize" scope="data">
+            <template slot="FOOT_diskMountSize" slot-scope="data">
               <span class="total-text"><strong class="text-danger">{{ total }}</strong> GB</span>
             </template>
           </b-table>
@@ -217,7 +217,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>
@@ -306,7 +306,7 @@
             .reduce((p, n) => p + n)
       },
       isProcessComplete (){
-        return (this.items.processStateCode !== null &&
+        return this.items.processId === null || (this.items.processStateCode !== null &&
         this.items.processStateCode !== '' &&
         this.items.processStateCode === 'PROCESS_STATE_02')
       }

@@ -124,14 +124,14 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="serviceTypeName" scope="row">
+        <template slot="serviceTypeName" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="cnameUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-        <template slot="sslCertUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
-        <template slot="serviceUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="cnameUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="sslCertUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="serviceUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 

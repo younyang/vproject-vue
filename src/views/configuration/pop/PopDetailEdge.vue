@@ -18,7 +18,7 @@
           :items="items.lowReferrerList"
           :fields="fields.lowReferrerList"
         >
-          <template slot="referrerUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+          <template slot="referrerUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
         </b-table>
       </section>
     </b-collapse>
@@ -52,8 +52,8 @@
           :items="items.edgeList"
           :fields="fields.edgeList"
         >
-          <template slot="edgeRelayYn" scope="row">{{row.value? 'Relay':'Edge'}}</template>
-          <template slot="edgeUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+          <template slot="edgeRelayYn" slot-scope="row">{{row.value? 'Relay':'Edge'}}</template>
+          <template slot="edgeUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
         </b-table>
       </section>
     </b-collapse>

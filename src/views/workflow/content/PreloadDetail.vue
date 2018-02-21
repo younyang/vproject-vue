@@ -64,7 +64,7 @@
             :items="items.fileList"
             :fields="fields"
           >
-            <template slot="contentFileSize" scope="row">{{ row.value }} MB</template>
+            <template slot="contentFileSize" slot-scope="row">{{ row.value }} MB</template>
           </b-table>
         </b-form-fieldset>
 

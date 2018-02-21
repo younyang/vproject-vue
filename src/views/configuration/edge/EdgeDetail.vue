@@ -309,7 +309,7 @@
           :items="history.items"
           :fields="history.fields"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>

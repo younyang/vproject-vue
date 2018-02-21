@@ -114,8 +114,8 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="referrerTypeCodeName" scope="row">{{row.value.split(' ')[0]}}</template>
-        <template slot="referrerUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="referrerTypeCodeName" slot-scope="row">{{row.value.split(' ')[0]}}</template>
+        <template slot="referrerUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 
@@ -153,7 +153,7 @@
           :fields="createList.fields"
           @row-clicked="creates"
         >
-          <template slot="referrerTypeCodeName" scope="row">{{row.value.split(' ')[0]}}</template>
+          <template slot="referrerTypeCodeName" slot-scope="row">{{row.value.split(' ')[0]}}</template>
         </b-table>
       </section>
 

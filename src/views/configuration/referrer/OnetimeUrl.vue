@@ -6,7 +6,7 @@
         :items="items"
         :fields="fields"
       >
-        <template slot="expireTime" scope="row">
+        <template slot="expireTime" slot-scope="row">
           <span v-if="row.item.isEdit">
             <cleave
               class="form-control"
@@ -19,7 +19,7 @@
           <span v-else>{{ row.value }} 초</span>
         </template>
 
-        <template slot="bypassYn" scope="row">
+        <template slot="bypassYn" slot-scope="row">
           <c-switch
             v-if="row.item.isEdit"
             type="text"
@@ -37,7 +37,7 @@
           </span>
         </template>
 
-        <template slot="action" scope="row">
+        <template slot="action" slot-scope="row">
           <span v-if="row.item.isEdit">
             <b-button type="button" variant="in-table" @click="onView(row)">취소</b-button>
             <b-button type="button" variant="in-table" @click="onSubmit(row)">저장</b-button>
@@ -61,7 +61,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="bypassYn" scope="row">
+          <template slot="bypassYn" slot-scope="row">
             {{ row.value ? '사용' : '미사용' }}
           </template>
         </b-table>

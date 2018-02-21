@@ -144,12 +144,12 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="serviceTypeName" scope="row">
+        <template slot="serviceTypeName" slot-scope="row">
           <span class="badge badge-pill badge-success" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="edgeUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="edgeUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 

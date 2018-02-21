@@ -126,7 +126,7 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="popUseYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="popUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 

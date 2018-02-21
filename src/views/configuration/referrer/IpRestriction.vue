@@ -40,10 +40,10 @@
             ip: {label: '서버 IP 주소', 'class': 'text-left'}
           }"
         >
-          <template slot="index" scope="row">
+          <template slot="index" slot-scope="row">
             {{ row.index + 1 }}
           </template>
-          <template slot="ip" scope="row">
+          <template slot="ip" slot-scope="row">
             <span v-if="isEdit">
               <b-form-input
                 v-model="row.item.ip"
@@ -177,7 +177,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>

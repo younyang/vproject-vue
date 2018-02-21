@@ -98,8 +98,8 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="popBandwidth" scope="row">{{row.value}} GB</template>
-        <template slot="setApplyYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="popBandwidth" slot-scope="row">{{row.value}} GB</template>
+        <template slot="setApplyYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 

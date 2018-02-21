@@ -51,10 +51,10 @@
                 data: {label: 'Aliases', 'class': 'text-left'}
               }"
             >
-              <template slot="index" scope="row">
+              <template slot="index" slot-scope="row">
                 {{ row.index + 1 }}
               </template>
-              <template slot="data" scope="row">
+              <template slot="data" slot-scope="row">
                 <b-form-input
                   v-model="row.item.data"
                   type="text"
@@ -82,10 +82,10 @@
                 data: {label: 'Pools', 'class': 'text-left'}
               }"
             >
-              <template slot="index" scope="row">
+              <template slot="index" slot-scope="row">
                 {{ row.index + 1 }}
               </template>
-              <template slot="data" scope="row">
+              <template slot="data" slot-scope="row">
                 <b-form-input
                   v-model="row.item.data"
                   type="text"
@@ -157,10 +157,10 @@
                 data: {label: 'Server', 'class': 'text-left'}
               }"
             >
-              <template slot="index" scope="row">
+              <template slot="index" slot-scope="row">
                 {{ row.index + 1 }}
               </template>
-              <template slot="data" scope="row">
+              <template slot="data" slot-scope="row">
                 <b-form-input
                   v-model="row.item.data"
                   type="text"

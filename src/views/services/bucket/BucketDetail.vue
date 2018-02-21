@@ -139,13 +139,13 @@
         :items="policies.items"
         :fields="policies.fields"
       >
-        <template slot="HEAD_index" scope="row">
+        <template slot="HEAD_index" slot-scope="row">
           <span class="ico">
             <button type="button" @click="showUserFind" v-b-tooltip.hover :title="`관리자 추가`"><i class="fa fa-plus-circle"></i></button>
           </span>
         </template>
 
-        <template slot="index" scope="row">
+        <template slot="index" slot-scope="row">
           <span class="ico">
             <button type="button" @click="removeModal(row.item.s3UserId)" v-b-tooltip.hover :title="`관리자 삭제`"><i class="fa fa-times-circle"></i></button>
           </span>
@@ -284,7 +284,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>

@@ -74,7 +74,7 @@
           :items="cache.cacheThrottlingComps"
           :fields="caseFields"
         >
-          <template slot="bandwidth1" scope="row">
+          <template slot="bandwidth1" slot-scope="row">
             <span v-if="isEdit">
               <b-form-checkbox
                 v-model="row.item.band1UseYn"
@@ -92,7 +92,7 @@
             <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
           </template>
 
-          <template slot="bandwidth2" scope="row">
+          <template slot="bandwidth2" slot-scope="row">
             <span v-if="isEdit">
               <b-form-checkbox
                 v-model="row.item.band2UseYn"
@@ -111,17 +111,17 @@
             <span v-else>{{ row.value > 0 ? `${row.value} GB 제한` : '--' }}</span>
           </template>
 
-          <template slot="FOOT_serviceTypeCodeName" scope="data">
+          <template slot="FOOT_serviceTypeCodeName" slot-scope="data">
             <span class="total-title">Total</span>
           </template>
-          <template slot="FOOT_bandwidth1" scope="data">
+          <template slot="FOOT_bandwidth1" slot-scope="data">
             <small
               class="invalid"
               v-if="total[index].bandwidth1 > items.bandwidth"
             >설정 가능한 최대 Bandwidth {{ items.bandwidth }} GB를 초과하였습니다</small>
             <span class="total-text" :class="{'text-danger' : total[index].bandwidth1 > items.bandwidth }">{{ total[index].bandwidth1 }} GB 제한</span>
           </template>
-          <template slot="FOOT_bandwidth2" scope="data">
+          <template slot="FOOT_bandwidth2" slot-scope="data">
             <small
               class="invalid"
               v-if="total[index].bandwidth2 > items.bandwidth"
@@ -246,7 +246,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value, row.item.caseSeq)" target="_blank">보기</a>
           </template>
         </b-table>

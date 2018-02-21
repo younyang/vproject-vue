@@ -100,12 +100,12 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="serviceTypeName" scope="row">
+        <template slot="serviceTypeName" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="useYn" scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="useYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 

@@ -73,11 +73,11 @@
             domainHashingTypeCode: {label: 'Hasing type<i class=\'require\'>*</i>', 'class': 'w-25'}
           }"
           >
-            <template slot="serviceTypeCode" scope="row">
+            <template slot="serviceTypeCode" slot-scope="row">
               {{ row.value.codeValChar1 }}
             </template>
 
-            <template slot="domainProtocolCode" scope="row">
+            <template slot="domainProtocolCode" slot-scope="row">
               <multiselect
                 label="codeName"
                 v-model="row.item.domainProtocolCode"
@@ -94,7 +94,7 @@
               </span>
             </template>
 
-            <template slot="domainHashingTypeCode" scope="row">
+            <template slot="domainHashingTypeCode" slot-scope="row">
               <multiselect
                 label="codeName"
                 v-model="row.item.domainHashingTypeCode"
@@ -463,7 +463,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" scope="row">
+          <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>
