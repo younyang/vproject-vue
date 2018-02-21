@@ -99,7 +99,7 @@
     </b-form>
 
     <section class="board-btn">
-      <b-button type="button" variant="primary">
+      <b-button type="button" variant="primary" @click="excelDownload()">
         엑셀 다운로드
       </b-button>
     </section>
@@ -340,8 +340,13 @@
 
       onPagination (page){
         this.fetchList({ page });
+      },
+      
+      excelDownload(){
+        const queryParams = JSON.stringify(this.queryParams);
+        const q = encodeURI(queryParams);
+        return window.location.href = '/api/excel/processes/download?q=' + q;
       }
     }
   }
 </script>
-

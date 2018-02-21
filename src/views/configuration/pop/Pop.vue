@@ -110,7 +110,7 @@
     </b-form>
 
     <section class="board-btn">
-      <b-button type="button" variant="primary">
+      <b-button type="button" variant="primary" @click="excelDownload()">
         엑셀 다운로드
       </b-button>
       <b-button type="button" variant="primary" :to="{ name: 'Pop 등록' }">
@@ -371,8 +371,13 @@
 
       onFirstAddress (obj){
         this.fetchAddress(obj.addressCode)
+      },
+
+      excelDownload(){
+        const queryParams = JSON.stringify(this.queryParams);
+        const q = encodeURI(queryParams);
+        return window.location.href = '/api/excel/pops/download?q=' + q;
       }
     }
   }
 </script>
-
