@@ -55,7 +55,18 @@
       :key="index"
     >
       <h3 class="cache-title">
-        <i class="fa fa-arrow-right"></i>
+        <label class="custom-control custom-radio" v-if="isEdit">
+          <input
+            type="radio"
+            name="caseSeq"
+            class="custom-control-input"
+            :value="cache.caseSeq"
+            v-model="caseSeq"
+            @change="onSelectCase"
+          >
+          <span aria-hidden="true" class="custom-control-indicator"></span>
+        </label>
+        <i class="fa fa-arrow-right" v-else></i>
         <strong>CASE {{ cache.caseSeq }}/</strong>{{ cache.caseName }}
 
         <b-button
@@ -78,6 +89,7 @@
             <span v-if="isEdit">
               <b-form-checkbox
                 v-model="row.item.band1UseYn"
+                :disabled="caseSeq !== cache.caseSeq"
                 @change="onChecked(row.item, '1')"
               ></b-form-checkbox>
               <cleave
@@ -85,7 +97,7 @@
                 style="width: 80px;"
                 v-model.number="row.item.bandwidth1"
                 :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
-                :disabled="!row.item.band1UseYn"
+                :disabled="!row.item.band1UseYn || caseSeq !== cache.caseSeq"
                 @input="setDefault(row.item, 'bandwidth1')"
               ></cleave> GB 제한
             </span>
@@ -96,7 +108,7 @@
             <span v-if="isEdit">
               <b-form-checkbox
                 v-model="row.item.band2UseYn"
-                :disabled="!items.setApplyYn"
+                :disabled="!items.setApplyYn || caseSeq !== cache.caseSeq"
                 @change="onChecked(row.item, '2')"
               ></b-form-checkbox>
               <cleave
@@ -104,7 +116,7 @@
                 style="width: 80px;"
                 v-model.number="row.item.bandwidth2"
                 :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
-                :disabled="!row.item.band2UseYn"
+                :disabled="!row.item.band2UseYn || caseSeq !== cache.caseSeq"
                 @input="setDefault(row.item, 'bandwidth2')"
               ></cleave> GB 제한
             </span>
@@ -301,6 +313,8 @@
           cacheThrottlingCases: []
         },
 
+        caseSeq: 1,
+
         caseFields: {
           serviceTypeCodeName: {label: 'Service Type', 'class': 'serviceType'},
           bandwidth1: {label: 'Set1 (Basic)', 'class': 'bandwidth'},
@@ -401,19 +415,23 @@
           modifyHistReason
         } = this.items;
 
-        const cacheCase = this.items.cacheThrottlingCases.map(obj => {
-          const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
-            obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
-              serviceTypeCode,
-              bandwidth1,
-              bandwidth2
-            }))
-            : [];
-          return {
-            ...obj,
-            cacheThrottlingComps
-          }
-        });
+
+        const cacheCase = this.items.cacheThrottlingCases
+          .filter(({ caseSeq }) => this.caseSeq === caseSeq)
+          .map(obj => {
+            const cacheThrottlingComps = obj.cacheThrottlingComps.length > 0 ?
+              obj.cacheThrottlingComps.map(({ serviceTypeCode, bandwidth1, bandwidth2 }) => ({
+                serviceTypeCode,
+                bandwidth1,
+                bandwidth2
+              }))
+              : [];
+            return {
+              ...obj,
+              cacheThrottlingComps
+            }
+          });
+
 
         const validate = this.$valid.all({ modifyHistReason });
         this.inValidForm = !validate;
@@ -434,6 +452,7 @@
               console.log(error);
             });
         }
+
       },
 
       onDelete (){
@@ -484,6 +503,18 @@
                 ob.bandwidth2 = 0;
               })
             }
+          });
+        }
+      },
+
+      onSelectCase (event){
+        const value = parseInt(event.target.value);
+        const targetCases = this.items.cacheThrottlingCases.filter(({ caseSeq }) => caseSeq !== value);
+        const originCases = this.originItems.cacheThrottlingCases;
+        if (targetCases.length){
+          targetCases.forEach(obj => {
+            let originCase = originCases.find(({ caseSeq }) => caseSeq === obj.caseSeq);
+            obj.cacheThrottlingComps = JSON.parse(JSON.stringify(originCase.cacheThrottlingComps));
           });
         }
       },

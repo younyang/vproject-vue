@@ -601,6 +601,9 @@ input.form-control-plaintext {
     &:disabled ~ .custom-control-indicator {
       border: 1px solid $border-color;
       background-color: #fafafa;
+      &:after {
+        color: $line-color;
+      }
     }
   }
 

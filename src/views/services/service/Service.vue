@@ -18,7 +18,7 @@
           <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
 
-        <b-form-fieldset>
+        <b-form-fieldset
           label="Service Type"
           class="label-lg"
           :horizontal="true">
