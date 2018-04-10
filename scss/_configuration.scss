@@ -1,0 +1,234 @@
+$font-color: #4c4c4c;
+$line-color: #e3e3e3;
+$border-color: #d8d8d8;
+$primary-color: #0088cc;
+$error-color: #f0534c;
+
+/**
+ * Edge > Edge Monitoring
+ */
+.monitor-search {
+  height: 40px;
+
+  input.form-control {
+    display: inline-block;
+    width: calc(100% - 75px);
+    vertical-align: middle;
+    margin-right: 1px;
+  }
+
+  .btn {
+    padding: 5px;
+    width: 33px;
+    margin: -2px 0 0;
+  }
+}
+
+
+
+.monitor-article {
+  height: 40px;
+
+  dl, dt, dd {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+  }
+
+  dl {
+    float: left;
+    margin: 3px 10px 0 0;
+
+    &.success dt {
+      color: $primary-color;
+      i {
+        border-color: $primary-color;
+      }
+    }
+
+    &.error dt {
+      color: $error-color;
+      i {
+        border-color: $error-color;
+      }
+    }
+  }
+
+  dt {
+    font-weight: normal;
+    i {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      vertical-align: middle;
+      margin: -1px 0 0;
+      border-width: 5px;
+      border-style: solid;
+      border-radius: 100% 100%;
+      transform: scale(.8,.8);
+    }
+  }
+
+  dd {
+    font-weight: bold;
+  }
+
+  > .multiselect {
+    float: right;
+  }
+
+
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+}
+
+
+.monitorWrap {
+  > .monitor {
+    float: left;
+    width: calc(20% + 1px);
+    height: 135px;
+    border: 1px solid $line-color;
+    margin: -1px 0 0 -1px;
+  }
+
+  .thumb {
+    position: relative;
+    height: 100px;
+
+    .fa {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      text-align: center;
+      background: #f1f1f1;
+      font-size: 3rem;
+      line-height: 100px;
+      color: #b3b3b3;
+    }
+  }
+
+  .title {
+    display: block;
+    text-align: center;
+    line-height: 30px;
+    border-top: 1px solid $line-color;
+  }
+
+
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+}
+
+
+
+
+
+/**
+ * Edge > Cache Throttling Detail
+ */
+.cache-content {
+  margin-top: 30px;
+
+  h3.cache-title {
+    font-size: 0.825rem;
+    font-weight: 200;
+
+    i.fa {
+      @extend %title-icon;
+      margin-top: -1px;
+    }
+  }
+
+  .custom-control {
+    margin: 0;
+  }
+
+  .table {
+    tbody tr > td {
+      &.serviceType {
+        text-align: left;
+        width: 180px;
+      }
+      &.bandwidth {
+        text-align: right;
+        width: calc(50% - 90px);
+      }
+    }
+
+    tfoot th {
+      border-top: 1px solid $line-color;
+      box-shadow: 1px 0 $line-color inset;
+      font-size: 0.8rem;
+      padding: 0.65rem;
+
+      &:first-child {
+        box-shadow: none;
+      }
+      .total-text {
+        float: right;
+      }
+      .invalid {
+        color: #f86c6b;
+        float: left;
+        line-height: 20px;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .formView {
+    margin-top: 10px;
+  }
+}
+
+
+
+/**
+ * Referrer Detail
+ */
+.referrer-content {
+  position: relative;
+
+  .link-list {
+    position: absolute;
+    top: -35px;
+    right: 0;
+  }
+}
+
+
+/**
+ * Referrer > GEO IP
+ */
+.searchBox.deploy {
+  border-color: $border-color;
+  background: #f9f9f9;
+}
+
+
+/**
+ * DNS > GTM IP Config
+ */
+.table .gtm-ip-list {
+  .form-control {
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+  }
+
+  li:first-child .form-control {
+    margin-top: -0.2rem;
+  }
+
+  li:last-child .form-control {
+    margin-bottom: -0.2rem;
+  }
+}

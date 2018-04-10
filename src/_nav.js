@@ -34,8 +34,16 @@ export default {
               url: '/configuration/edges/edge'
             },
             {
+              name: 'Edge Monitoring',
+              url: '/configuration/edges/edgeMonitoring'
+            },
+            {
               name: 'Cache Throttling 관리',
               url: '/configuration/edges/cache'
+            },
+            {
+              name: 'Cache Deletions',
+              url: '/configuration/edges/cacheDeletions'
             }
           ]
         },
@@ -55,12 +63,10 @@ export default {
               name: 'IP Restriction',
               url: '/configuration/referrers/ipRestriction'
             },
-            /*
-             {
-             name: 'GEO IP',
-             url: '/configuration/referrers/geoIp'
-             },
-             */
+            {
+              name: 'GEO IP',
+              url: '/configuration/referrers/geoIp'
+            },
             {
               name: 'One-Time URL',
               url: '/configuration/referrers/onetime'
@@ -72,12 +78,20 @@ export default {
           url: '/configuration/pop'
         },
         {
+          name: 'Server 관리',
+          url: '/configuration/server'
+        },
+        {
           name: 'DNS',
           url: '/configuration/dns',
           children: [
             {
-              name: 'GTM 등록 관리',
+              name: 'GTM 관리',
               url: '/configuration/dns/gtm'
+            },
+            {
+              name: 'GTM IP Config',
+              url: '/configuration/dns/gtmIp'
             }
           ]
         }
@@ -86,18 +100,16 @@ export default {
     {
       name: 'Workflow',
       url: '/workflow',
-      icon: 'icon-share',
+      icon: 'icon-organization',
       children: [
         {
           name: 'Service Processing 관리',
           url: '/workflow/service'
         },
-        /*
         {
           name: 'Domain Processing 관리',
           url: '/workflow/domain'
         },
-        */
         {
           name: 'Content Processing 관리',
           url: '/workflow/content',
@@ -113,32 +125,25 @@ export default {
           ]
         }
       ]
+    },
+    {
+      name: 'APIs',
+      url: '/apis',
+      icon: 'icon-share',
+      children: [
+        {
+          name: 'API 관리',
+          url: '/apis/api'
+        },
+        {
+          name: 'Application 관리',
+          url: '/apis/application'
+        },
+        {
+          name: 'Adaptor 관리',
+          url: '/apis/adaptor'
+        },
+      ]
     }
-    /*
-    {
-      title: true,
-      name: 'UI Component Sample',
-      class: '',
-      wrapper: {
-        element: '',
-        attributes: {}
-      }
-    },
-    {
-      name: 'Process(drag&drop)',
-      url: '/process',
-      icon: 'icon-chart'
-    },
-    {
-      name: 'Map',
-      url: '/map',
-      icon: 'icon-map'
-    },
-    {
-      name: 'Grid UI',
-      url: '/gridUI',
-      icon: 'icon-grid'
-    }
-    */
   ]
 }

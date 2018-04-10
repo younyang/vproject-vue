@@ -154,6 +154,11 @@ export default new Router({
                   ]
                 },
                 {
+                  path: 'edgeMonitoring',
+                  name: 'Edge Monitoring',
+                  component: lazyLoading('configuration/edge/EdgeMonitoring')
+                },
+                {
                   path: 'cache',
                   name: 'Cache Throttling 관리',
                   component: lazyLoading('configuration/edge/CacheThrottling')
@@ -168,6 +173,11 @@ export default new Router({
                   name: 'Cache Throttling 상세',
                   props: true,
                   component: lazyLoading('configuration/edge/CacheThrottlingDetail')
+                },
+                {
+                  path: 'cacheDeletions',
+                  name: 'Cache Deletions',
+                  component: lazyLoading('configuration/edge/CacheDeletions')
                 }
               ]
             },
@@ -248,6 +258,22 @@ export default new Router({
               ]
             },
             {
+              path: 'server',
+              name: 'Server 관리',
+              component: lazyLoading('configuration/server/Server')
+            },
+            {
+              path: 'server/create',
+              name: 'Server 등록',
+              component: lazyLoading('configuration/server/ServerCreate')
+            },
+            {
+              path: 'server/:id',
+              name: 'Server 상세',
+              props: true,
+              component: lazyLoading('configuration/server/ServerDetail')
+            },
+            {
               path: 'dns',
               redirect: '/configuration/dns/gtm',
               name: 'DNS',
@@ -261,6 +287,11 @@ export default new Router({
                   path: 'gtm',
                   name: 'GTM 관리',
                   component: lazyLoading('configuration/dns/GTM')
+                },
+                {
+                  path: 'gtmIp',
+                  name: 'GTM IP Config',
+                  component: lazyLoading('configuration/dns/GTMip')
                 }
               ]
             }
@@ -291,6 +322,18 @@ export default new Router({
               path: 'domain',
               name: 'Domain Processing 관리',
               component: lazyLoading('workflow/domain/DomainProcess')
+            },
+            {
+              path: 'domain/pool/:method',
+              name: 'Domain Processing - Pool',
+              props: true,
+              component: lazyLoading('workflow/domain/DomainProcessPool')
+            },
+            {
+              path: 'domain/:id',
+              name: 'Domain Processing 상세',
+              props: true,
+              component: lazyLoading('workflow/domain/DomainProcessDetail')
             },
             {
               path: 'content',
@@ -325,6 +368,45 @@ export default new Router({
                   component: lazyLoading('workflow/content/PurgeDetail')
                 }
               ]
+            }
+          ]
+        },
+        {
+          path: 'apis',
+          redirect: '/apis/api',
+          name: 'APIs',
+          component: {
+            render (c) {
+              return c('router-view')
+            }
+          },
+          children: [
+            {
+              path: 'api',
+              name: 'API 관리',
+              component: lazyLoading('apis/api/API')
+            },
+            {
+              path: 'application',
+              name: 'Application 관리',
+              props: true,
+              component: lazyLoading('apis/application/Application')
+            },
+            {
+              path: 'application/create',
+              name: 'Application 등록',
+              component: lazyLoading('apis/application/ApplicationCreate')
+            },
+            {
+              path: 'application/:id',
+              name: 'Application 상세',
+              props: true,
+              component: lazyLoading('apis/application/ApplicationDetail')
+            },
+            {
+              path: 'adaptor',
+              name: 'Adaptor 관리',
+              component: lazyLoading('apis/adaptor/Adaptor')
             }
           ]
         }

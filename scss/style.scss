@@ -11,12 +11,15 @@
 // Import vendors styles
 @import "vendors/vendors";
 
-// Override core variables
-@import "core-variables";
-
 // Import core styles
 @import "core/core";
 
 
 // Custom styles
 @import "custom";
+
+// Page style
+@import "login";
+@import "dashboard";
+@import "configuration";
+@import "workflow";
