@@ -6,7 +6,7 @@
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
     "build": "node build/build.js",
-    "storybook": "start-storybook -p 6006",
+    "docs": "docsify serve ./docs",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
@@ -29,12 +29,6 @@
     "vue-router": "^2.8.1"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^3.3.13",
-    "@storybook/addon-info": "^3.3.13",
-    "@storybook/addon-links": "^3.3.13",
-    "@storybook/addon-options": "^3.3.13",
-    "@storybook/addons": "^3.3.13",
-    "@storybook/vue": "^3.3.13",
     "autoprefixer": "7.1.3",
     "babel-core": "6.26.0",
     "babel-eslint": "7.2.3",

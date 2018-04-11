@@ -1,6 +1,3 @@
-# v-project
-vproject ui source의 Vue프레임워크 버전 입니다.
-
 ## Setup
 nodejs가 설치되어 있어야 합니다.
 ```
@@ -21,16 +18,3 @@ Build your project into `/dist` directory.
 npm run build
 ```
 배포용 build. `/dist`폴더에 배포용으로 빌드된 파일이 만들어 집니다.
-
-
-## Docs server
-docsify-cli 를 global로 설치합니다.
-```
-npm i docsify-cli -g
-```
-
-docs server를 띄웁니다.
-```
-docsify serve ./docs
-```
-http://localhost:3000 으로 Doc문서를 볼 수 있습니다.
