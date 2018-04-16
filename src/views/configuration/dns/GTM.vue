@@ -264,7 +264,7 @@
           pools: {
             name : null,
             monitor: 'gateway_icmp',
-            ttl : null,
+            ttl : 30,
             members : [{ data: null }]
           },
           servers: {
@@ -336,6 +336,7 @@
           .then(this.onSubmitComplete)
           .catch((error) => {
             console.log(error);
+            alert('GTM 연동 오류가 발생 하였습니다');
           });
       },
 

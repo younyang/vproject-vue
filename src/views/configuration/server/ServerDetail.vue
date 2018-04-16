@@ -25,7 +25,7 @@
           label="구분"
           :horizontal="true">
           <b-form-input
-            :value="items.serverTypeCodeName"
+            :value="items.componentTypeName"
             type="text"
             plaintext
           ></b-form-input>
@@ -36,7 +36,7 @@
           label="IP"
           :horizontal="true">
           <b-form-input
-            :value="items.componentIp"
+            :value="items.ip"
             type="text"
             plaintext
           ></b-form-input>
@@ -47,7 +47,7 @@
           label="Host Name"
           :horizontal="true">
           <b-form-input
-            :value="items.componentHostName"
+            :value="items.hostName"
             type="text"
             plaintext
           ></b-form-input>
@@ -89,13 +89,13 @@
             class="v-switch"
             on="사용"
             off="미사용"
-            v-model="items.serviceUseYn"
+            v-model="items.serverUseYn"
           ></c-switch>
           <span
             v-else
             class="badge"
-            :class="{'primary' : items.serviceUseYn }"
-          >{{ items.serviceUseYn ? '사용' : '미사용' }}
+            :class="{'primary' : items.serverUseYn }"
+          >{{ items.serverUseYn ? '사용' : '미사용' }}
           </span>
         </b-form-fieldset>
 
@@ -240,11 +240,12 @@
         originItems: {},
         items: {
           serverId : null,
-          popId : null,
-          serverUseYn : false,
-          serverTypeCode : null,
-          serverTypeCodeName: 'ADS',
-          modifyHistReason : "Server 수정"
+          componentTypeName: '',
+          ip : null,
+          hostName : null,
+          popId: null,
+          popName: '',
+          serverUseYn : true
         },
         code: {
           popId: []
@@ -268,7 +269,6 @@
         },
         isEdit: false,
         isModalHistory: false,
-        isReferrerType: '',
 
         modal: {
           open: false,
@@ -300,16 +300,13 @@
     },
 
     created (){
-      /*
       // History
       const historyId = this.$route.query.histories;
-      const detailUrl = historyId !== undefined ? `/referrers/${this.id}/histories/${historyId}` : `/referrers/${this.id}`;
+      const detailUrl = historyId !== undefined ? `/servers/${this.id}/histories/${historyId}` : `/servers/${this.id}`;
 
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode')
       }
-      */
-
 
       // PoP List
       this.$https.get('/pops')
@@ -318,17 +315,13 @@
           this.code.popId = res.data.items;
         });
 
-      /*
       // Detail Data
-      this.$https.get(detailUrl, {
-          referrerTypeCode: this.referrerTypeCode
-        })
+      this.$https.get(detailUrl)
         .then((res) => {
-          this.items = { ...this.items, ...res.data.items, referrerId: this.id };
+          this.items = res.data.items;
           this.originItems = JSON.parse(JSON.stringify(this.items));
-          this.isReferrerType = this.referrerTypeCode === 'COMPONENT_TYPE_01' ? 'high' : 'low';
         });
-        */
+
     },
 
     methods: {
@@ -342,15 +335,15 @@
       },
 
       onSubmit (){
-        /*
-        const { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason } = this.items;
-        const submitItems = { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason };
+
+        const { popId, serverUseYn, modifyHistReason } = this.items;
+        const submitItems = { popId, serverUseYn, modifyHistReason };
         const validate = this.$valid.all(submitItems);
 
         this.inValidForm = !validate;
 
         if (validate){
-          this.$https.put(`/referrers/${this.id}`, { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason })
+          this.$https.put(`/servers/${this.id}`, { popId, serverUseYn, modifyHistReason })
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -358,7 +351,7 @@
               console.log(error);
             });
         }
-        */
+
       },
 
       onDelete (){
@@ -371,30 +364,25 @@
       },
 
       onDeleteData (){
-        /*
-        this.$https.delete(`/referrers/${this.id}?referrerTypeCode=${this.referrerTypeCode}`)
+        this.$https.delete(`/servers/${this.id}`)
           .then(() => {
-            this.$router.push({ name: 'Referrer 관리' });
+            this.$router.push({ name: 'Server 관리' });
           })
           .catch((error) => {
             console.log(error);
           });
-          */
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/referrers/referrer/${this.id}?histories=${rowId}&referrerTypeCode=${this.referrerTypeCode}`
+        return `#/configuration/server/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-        /*
-        this.$https.get(`/referrers/${this.id}/histories`,{
-            referrerTypeCode: this.referrerTypeCode
-          })
+        this.$https.get(`/servers/${this.id}/histories`)
           .then((res) => {
             this.history.items = res.data.items;
-          });*/
+          });
       }
     }
   }

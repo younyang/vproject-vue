@@ -23,9 +23,13 @@
           class="label-lg"
           :horizontal="true">
           <multiselect
+            v-model="componentType"
             :showLabels="false"
             :searchable="false"
-            :options="['ADS','DRM','ORGIN']"
+            :options="code.componentType"
+            :loading="isLoad.componentType"
+            label="codeName"
+            track-by="code"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -97,7 +101,7 @@
       <b-button type="button" variant="primary" @click="excelDownload()">
         엑셀 다운로드
       </b-button>
-      <b-button type="button" variant="primary" @click="showCreateList">
+      <b-button type="button" variant="primary" :to="{ name: 'Server 등록' }">
         등록
       </b-button>
     </section>
@@ -137,25 +141,6 @@
       ></b-pagination>
     </section>
 
-
-    <!-- Create List Modal -->
-    <b-modal size="lg" title="선택" v-model="isModalCreate">
-      <section class="board">
-        <b-table
-          hover
-          show-empty
-          :items="createList.items"
-          :fields="createList.fields"
-          @row-clicked="creates"
-        >
-        </b-table>
-      </section>
-
-      <div slot="modal-footer">
-        <b-button type="button" variant="outline-secondary" @click="isModalCreate = false">취소</b-button>
-      </div>
-    </b-modal>
-
   </div>
 </template>
 
@@ -168,15 +153,15 @@
       return {
         fields: {
           serverId: {label: 'ID'},
-          serverTypeCodeName: {label: '구분', 'class': 'text-left'},
-          componentIp: {label: 'IP', 'class': 'text-left'},
-          componentHostName: {label: 'Host Name', 'class': 'text-left'},
+          componentTypeName: {label: '구분', 'class': 'text-left'},
+          ip: {label: 'IP', 'class': 'text-left'},
+          hostName: {label: 'Host Name', 'class': 'text-left'},
           popName: {label: 'PoP'},
           createDateTime: {label: '등록일시'},
           modifyDateTime: {label: '수정일시'},
           serverUseYn: {label: '사용여부'}
         },
-        items: [{
+        items: [/*{
           serverId: 10001,
           serverTypeCodeName: 'ADS',
           componentIp: '1.255.34.56',
@@ -185,7 +170,7 @@
           createDateTime: '2017-10-10 12:44:21',
           modifyDateTime: '2017-10-10 12:44:21',
           serverUseYn: true
-        }],
+        }*/],
         pageInfo: {
           page: 1,
           size: 10,
@@ -197,9 +182,9 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'componentIp',
+          searchType: 'IP',
           searchKeyword: null,
-          serverTypeCode: null,
+          componentType: null,
           popId: null,
           serverUseYn: null,
           searchDateType: 'createDate',
@@ -220,13 +205,13 @@
         },
         code: {
           searchType: [{
-            code: 'componentIp',
+            code: 'IP',
             codeName: 'IP'
           },{
-            code: 'componentHostName',
+            code: 'HOST',
             codeName: 'Host Name'
           },{
-            code: 'serverId',
+            code: 'ID',
             codeName: 'ID'
           }],
           searchDateType: [{
@@ -236,11 +221,11 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          serverTypeCode: [],
+          componentType: [],
           popId: []
         },
         isLoad: {
-          serverTypeCode: false,
+          componentType: false,
           popId: false
         },
         isModalCreate: false
@@ -264,12 +249,12 @@
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
-      serverTypeCode: {
+      componentType: {
         get () {
-          return this.code.serverTypeCode.find(obj => obj.code === this.searchItem.serverTypeCode) || null;
+          return this.code.componentType.find(obj => obj.code === this.searchItem.componentType) || null;
         },
         set (newValue) {
-          this.searchItem.serverTypeCode = newValue !== null ? newValue.code : null;
+          this.searchItem.componentType = newValue !== null ? newValue.code : null;
         }
       },
       popId: {
@@ -283,24 +268,29 @@
     },
 
     created (){
-      /*
       // Server List
       this.fetchList();
 
-      // Server Type Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'COMPONENT_TYPE' }
-        })
-        .then((res) => {
-          this.isLoad.referrerTypeCode = false;
-          this.code.referrerTypeCode = res.data.items.filter(({codeName}) => codeName !== 'Edge');
-        });
-        */
       // PoP List
       this.$https.get('/pops')
         .then((res) => {
           this.isLoad.popId = false;
           this.code.popId = res.data.items;
+        });
+
+      // 구분 List
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'COMPONENT_TYPE' }
+      })
+        .then((res) => {
+          this.isLoad.componentType = false;
+          this.code.componentType = res.data.items.filter(({code}) => {
+            if(code !== 'COMPONENT_TYPE_01' && code !== 'COMPONENT_TYPE_02' && code !== 'COMPONENT_TYPE_03' ){
+              return true;
+            }else{
+              return false;
+            }
+          });
         });
     },
 
@@ -311,7 +301,7 @@
           params: { id: item.serverId }
         })
       },
-
+      /*
       creates (item) {
         const {serverId, serverTypeCode, serverTypeCodeName, componentIp, componentHostName } = item;
         this.$router.push({
@@ -326,7 +316,7 @@
             })
           }})
       },
-
+      */
       fetchList (params = {}){
         const defaultParams = {
           page: this.pageInfo.page,
@@ -334,21 +324,11 @@
           q: this.queryParams
         };
 
-        this.$https.get('/referrers', {...defaultParams, ...params})
+        this.$https.get('/servers', {...defaultParams, ...params})
           .then((res) => {
             this.items = res.data.items;
             this.pageInfo = res.data.pageInfo;
           });
-      },
-
-      showCreateList (){
-        this.isModalCreate = !this.isModalCreate;
-        /*
-        this.$https.get('/referrers/components')
-          .then((res) => {
-            this.createList.items = res.data.items;
-          });
-          */
       },
 
       onCalendar (day, type){
@@ -381,7 +361,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'componentIp';
+            this.searchItem[key] = 'IP';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
           } else {
@@ -403,7 +383,7 @@
       excelDownload(){
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
-        return window.location.href = '/api/excel/referrers/download?q=' + q;
+        return window.location.href = '/api/excel/servers/download?q=' + q;
       }
     }
   }

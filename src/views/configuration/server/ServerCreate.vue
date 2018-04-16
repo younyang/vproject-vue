@@ -3,34 +3,44 @@
     <b-form class="formView" :validated="inValidForm" novalidate>
       <!-- 구분 -->
       <b-form-fieldset
-        label="구분"
+        label="구분<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
         :horizontal="true">
-        <b-form-input
-          :value="getItems.serverTypeCodeName"
-          type="text"
-          plaintext
-        ></b-form-input>
+        <multiselect
+          v-model="componentType"
+          :showLabels="false"
+          :options="code.componentType"
+          :loading="isLoad.componentType"
+          :class="{'invalid': !valid.componentType }"
+          track-by="code"
+          label="codeName"
+          placeholder="선택"
+        ></multiselect>
       </b-form-fieldset>
 
       <!-- IP -->
       <b-form-fieldset
-        label="IP"
+        label="IP<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
         :horizontal="true">
         <b-form-input
-          :value="getItems.componentIp"
+          v-model="items.ip"
           type="text"
-          plaintext
+          placeholder="Enter IP"
+          required
         ></b-form-input>
       </b-form-fieldset>
 
       <!-- Host Name -->
       <b-form-fieldset
-        label="Host Name"
+        label="Host Name<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
         :horizontal="true">
         <b-form-input
-          :value="getItems.componentHostName"
+          v-model="items.hostName"
           type="text"
-          plaintext
+          placeholder="Enter Host Name"
+          required
         ></b-form-input>
       </b-form-fieldset>
 
@@ -82,13 +92,20 @@
 
     data (){
       return {
-        items: {},
-        getItems: {},
+        items: {
+          componentType: null,
+          ip: '',
+          hostName: '',
+          popId: null,
+          serverUseYn: true
+        },
         code: {
-          popId: []
+          popId: [],
+          componentType: []
         },
         isLoad: {
-          popId: true
+          popId: true,
+          componentType: true
         },
         inValidForm: false
       }
@@ -103,30 +120,46 @@
           this.items.popId = newValue !== null ? newValue.popId : null;
         }
       },
+      componentType: {
+        get () {
+          return this.code.componentType.find(obj => obj.code === this.items.componentType) || null;
+        },
+        set (newValue) {
+          this.items.componentType = newValue !== null ? newValue.code : null;
+        }
+      },
 
       // validation
       valid (){
         return {
-          popId: this.items.popId !== null
+          popId: this.items.popId !== null,
+          componentType: this.items.componentType !== null
         }
       }
     },
 
     created (){
-      if (this.$route.query.q === undefined){
-        alert('잘못된 접근입니다')
-        this.$router.push({ name: 'Server 관리' })
-      }
-
-      const { referrerId, referrerTypeCode } = JSON.parse(this.$route.query.q);
-      this.items = { referrerId, referrerTypeCode, referrerUseYn: true, popId: null };
-      this.getItems = JSON.parse(this.$route.query.q);
 
       // PoP List
       this.$https.get('/pops')
         .then((res) => {
           this.isLoad.popId = false;
           this.code.popId = res.data.items;
+        });
+
+      // 구분 Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'COMPONENT_TYPE' }
+        })
+        .then((res) => {
+          this.isLoad.componentType = false;
+          this.code.componentType = res.data.items.filter(({code}) => {
+            if(code !== 'COMPONENT_TYPE_01' && code !== 'COMPONENT_TYPE_02' && code !== 'COMPONENT_TYPE_03' ){
+              return true;
+            }else{
+              return false;
+            }
+          });
         });
     },
 
@@ -139,19 +172,16 @@
         this.inValidForm = !validate;
 
         if (validate){
-          /*
-          this.$https.post('/referrers', this.items)
-            .then(() => {
+          this.$https.post('/servers', this.items)
+            .then((res) => {
               this.$router.push({
-                name: 'Referrer 상세',
-                params: { id: this.items.referrerId },
-                query: { referrerTypeCode: this.items.referrerTypeCode }
-              })
+                name: 'Server 상세',
+                params: { id: res.data.items }})
             })
             .catch((error) => {
               console.log(error);
+              alert(error.response.data.error.message);
             });
-            */
         }
       }
     }
