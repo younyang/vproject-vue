@@ -23,9 +23,13 @@
           class="label-lg"
           :horizontal="true">
           <multiselect
+            v-model="serviceCode"
             :showLabels="false"
             :searchable="false"
-            :options="['Edge', 'LOW Referrer']"
+            :options="code.serviceCode"
+            :loading="isLoad.serviceCode"
+            label="codeName"
+            track-by="code"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -36,7 +40,7 @@
           label="사용여부"
           :horizontal="true">
           <multiselect
-            v-model="searchItem.serviceUseYn"
+            v-model="searchItem.appUseYn"
             :showLabels="false"
             :searchable="false"
             :options="['사용', '미사용']"
@@ -77,7 +81,7 @@
 
 
     <section class="board-btn">
-      <b-button type="button" variant="primary" @click="excelDownload()">
+      <b-button type="button" variant="primary" @click="excelDownload">
         엑셀 다운로드
       </b-button>
       <b-button type="button" variant="primary" :to="{ name: 'Application 등록' }">
@@ -93,12 +97,12 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="serviceName" slot-scope="row">
+        <template slot="serviceNames" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="applicationUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="appUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 
@@ -138,12 +142,12 @@
     data (){
       return {
         fields: {
-          applicationId: {label: 'ID'},
-          applicationName: {label: 'Application Name', 'class': 'text-left'},
-          serviceName: {label: 'Service', 'class': 'text-left'},
+          appId: {label: 'ID'},
+          appName: {label: 'Application Name', 'class': 'text-left'},
+          serviceNames: {label: 'Service', 'class': 'text-left'},
           createDateTime: {label: '등록일시'},
           modifyDateTime: {label: '수정일시'},
-          applicationUseYn: {label: '사용여부'}
+          appUseYn: {label: '사용여부'}
         },
         items: [],
         pageInfo: {
@@ -157,22 +161,20 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'application',
+          searchType: 'appName',
           searchKeyword: null,
-          serviceTypeCode: null,
-          cnameUseYn: null,
-          sslCertUseYn: null,
-          serviceUseYn: null,
+          serviceCode: null,
+          appUseYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
         code: {
           searchType: [{
-            code: 'applicationName',
+            code: 'appName',
             codeName: 'Application Name'
           },{
-            code: 'applicationId',
+                code: 'appId',
             codeName: 'ID'
           }],
           searchDateType: [{
@@ -182,10 +184,10 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          serviceTypeCode: []
+          serviceCode: []
         },
         isLoad: {
-          serviceTypeCode: false
+          serviceCode: false
         }
       }
     },
@@ -199,6 +201,14 @@
           this.searchItem.searchType = newValue !== null ? newValue.code : null;
         }
       },
+      serviceCode: {
+        get () {
+          return this.code.serviceCode.find(obj => obj.code === this.searchItem.serviceCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.serviceCode = newValue !== null ? newValue.code : null;
+        }
+      },
       searchDateType: {
         get () {
           return this.code.searchDateType.find(obj => obj.code === this.searchItem.searchDateType) || null;
@@ -210,20 +220,19 @@
     },
 
     created (){
-      //this.fetchList();
-      this.items = [{
-        applicationId: 123,
-        applicationName: 'test',
-        serviceName: ['Edge','Low Referrer'],
-        createDateTime: '2017-10-12 12:44:21',
-        modifyDateTime: '2017-10-12 12:44:21',
-        applicationUseYn: true
-      }]
+      this.fetchList();
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'API_SERVICE' }
+        })
+        .then((res) => {
+          this.isLoad.serviceCode = false;
+          this.code.serviceCode = res.data.items;
+        });
     },
 
     methods: {
       details (item) {
-        this.$router.push({ name: 'Application 상세', params: { id: item.applicationId }})
+        this.$router.push({ name: 'Application 상세', params: { id: item.appId }})
       },
 
       fetchList (params = {}){
@@ -233,11 +242,11 @@
           q: this.queryParams
         };
 
-        this.$https.get('/services', {...defaultParams, ...params})
+        this.$https.get('/apiManagement/apps', {...defaultParams, ...params})
           .then((res) => {
-            // Setting Service Type Name
+            // Setting API Service Name
             this.items = res.data.items.map(obj => {
-              obj.serviceTypeName = (obj.serviceTypeName) ? obj.serviceTypeName.split(',') : [];
+              obj.serviceNames = (obj.serviceNames) ? obj.serviceNames.split(',') : [];
               return obj
             });
             this.pageInfo = res.data.pageInfo;
@@ -263,7 +272,7 @@
         // UseYn data convert
         Object.keys(this.searchItem).forEach(key => {
           if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = (key === 'cnameUseYn' || key === 'sslCertUseYn' || key === 'serviceUseYn')
+            this.queryParams[key] = (key === 'appUseYn' )
               ? (this.searchItem[key] === '사용')
               : this.searchItem[key];
           }
@@ -275,7 +284,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'service';
+            this.searchItem[key] = 'appName';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
           } else {
@@ -297,7 +306,7 @@
       excelDownload(){
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
-        return window.location.href = '/api/excel/services/download?q=' + q;
+        return window.location.href = '/api/excel/apps/download?q=' + q;
       },
     }
   }

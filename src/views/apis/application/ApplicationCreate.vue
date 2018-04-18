@@ -11,7 +11,7 @@
         </template>
 
         <b-form-input
-          v-model="items.applicationName"
+          v-model="items.appName"
           type="text"
           placeholder="Enter application name"
           required
@@ -28,12 +28,16 @@
 
         <multiselect
           class="multiple"
-          :class="{'invalid': !(items.service.length) }"
+          :class="{'invalid': !(valid.serviceCode) }"
           track-by="code"
           label="codeName"
           :multiple="true"
           :showLabels="false"
-          :options="[{ code: 1, codeName: 'Edge'}, { code: 2, codeName: 'Low Referrer'}]"
+          :options="code.serviceCode"
+          :loading="isLoad.serviceCode"
+          @select="onSelectType"
+          @remove="onRemoveType"
+            placeholder="Select service type"
         ></multiselect>
       </b-form-fieldset>
 
@@ -42,7 +46,7 @@
         label="설명"
         :horizontal="true">
         <b-form-textarea
-          v-model="items.description"
+          v-model="items.appDesc"
           :rows="6"
         ></b-form-textarea>
       </b-form-fieldset>
@@ -57,7 +61,7 @@
           class="v-switch"
           on="사용"
           off="미사용"
-          v-model="items.applicationUseYn"
+          v-model="items.appUseYn"
         ></c-switch>
       </b-form-fieldset>
     </b-form>
@@ -81,14 +85,16 @@
     data (){
       return {
         items: {
-          applicationName: '',
-          service: [],
-          description: '',
-          applicationUseYn: true
+          appName: '',
+          appServiceList:[],
+          appDesc: '',
+          appUseYn: true
         },
         code: {
+          serviceCode: []
         },
         isLoad: {
+          serviceCode: true
         },
 
         inValidForm: false
@@ -96,16 +102,84 @@
     },
 
     computed: {
+      serviceCode : {
+       get () {
+         return this.items.serviceCode.length > 0
+         ? this.items.serviceCode.map(val => this.code.serviceCode.find(obj => obj.code === val))
+         : [];
+       },
+       set (newValue) {
+         this.items.serviceCode = newValue.length > 0
+           ? newValue.map(obj => obj.code)
+           : [];
+       }
+     },
+
+     // validation
+     valid (){
+       return {
+         appName: this.items.appName !== null,
+         serviceCode: this.items.appServiceList.length,
+         appServiceList: this.items.appServiceList !== null,
+         appDesc: this.items.appDesc !== null,
+         appUseYn: this.items.appUseYn !== null
+       }
+     },
+
     },
 
+
     created (){
+      // Service Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'API_SERVICE' }
+        })
+        .then((res) => {
+          this.isLoad.serviceCode = false;
+          this.code.serviceCode = res.data.items;
+        });
     },
 
     methods: {
       onSubmit (){
+        // const appServiceCase = this.items
+        console.log(this.items)
+        // History
+        this.items.modifyHistReason = '등록';
+
+        const validationItems = {
+          appName: this.items.appName,
+          appServiceList: this.items.appServiceList,
+          appUseYn: this.items.appUseYn
+        }
+        const validate = this.$valid.all(validationItems);
+        this.inValidForm = !validate;
+        console.log(validate);
+        if (validate){
+          this.$https.post('/apiManagement/apps', this.items)
+            .then((res) => {
+              console.log(res.data.items);
+              this.$router.push({ name: 'Application 상세', params: { id: res.data.items }})
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+
+        }
       },
 
-      validate (submitItems){
+      onSelectType(item){
+        const code = item.code;
+        this.items.appServiceList.push({
+          serviceCode: code
+        });
+      },
+
+      onRemoveType(item){
+        const code = item.code;
+        this.items.appServiceList = this.items.appServiceList.filter(({serviceCode}) => {
+          return serviceCode !== code;
+        });
       }
     }
   }

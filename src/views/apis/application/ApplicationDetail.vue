@@ -30,7 +30,7 @@
           </template>
 
           <b-form-input
-            v-model="items.applicationName"
+            v-model="items.appName"
             type="text"
             placeholder="Enter application name"
             :plaintext="!isEdit"
@@ -40,25 +40,31 @@
 
         <!-- Service 선택 -->
         <b-form-fieldset
+          :invalid-feedback="$valid.msg.select"
           :horizontal="true">
           <template slot="label">
             Service 선택<i class="require" v-if="isEdit">*</i>
           </template>
 
           <multiselect
+            v-model="items.serviceCode"
             v-if="isEdit"
             class="multiple"
-            :class="{'invalid': !(items.service.length) }"
+            :class="{'invalid': !(valid.serviceCode) }"
             track-by="code"
             label="codeName"
             :multiple="true"
             :showLabels="false"
-            :options="[{ code: 1, codeName: 'Edge'}, { code: 2, codeName: 'Low Referrer'}]"
+            :options="code.serviceCode"
+            :loading="isLoad.serviceCode"
+            @select="onSelectType"
+            @remove="onRemoveType"
+              placeholder="Select service type"
           ></multiselect>
 
 
           <div class="badge-list" v-else>
-            <span class="badge sm" v-for="item in ['Edge','Low Referrer']">
+            <span class="badge sm" v-for="item in items.serviceNames">
               {{ item }}
             </span>
           </div>
@@ -69,7 +75,7 @@
           label="설명"
           :horizontal="true">
           <b-form-textarea
-            v-model="items.description"
+            v-model="items.appDesc"
             :rows="6"
             :plaintext="!isEdit"
           ></b-form-textarea>
@@ -80,7 +86,7 @@
           v-if="!isEdit"
           label="Key"
           :horizontal="true">
-          <span class="form-text-alone">{{ items.key }}</span>
+          <span class="form-text-alone">{{ items.appKey }}</span>
           <b-button variant="in-table" @click="onReissue">재발급</b-button>
         </b-form-fieldset>
 
@@ -88,10 +94,19 @@
         <b-form-fieldset
           label="사용여부"
           :horizontal="true">
+          <c-switch
+            v-if="isEdit"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
+            v-model="items.appUseYn"
+          ></c-switch>
           <span
+          v-else
             class="badge"
-            :class="{'primary' : items.applicationUseYn }"
-          >{{ items.applicationUseYn ? '사용' : '미사용' }}
+            :class="{'primary' : items.appUseYn }"
+          >{{ items.appUseYn ? '사용' : '미사용' }}
           </span>
         </b-form-fieldset>
 
@@ -234,16 +249,22 @@
 
     data (){
       return {
+        name: 'Application 상세',
         originItems: {},
         items: {
-          applicationName: 'test',
-          service: [],
-          description: 'test',
-          key: '5476e51b-0be2-4d7b-ba45-6ece068364ts',
+          createId: null,
+          appName: null,
+          appDesc: null,
+          appUseYn: null,
+          appKey: null,
+          serviceNames: [],
+          serviceCode:[],
+          appServiceList: [],
           applicationUseYn: true,
           modifyHistReason: '',
         },
         code: {
+          serviceCode:[]
         },
         history: {
           fields: {
@@ -261,6 +282,7 @@
         },
 
         isLoad: {
+          serviceCode:true
         },
 
         isEdit: false,
@@ -278,17 +300,57 @@
     },
 
     computed: {
+      // validation
+      valid (){
+        return {
+          appName: this.items.appName !== null,
+          serviceCode: this.code.serviceCode.length &&
+          this.items.serviceCode.length,
+          appServiceList: this.items.appServiceList !== null,
+          appDesc: this.items.appDesc !== null,
+          appUseYn: this.items.appUseYn !== null,
+          modifyHistReason: this.items.modifyHistReason != null
+        }
+      }
+
     },
 
 
     created (){
       // History
       const historyId = this.$route.query.histories;
-      this.detailUrl = historyId !== undefined ? `/services/${this.id}/histories/${historyId}` : `/services/${this.id}`;
+      const detailUrl = historyId !== undefined ? `/apiManagement/apps/${this.id}/histories/${historyId}` : `/apiManagement/apps/${this.id}`;
 
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode');
       }
+
+      // Detail Data
+      this.$https.get(detailUrl)
+        .then((res) => {
+          this.items = { ...this.items, ...res.data.items };
+          this.items.serviceNames = this.items.serviceNames.split(',');
+
+          const serviceItems = [];
+          this.items.appServiceList.forEach( obj => {
+            serviceItems.push({
+              code : obj.serviceCode,
+              codeName : obj.serviceName
+            })
+          });
+          this.items.serviceCode = serviceItems;
+          this.originItems = JSON.parse(JSON.stringify(this.items));
+        });
+
+        // Service Type Code
+        this.$https.get('/system/commonCode', {
+            q: { groupCode: 'API_SERVICE' }
+          })
+          .then((res) => {
+            this.isLoad.serviceCode = false;
+            this.code.serviceCode = res.data.items;
+          });
+
     },
 
     methods: {
@@ -305,6 +367,24 @@
       },
 
       onSubmit (){
+        const validationItems = {
+          appName: this.items.appName,
+          appServiceList: this.items.appServiceList,
+          appUseYn: this.items.appUseYn,
+          modifyHistReason: this.items.modifyHistReason
+        }
+        const validate = this.$valid.all(validationItems);
+        this.inValidForm = !validate;
+        if (validate){
+          this.$https.put(`/apiManagement/apps/${this.id}`, this.items)
+            .then(() => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+
+        }
       },
 
       onDelete (){
@@ -317,6 +397,13 @@
       },
 
       onDeleteData (){
+        this.$https.delete(`/apiManagement/apps/${this.id}`)
+          .then(() => {
+            this.$router.push({ name: 'Application 관리' });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       },
 
       onReissue (){
@@ -329,19 +416,47 @@
       },
 
       onReissueData (){
-
+        this.$https.post(`/apiManagement/apps/${this.id}/key`)
+        .then((res) => {
+          this.items.appKey = res.data.items;
+          this.originItems.appKey = res.data.items
+          this.modal = {
+            open:false
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
       },
 
       validate (submitItems){
       },
 
       getHistoryLink (rowId){
-        return `#/service/service/${this.id}?histories=${rowId}`
+        return `#/apis/application/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-      }
+        this.$https.get(`/apiManagement/apps/${this.id}/histories`)
+          .then((res) => {
+            this.history.items = res.data.items;
+          });
+      },
+
+      onSelectType(item){
+        const code = item.code;
+        this.items.appServiceList.push({
+          serviceCode: code
+        });
+      },
+
+      onRemoveType(item){
+        const code = item.code;
+        this.items.appServiceList = this.items.appServiceList.filter(({serviceCode}) => {
+          return serviceCode !== code;
+        });
+      },
     }
   }
 </script>
