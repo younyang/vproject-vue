@@ -253,6 +253,7 @@
         originItems: {},
         items: {
           createId: null,
+          modifyId: null,
           appName: null,
           appDesc: null,
           appUseYn: null,
@@ -260,7 +261,6 @@
           serviceNames: [],
           serviceCode:[],
           appServiceList: [],
-          applicationUseYn: true,
           modifyHistReason: '',
         },
         code: {

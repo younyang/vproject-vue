@@ -387,6 +387,17 @@ export default new Router({
               component: lazyLoading('apis/api/API')
             },
             {
+              path: 'api/create',
+              name: 'API 등록',
+              component: lazyLoading('apis/api/APICreate')
+            },
+            {
+              path: 'api/:id',
+              name: 'API 상세',
+              props: true,
+              component: lazyLoading('apis/api/APIDetail')
+            },
+            {
               path: 'application',
               name: 'Application 관리',
               props: true,
