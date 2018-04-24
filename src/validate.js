@@ -21,7 +21,8 @@ export default {
     require: '필수 입력 항목입니다.',
     select: '필수 선택 항목입니다.',
     check: '필수 체크 항목 입니다.',
-    onlyeng: '영문, 숫자만 입력 가능합니다.'
+    onlyeng: '영문, 숫자만 입력 가능합니다.',
+    passwordCheck: '비밀번호 확인이 일치하지 않습니다.'
   },
 
   is (value, rule='require'){

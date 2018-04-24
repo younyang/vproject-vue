@@ -16,7 +16,7 @@
 
         <div class="row">
           <div class="col-6">
-            <b-button type="button" :block="true" class="btn btn-login-link" @click="isPwdMode = true">비밀번호 찾기</b-button>
+            <b-button type="button" :block="true" class="btn btn-login-link" @click="onViewPassword">비밀번호 찾기</b-button>
           </div>
           <div class="col-6">
             <b-button type="button" :block="true" :to="{ name: 'Register' }" class="btn btn-login-link">운영자 가입</b-button>
@@ -36,7 +36,7 @@
           <input type="email" class="form-control" v-model="findPwd.email" placeholder="이메일">
         </div>
         <b-button type="button" :block="true" class="btn btn-login" @click="onFindPassword">확인</b-button>
-        <b-button type="button" :block="true" class="btn btn-login-link" @click="isPwdMode = false">로그인 화면으로</b-button>
+        <b-button type="button" :block="true" class="btn btn-login-link" @click="onViewLogin">로그인 화면으로</b-button>
       </div>
 
       <p class="warning" v-if="errorMessage !== null">{{ errorMessage }}</p>
@@ -47,7 +47,6 @@
 <script>
   import auth from '../auth'
   import { sha256 } from 'js-sha256';
-
   function authRequest (loginId, password, callback) {
     setTimeout(() => {
       if (loginId === 'admin' && password === '!admin1234') {
@@ -87,6 +86,16 @@
     },
 
     methods: {
+      onViewPassword (){
+        this.isPwdMode = true;
+        this.errorMessage = null;
+      },
+
+      onViewLogin (){
+        this.isPwdMode = false;
+        this.errorMessage = null;
+      },
+
       onLogin () {
         const formData = new FormData();
         formData.append('loginId', this.items.loginId);
@@ -102,15 +111,26 @@
           .then(res => {
             localStorage.token = Math.random().toString(36).substring(7);
             localStorage.setItem('operatorName', res.data.items.operatorName );
+            localStorage.setItem('operatorId', res.data.items.operatorId );
+
             this.$router.replace(this.$route.query.redirect || '/');
           })
           .catch(error => {
             this.errorMessage = error.response.data.error.message;
+            console.clear();
           })
       },
 
       onFindPassword () {
-
+        this.$https.put('/setting/operators/password', {...this.findPwd})
+          .then(() => {
+            alert('임시 비밀번호 메일이 발송되었습니다.');
+            this.isPwdMode = false;
+          })
+          .catch(error => {
+            this.errorMessage = error.response.data.error.message;
+            console.clear();
+          })
       }
     }
   }

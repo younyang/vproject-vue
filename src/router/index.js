@@ -33,6 +33,11 @@ export default new Router({
       beforeEnter: requireAuth,
       children: [
         {
+          path: 'user',
+          name: '회원 정보 수정',
+          component: lazyLoading('UserInfo')
+        },
+        {
           path: 'dashboard',
           name: 'Dashboard',
           component: lazyLoading('dashboard/Dashboard')
