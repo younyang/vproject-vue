@@ -321,10 +321,10 @@
           this.items = res.data.items;
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
-
     },
 
     methods: {
+
       onEdit (){
         this.isEdit = true;
       },

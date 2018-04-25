@@ -150,7 +150,7 @@
       </b-form-fieldset>
       -->
 
-      <div slot="footer">
+      <div style="text-align:right">
         <b-button type="button" variant="secondary" :to="{ name: 'Login' }">취소</b-button>
         <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
       </div>
