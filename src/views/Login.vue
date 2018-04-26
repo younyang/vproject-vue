@@ -1,7 +1,7 @@
 <template>
   <div class="app login-page flex-row align-items-center justify-content-center">
     <div class="login-box">
-      <h1 class="sr-only">SK broadband V Project Pilot 플랫폼 Login</h1>
+      <h1 class="sr-only">SK broadband E-CDN Pilot 플랫폼 Login</h1>
 
       <div v-if="!isPwdMode">
         <b-form @submit.prevent="onLogin">

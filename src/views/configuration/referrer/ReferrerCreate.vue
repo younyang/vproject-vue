@@ -6,7 +6,7 @@
         label="구분"
         :horizontal="true">
         <b-form-input
-          :value="getItems.referrerTypeCodeName"
+          value="High Referrer"
           type="text"
           plaintext
         ></b-form-input>
@@ -118,8 +118,8 @@
         this.$router.push({ name: 'Referrer 관리' })
       }
 
-      const { referrerId, referrerTypeCode } = JSON.parse(this.$route.query.q);
-      this.items = { referrerId, referrerTypeCode, referrerUseYn: true, popId: null };
+      const { referrerId } = JSON.parse(this.$route.query.q);
+      this.items = { referrerId, referrerUseYn: true, popId: null };
       this.getItems = JSON.parse(this.$route.query.q);
 
       // PoP List
@@ -143,8 +143,7 @@
             .then(() => {
               this.$router.push({
                 name: 'Referrer 상세',
-                params: { id: this.items.referrerId },
-                query: { referrerTypeCode: this.items.referrerTypeCode }
+                params: { id: this.items.referrerId }
               })
             })
             .catch((error) => {

@@ -1,6 +1,6 @@
 <template>
   <header class="app-header navbar">
-    <b-link class="navbar-brand" to="/"><span class="sr-only">SK V Project</span></b-link>
+    <b-link class="navbar-brand" to="/"><span class="sr-only">SK E-CDN</span></b-link>
     <button class="navbar-toggler sidebar-toggler" type="button" @click="sidebarMinimize">&#9776;</button>
 
     <b-nav class="ml-auto">

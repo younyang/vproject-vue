@@ -13,11 +13,11 @@ export default {
         {
           name: 'Service 관리',
           url: '/service/service'
-        },
+        }/*,
         {
           name: 'Bucket 관리',
           url: '/service/bucket'
-        }
+        }*/
       ]
     },
     {
@@ -40,11 +40,11 @@ export default {
             {
               name: 'Cache Throttling 관리',
               url: '/configuration/edges/cache'
-            },
+            }/*,
             {
               name: 'Cache Deletions',
               url: '/configuration/edges/cacheDeletions'
-            }
+            }*/
           ]
         },
         {
@@ -54,11 +54,11 @@ export default {
             {
               name: 'Referrer 관리',
               url: '/configuration/referrers/referrer'
-            },
+            }/*,
             {
               name: 'PoP Preference',
               url: '/configuration/referrers/popPreference'
-            },
+            }*/,
             {
               name: 'IP Restriction',
               url: '/configuration/referrers/ipRestriction'
@@ -138,11 +138,11 @@ export default {
         {
           name: 'Application 관리',
           url: '/apis/application'
-        },
+        }/*,
         {
           name: 'Adaptor 관리',
           url: '/apis/adaptor'
-        },
+        }*/,
       ]
     }
   ]

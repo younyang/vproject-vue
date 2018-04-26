@@ -25,7 +25,7 @@
           label="구분"
           :horizontal="true">
           <b-form-input
-            :value="items.referrerTypeCodeName"
+            value="High Referrer"
             type="text"
             plaintext
           ></b-form-input>
@@ -127,7 +127,7 @@
       <div class="referrer-content" v-if="isReferrerType === 'high'">
         <div class="link-list">
           <a href="#/configuration/referrers/ipRestriction" class="btn btn-in-table" target="_blank">IP Restriction 설정</a>
-          <a href="#/configuration/referrers/popPreference" class="btn btn-in-table" target="_blank">PoP Preference 설정</a>
+          <!--<a href="#/configuration/referrers/popPreference" class="btn btn-in-table" target="_blank">PoP Preference 설정</a>-->
         </div>
 
         <div class="formView">
@@ -144,7 +144,7 @@
               </b-form-fieldset>
             </div>
           </b-form-fieldset>
-
+          <!--
           <b-form-fieldset
             label="PoP Preference"
             :horizontal="true">
@@ -162,6 +162,7 @@
               </b-form-fieldset>
             </div>
           </b-form-fieldset>
+        -->
         </div>
       </div>
 
@@ -252,7 +253,7 @@
           </b-form-fieldset>
         </div>
 
-        <!-- 배포상태 -->
+        <!-- 배포상태
         <b-form-fieldset
           label="배포상태"
           :horizontal="true">
@@ -264,7 +265,7 @@
             :value="items.processStateCodeName"
           >
           <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
-        </b-form-fieldset>
+        </b-form-fieldset>-->
       </b-form>
     </b-collapse>
 
@@ -344,8 +345,6 @@
           referrerId : null,
           popId : null,
           referrerUseYn : false,
-          referrerTypeCode : null,
-          preferenceList: [],
           ipRestrictionList: [],
           oneTimeUrlInfo: {
             expireTime: null,
@@ -376,8 +375,7 @@
         },
         isEdit: false,
         isModalHistory: false,
-        isReferrerType: '',
-
+        isReferrerType: 'high',
         modal: {
           open: false,
           type: 'done',
@@ -400,9 +398,9 @@
       },
 
       isProcessComplete (){
-        return (this.items.processStateCode !== null &&
+        return (this.items.processStateCode === null || (
         this.items.processStateCode !== '' &&
-        this.items.processStateCode === 'PROCESS_STATE_02')
+        this.items.processStateCode === 'PROCESS_STATE_02'))
       },
 
       // validation
@@ -414,11 +412,6 @@
     },
 
     created (){
-      if (this.$route.query.referrerTypeCode === undefined){
-        alert('잘못된 접근입니다')
-        this.$router.push({ name: 'Referrer 관리' })
-      }
-
       // History
       const historyId = this.$route.query.histories;
       const detailUrl = historyId !== undefined ? `/referrers/${this.id}/histories/${historyId}` : `/referrers/${this.id}`;
@@ -426,8 +419,6 @@
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode')
       }
-      this.referrerTypeCode = this.$route.query.referrerTypeCode;
-
 
       // PoP List
       this.$https.get('/pops')
@@ -437,13 +428,10 @@
         });
 
       // Detail Data
-      this.$https.get(detailUrl, {
-          referrerTypeCode: this.referrerTypeCode
-        })
+      this.$https.get(detailUrl)
         .then((res) => {
           this.items = { ...this.items, ...res.data.items, referrerId: this.id };
           this.originItems = JSON.parse(JSON.stringify(this.items));
-          this.isReferrerType = this.referrerTypeCode === 'COMPONENT_TYPE_01' ? 'high' : 'low';
         });
     },
 
@@ -458,14 +446,14 @@
       },
 
       onSubmit (){
-        const { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason } = this.items;
-        const submitItems = { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason };
+        const { referrerId, popId, referrerUseYn, modifyHistReason } = this.items;
+        const submitItems = { referrerId, popId, referrerUseYn, modifyHistReason };
         const validate = this.$valid.all(submitItems);
 
         this.inValidForm = !validate;
 
         if (validate){
-          this.$https.put(`/referrers/${this.id}`, { referrerId, popId, referrerUseYn, referrerTypeCode, modifyHistReason })
+          this.$https.put(`/referrers/${this.id}`, { referrerId, popId, referrerUseYn, modifyHistReason })
             .then(() => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -485,7 +473,7 @@
       },
 
       onDeleteData (){
-        this.$https.delete(`/referrers/${this.id}?referrerTypeCode=${this.referrerTypeCode}`)
+        this.$https.delete(`/referrers/${this.id}`)
           .then(() => {
             this.$router.push({ name: 'Referrer 관리' });
           })
@@ -495,14 +483,12 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/referrers/referrer/${this.id}?histories=${rowId}&referrerTypeCode=${this.referrerTypeCode}`
+        return `#/configuration/referrers/referrer/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/referrers/${this.id}/histories`,{
-            referrerTypeCode: this.referrerTypeCode
-          })
+        this.$https.get(`/referrers/${this.id}/histories`)
           .then((res) => {
             this.history.items = res.data.items;
           });

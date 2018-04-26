@@ -17,22 +17,6 @@
           ></multiselect>
           <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
-
-        <b-form-fieldset
-          label="구분"
-          class="label-lg"
-          :horizontal="true">
-          <multiselect
-            v-model="referrerTypeCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.referrerTypeCode"
-            :loading="isLoad.referrerTypeCode"
-            label="codeName"
-            track-by="code"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
       </div>
 
       <div class="form-row">
@@ -114,7 +98,6 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="referrerTypeCodeName" slot-scope="row">{{row.value.split(' ')[0]}}</template>
         <template slot="referrerUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
@@ -153,7 +136,6 @@
           :fields="createList.fields"
           @row-clicked="creates"
         >
-          <template slot="referrerTypeCodeName" slot-scope="row">{{row.value.split(' ')[0]}}</template>
         </b-table>
       </section>
 
@@ -174,7 +156,6 @@
       return {
         fields: {
           referrerId: {label: 'ID'},
-          referrerTypeCodeName: {label: '구분', 'class': 'text-left'},
           componentIp: {label: 'IP', 'class': 'text-left'},
           componentHostName: {label: 'Host Name', 'class': 'text-left'},
           popName: {label: 'PoP'},
@@ -196,7 +177,6 @@
         searchItem: {
           searchType: 'componentIp',
           searchKeyword: null,
-          referrerTypeCode: null,
           popId: null,
           referrerUseYn: null,
           searchDateType: 'createDate',
@@ -205,7 +185,6 @@
         },
         createList: {
           fields: {
-            referrerTypeCodeName: {label: '구분', 'class': 'text-left'},
             componentIp: {label: 'IP', 'class': 'text-left'},
             componentHostName: {label: 'Host Name', 'class': 'text-left'},
           },
@@ -229,12 +208,10 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          referrerTypeCode: [],
           popId: [],
           secondAddressCode: []
         },
         isLoad: {
-          referrerTypeCode: false,
           popId: false
         },
         isModalCreate: false
@@ -258,14 +235,6 @@
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
-      referrerTypeCode: {
-        get () {
-          return this.code.referrerTypeCode.find(obj => obj.code === this.searchItem.referrerTypeCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.referrerTypeCode = newValue !== null ? newValue.code : null;
-        }
-      },
       popId: {
         get () {
           return this.code.popId.find(obj => obj.popId === this.searchItem.popId) || null;
@@ -280,14 +249,6 @@
       // Referrer List
       this.fetchList();
 
-      // Referrer Type Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'COMPONENT_TYPE' }
-        })
-        .then((res) => {
-          this.isLoad.referrerTypeCode = false;
-          this.code.referrerTypeCode = res.data.items.filter(({codeName}) => codeName !== 'Edge');
-        });
       // PoP List
       this.$https.get('/pops')
         .then((res) => {
@@ -300,21 +261,17 @@
       details (item) {
         this.$router.push({
           name: 'Referrer 상세',
-          params: { id: item.referrerId },
-          query: { referrerTypeCode: item.referrerTypeCode }
-
+          params: { id: item.referrerId }
         })
       },
 
       creates (item) {
-        const {referrerId, referrerTypeCode, referrerTypeCodeName, componentIp, componentHostName } = item;
+        const {referrerId, componentIp, componentHostName } = item;
         this.$router.push({
           name: 'Referrer 등록',
           query: {
             q: JSON.stringify({
               referrerId,
-              referrerTypeCode,
-              referrerTypeCodeName,
               componentIp,
               componentHostName
             })
