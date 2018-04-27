@@ -30,7 +30,7 @@
           ・ 정보 일치 시, 등록된 이메일 정보로 임시비밀번호 메일이 발송됩니다.
         </p>
         <div class="input-group">
-          <input type="text" class="form-control" v-model="findPwd.id" placeholder="아이디">
+          <input type="text" class="form-control" v-model="findPwd.loginId" placeholder="아이디">
         </div>
         <div class="input-group">
           <input type="email" class="form-control" v-model="findPwd.email" placeholder="이메일">
