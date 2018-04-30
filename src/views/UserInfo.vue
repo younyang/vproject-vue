@@ -206,7 +206,7 @@
 
     created (){
       // User 정보
-      this.$https.get('/setting/operators/main')
+      this.$https.get('/setting/management/operators/main')
         .then((res) => {
           console.log(res.data.items)
           this.items = res.data.items;
@@ -232,7 +232,7 @@
         this.inValidForm = !validate;
 
         if (validate){
-          this.$https.put('/setting/operators/main', { ...submitItems, telephoneNumber})
+          this.$https.put('/setting/management/operators/main', { ...submitItems, telephoneNumber})
             .then(() => {
               this.isModalAlert = !this.isModalAlert;
             })

@@ -52,8 +52,34 @@
           label="Domain"
           :horizontal="true">
           <small class="form-text-alone">
-            http(s)://[edge].[content type].<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+            http(s)://<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
           </small>
+        </b-form-fieldset>
+
+        <!-- Data Center -->
+        <b-form-fieldset
+          :invalid-feedback="$valid.msg.select"
+          :horizontal="true">
+          <template slot="label">
+            Data Center<i v-if="isEdit" class="require">*</i>
+          </template>
+          <multiselect
+            v-if="isEdit"
+            v-model="dataCenterCode"
+            :showLabels="false"
+            :options="code.dataCenterCode"
+            :loading="isLoad.dataCenterCode"
+            :class="{'invalid': !valid.dataCenterCode }"
+            track-by="code"
+            label="codeName"
+            placeholder="선택"
+          ></multiselect>
+          <b-form-input
+            v-else
+            :value="items.dataCenterCodeName"
+            type="text"
+            plaintext
+          ></b-form-input>
         </b-form-fieldset>
 
         <!-- 주소 :: Edit -->
@@ -150,7 +176,7 @@
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            Bandwidth<i v-if="isEdit" class="require">*</i>
+            Bandwidth(bps)<i v-if="isEdit" class="require">*</i>
           </template>
           <cleave
             v-if="isEdit"
@@ -361,6 +387,8 @@
           popAddress: '',
           qualitySolutionTeamCode: null,
           qualitySolutionTeamCodeName: '',
+          dataCenterCode: null,
+          dataCenterCodeName: '',
           bandwidth: 0,
           popUseYn: true,
           serviceNames: null,
@@ -373,7 +401,8 @@
         code: {
           popCtprvnCode: [],
           popSigCode: [],
-          qualitySolutionTeamCode: []
+          qualitySolutionTeamCode: [],
+          dataCenterCode: []
         },
         history: {
           fields: {
@@ -392,7 +421,8 @@
         isLoad: {
           popCtprvnCode: true,
           popSigCode: true,
-          qualitySolutionTeamCode: true
+          qualitySolutionTeamCode: true,
+          dataCenterCode: true
         },
         isEdit: false,
         isModalHistory: false,
@@ -433,6 +463,14 @@
           this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
+      dataCenterCode: {
+        get () {
+          return this.code.dataCenterCode.find(obj => obj.code === this.items.dataCenterCode) || null;
+        },
+        set (newValue) {
+          this.items.dataCenterCode = newValue !== null ? newValue.code : null;
+        }
+      },
       serviceNames (){
         return this.items.serviceNames !== null ? this.items.serviceNames.split(',') : []
       },
@@ -447,7 +485,8 @@
         return {
           popCtprvnCode: this.items.popCtprvnCode !== null,
           popSigCode: this.items.popSigCode !== null,
-          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null
+          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null,
+          dataCenterCode: this.items.dataCenterCode !== null
         }
       }
     },
@@ -471,6 +510,15 @@
         .then((res) => {
           this.isLoad.qualitySolutionTeamCode = false;
           this.code.qualitySolutionTeamCode = res.data.items;
+        });
+
+      // Data Center Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'DATACENTER' }
+        })
+        .then((res) => {
+          this.isLoad.dataCenterCode = false;
+          this.code.dataCenterCode = res.data.items;
         });
 
       // Detail Data

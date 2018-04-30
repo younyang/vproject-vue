@@ -372,7 +372,7 @@
             })
         }else{
           if(!validationItems.idCheck){
-            alert('아이디를 확인해주세요. ');  
+            alert('아이디를 확해주세요. ');
           }else{
             alert('필수항목을 모두 입력해주세요.');
           }

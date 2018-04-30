@@ -45,20 +45,26 @@
         <small
           class="form-text-alone ml-2"
           :class="{'invalid': items.popDomainName === null }">
-          http(s)://[edge].[content type].<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
+          http(s)://<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
         </small>
       </b-form-fieldset>
 
-      <!-- 구분 -->
+      <!-- data center -->
       <b-form-fieldset
-        label="구분<i class='require'>*</i>"
-        :invalid-feedback="$valid.msg.check"
+        label="Data Center<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
         :horizontal="true">
-
-        <span :class="{'invalid' : !valid.referrer }">
-          <b-form-checkbox v-model="items.referrerYn">Low Referrer</b-form-checkbox>
-          <b-form-checkbox v-model="items.highReferrerYn">High Referrer</b-form-checkbox>
-        </span>
+        <multiselect
+          v-model="dataCenterCode"
+          :showLabels="false"
+          :options="code.dataCenterCode"
+          :loading="isLoad.dataCenterCode"
+          :class="{'invalid': !valid.dataCenterCode }"
+          track-by="code"
+          label="codeName"
+          style="width:156px"
+          placeholder="선택"
+        ></multiselect>
       </b-form-fieldset>
 
       <!-- 주소 -->
@@ -167,6 +173,7 @@
           popCtprvnCode : null,
           popSigCode : null,
           qualitySolutionTeamCode : null,
+          dataCenterCode : null,
           referrerYn : false,
           highReferrerYn : false,
           bandwidth : 0,
@@ -175,12 +182,14 @@
         code: {
           popCtprvnCode: [],
           popSigCode: [],
-          qualitySolutionTeamCode: []
+          qualitySolutionTeamCode: [],
+          dataCenterCode : [],
         },
         isLoad: {
           popCtprvnCode: true,
           popSigCode: true,
-          qualitySolutionTeamCode: true
+          qualitySolutionTeamCode: true,
+          dataCenterCode : true,
         },
 
         popHostNameExists: null,
@@ -213,6 +222,14 @@
           this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
+      dataCenterCode: {
+        get () {
+          return this.code.dataCenterCode.find(obj => obj.code === this.items.dataCenterCode) || null;
+        },
+        set (newValue) {
+          this.items.dataCenterCode = newValue !== null ? newValue.code : null;
+        }
+      },
       // validation
       valid (){
         return {
@@ -224,7 +241,8 @@
           referrer: !(!this.items.referrerYn && !this.items.highReferrerYn),
           popCtprvnCode: this.items.popCtprvnCode !== null,
           popSigCode: this.items.popSigCode !== null,
-          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null
+          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null,
+          dataCenterCode: this.items.dataCenterCode !== null
         }
       },
 
@@ -257,6 +275,14 @@
         .then((res) => {
           this.isLoad.qualitySolutionTeamCode = false;
           this.code.qualitySolutionTeamCode = res.data.items;
+        });
+      // dataCenter Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'DATACENTER' }
+        })
+        .then((res) => {
+          this.isLoad.dataCenterCode = false;
+          this.code.dataCenterCode = res.data.items;
         });
     },
 

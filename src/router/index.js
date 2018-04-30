@@ -256,7 +256,7 @@ export default new Router({
                   component: lazyLoading('configuration/pop/PopDetailBase')
                 },
                 { path: 'edge',
-                  title: 'L/R, Edge',
+                  title: 'Edge',
                   props: true,
                   component: lazyLoading('configuration/pop/PopDetailEdge')
                 }

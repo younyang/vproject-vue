@@ -4,7 +4,7 @@
       :title="items.popName"
       :name="name">
     </content-header>
-
+    <!--
     <div class="collapse-title">
       <b-button class="btn-collapse" v-b-toggle.lowReferrer>
         <i class="fa"></i>
@@ -22,7 +22,7 @@
         </b-table>
       </section>
     </b-collapse>
-
+  -->
     <!-- Edge -->
     <div class="collapse-title">
       <b-button class="btn-collapse" v-b-toggle.edge>
@@ -86,8 +86,8 @@
           edgeList: {
             edgeId: {label: 'ID', thStyle:'width:100px'},
             edgeIp: {label: 'IP', thStyle:'width:200px', 'class': 'text-left'},
-            edgeHostName: {label: 'Host Name', 'class': 'text-left'},
-            edgeDomainName: {label: 'Domain', thStyle:'width:150px', 'class': 'text-left'},
+            edgeHostName: {label: 'Host Name', thStyle:'width:150px', 'class': 'text-left'},
+            //edgeDomainName: {label: 'Domain', thStyle:'width:150px', 'class': 'text-left'},
             edgeRelayYn: {label: 'Type', thStyle:'width:120px'},
             edgeUseYn: {label: '상태', thStyle:'width:120px'}
           }
