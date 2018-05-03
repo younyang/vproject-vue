@@ -377,6 +377,42 @@ export default new Router({
           ]
         },
         {
+          path: 'settings',
+          redirect: '/setting',
+          name: 'Settings',
+          component: {
+            render (c) { return c('router-view') }
+          },
+          children:[
+            {
+              path: 'operators',
+              redirect: 'setting/operators',
+              name: 'Operators',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                {
+                  path: 'operator',
+                  name: 'Operator 관리',
+                  component: lazyLoading('setting/operators/Operator')
+                },
+                {
+                  path: 'operator/:id',
+                  name: 'Operator 상세',
+                  props: true,
+                  component: lazyLoading('setting/operators/OperatorDetail')
+                },
+                {
+                  path: 'approval',
+                  name: 'Approval 관리',
+                  component: lazyLoading('setting/operators/Approval')
+                }
+              ]
+            }
+          ]
+        },
+        {
           path: 'apis',
           redirect: '/apis/api',
           name: 'APIs',

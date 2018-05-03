@@ -127,6 +127,27 @@ export default {
       ]
     },
     {
+      name: 'Settings',
+      url: '/settings',
+      icon: 'icon-share',
+      children: [
+        {
+          name: 'Operators',
+          url: '/settings/operators',
+          children: [
+            {
+              name: 'Operator 관리',
+              url: '/settings/operators/operator'
+            },
+            {
+              name: 'Approval 관리',
+              url: '/settings/operators/approval'
+            }
+          ]
+        }
+      ]
+    },
+    {
       name: 'APIs',
       url: '/apis',
       icon: 'icon-share',
