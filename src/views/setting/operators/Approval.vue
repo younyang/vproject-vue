@@ -19,15 +19,15 @@
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="서비스명"
+          label="회사명"
           class="label-lg"
           :horizontal="true">
           <multiselect
-            v-model="serviceCode"
+            v-model="companyCode"
             :showLabels="false"
             :searchable="false"
-            :options="code.serviceCode"
-            :loading="isLoad.serviceCode"
+            :options="code.companyCode"
+            :loading="isLoad.companyCode"
             label="codeName"
             track-by="code"
             placeholder="전체"
@@ -37,13 +37,49 @@
 
       <div class="form-row">
         <b-form-fieldset
-          label="사용여부"
+          label="그룹"
           :horizontal="true">
           <multiselect
-            v-model="searchItem.appUseYn"
+            v-model="groupId"
             :showLabels="false"
             :searchable="false"
-            :options="['사용', '미사용']"
+            :options="code.groupId"
+            :loading="isLoad.groupId"
+            label="groupName"
+            track-by="groupId"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          label="서비스"
+          class="label-lg"
+          :horizontal="true">
+          <multiselect
+            v-model="serviceId"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.serviceId"
+            :loading="isLoad.serviceId"
+            label="serviceName"
+            track-by="serviceId"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+      </div>
+
+      <div class="form-row">
+        <b-form-fieldset
+          label="승인상태"
+          :horizontal="true">
+          <multiselect
+            v-model="joinApprovalStateCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.joinApprovalStateCode"
+            :loading="isLoad.joinApprovalStateCode"
+            label="codeName"
+            track-by="code"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -84,9 +120,6 @@
       <b-button type="button" variant="primary" @click="excelDownload">
         엑셀 다운로드
       </b-button>
-      <b-button type="button" variant="primary" :to="{ name: 'Application 등록' }">
-        등록
-      </b-button>
     </section>
 
     <section class="board">
@@ -97,12 +130,17 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="serviceNames" slot-scope="row">
+        <template slot="operatorServiceNames" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="appUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
+        <template slot="operatorGroupNames" slot-scope="row">
+          <span class="badge" v-for="val in row.value">
+            {{ val }}
+          </span>
+        </template>
+        <template slot="accountLockYn" slot-scope="row">{{row.value? '잠김':'정상'}}</template>
       </b-table>
     </section>
 
@@ -142,12 +180,15 @@
     data (){
       return {
         fields: {
-          appId: {label: 'ID'},
-          appName: {label: 'Application Name', 'class': 'text-left'},
-          serviceNames: {label: 'Service', 'class': 'text-left'},
-          createDateTime: {label: '등록일시'},
-          modifyDateTime: {label: '수정일시'},
-          appUseYn: {label: '사용여부'}
+          loginId: {label: 'ID'},
+          operatorName: {label: '이름', 'class': 'text-left'},
+          companyName: {label: '회사명', 'class': 'text-left'},
+          deptName: {label: '부서', 'class': 'text-left'},
+          operatorGroupNames:{label: '그룹', 'class': 'text-left'},
+          operatorServiceNames: {label: '서비스', 'class': 'text-left'},
+          email: {label: '이메일', 'class': 'text-left'},
+          joinApplyDatetime: {label: '신청일시'},
+          joinApprovalStateCodeName: {label: '승인상태'}
         },
         items: [],
         pageInfo: {
@@ -161,21 +202,26 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'appName',
+          searchType: 'operatorId',
           searchKeyword: null,
-          serviceCode: null,
-          appUseYn: null,
+          companyCode: null,
+          groupId: null,
+          serviceId: null,
+          joinApprovalStateCode: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
         code: {
           searchType: [{
-            code: 'appName',
-            codeName: 'Application Name'
-          },{
-                code: 'appId',
+                code: 'operatorId',
             codeName: 'ID'
+          },{
+                code: 'operatorName',
+            codeName: '이름'
+          },{
+                code: 'email',
+            codeName: '이메일'
           }],
           searchDateType: [{
             code: 'createDate',
@@ -184,10 +230,16 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          serviceCode: []
+          companyCode: [],
+          groupId:[],
+          serviceId:[],
+          joinApprovalStateCode:[]
         },
         isLoad: {
-          serviceCode: false
+          companyCode: false,
+          groupId: false,
+          serviceId: false,
+          joinApprovalStateCode: false
         }
       }
     },
@@ -201,12 +253,36 @@
           this.searchItem.searchType = newValue !== null ? newValue.code : null;
         }
       },
-      serviceCode: {
+      companyCode: {
         get () {
-          return this.code.serviceCode.find(obj => obj.code === this.searchItem.serviceCode) || null;
+          return this.code.companyCode.find(obj => obj.code === this.searchItem.companyCode) || null;
         },
         set (newValue) {
-          this.searchItem.serviceCode = newValue !== null ? newValue.code : null;
+          this.searchItem.companyCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      groupId: {
+        get () {
+          return this.code.groupId.find(obj => obj.code === this.searchItem.groupId) || null;
+        },
+        set (newValue) {
+          this.searchItem.groupId = newValue !== null ? newValue.groupId : null;
+        }
+      },
+      serviceId: {
+        get () {
+          return this.code.serviceId.find(obj => obj.code === this.searchItem.serviceId) || null;
+        },
+        set (newValue) {
+          this.searchItem.serviceId = newValue !== null ? newValue.serviceId : null;
+        }
+      },
+      joinApprovalStateCode: {
+        get () {
+          return this.code.joinApprovalStateCode.find(obj => obj.code === this.searchItem.joinApprovalStateCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.joinApprovalStateCode = newValue !== null ? newValue.code : null;
         }
       },
       searchDateType: {
@@ -222,17 +298,42 @@
     created (){
       this.fetchList();
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'API_SERVICE' }
+          q: { groupCode: 'COMPANY' }
         })
         .then((res) => {
-          this.isLoad.serviceCode = false;
-          this.code.serviceCode = res.data.items;
+          this.isLoad.companyCode = false;
+          this.code.companyCode = res.data.items;
         });
+
+        this.$https.get('/setting/operators/groups')
+          .then((res) => {
+            this.isLoad.groupId = false;
+            this.code.groupId = res.data.items;
+          });
+
+        this.$https.get('/setting/operators/services')
+          .then((res) => {
+            this.isLoad.serviceId = false;
+            this.code.serviceId = res.data.items;
+          });
+
+        this.$https.get('/system/commonCode', {
+            q: { groupCode: 'JOIN_APPROVAL_STATE' }
+          })
+          .then((res) => {
+            this.isLoad.joinApprovalStateCode = false;
+            this.code.joinApprovalStateCode = res.data.items.filter(({code}) => {
+              return code !== 'JOIN_APPROVAL_STATE_02';
+            });
+          });
     },
 
     methods: {
       details (item) {
-        this.$router.push({ name: 'Application 상세', params: { id: item.appId }})
+        this.$router.push({
+          name: 'Approval 상세',
+          params: { id: item.operatorId }
+        })
       },
 
       fetchList (params = {}){
@@ -242,11 +343,24 @@
           q: this.queryParams
         };
 
-        this.$https.get('/apiManagement/apps', {...defaultParams, ...params})
+        this.$https.get('/setting/approvals', {...defaultParams, ...params})
           .then((res) => {
             // Setting API Service Name
+
             this.items = res.data.items.map(obj => {
-              obj.serviceNames = (obj.serviceNames) ? obj.serviceNames.split(',') : [];
+              // obj.operatorServiceNames = (obj.operatorServiceList) ? obj.operatorServiceList.serviceName : [];
+              // obj.operatorServiceNames = ['11','22'];
+              const operatorServiceNames = [];
+              const operatorGroupNames = [];
+              obj.operatorServiceList.forEach( obj => {
+                operatorServiceNames.push(obj.serviceName)
+              })
+              obj.operatorServiceNames = operatorServiceNames;
+              obj.operatorGroupList.forEach( obj => {
+                operatorGroupNames.push(obj.groupName)
+              })
+              obj.operatorGroupNames = operatorGroupNames;
+              // console.log(this.items.operatorServiceNames);
               return obj
             });
             this.pageInfo = res.data.pageInfo;
@@ -272,8 +386,8 @@
         // UseYn data convert
         Object.keys(this.searchItem).forEach(key => {
           if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = (key === 'appUseYn' )
-              ? (this.searchItem[key] === '사용')
+            this.queryParams[key] = (key === 'accountLockYn' )
+              ? (this.searchItem[key] === '잠김')
               : this.searchItem[key];
           }
         });
@@ -284,7 +398,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'appName';
+            this.searchItem[key] = 'operatorId';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
           } else {

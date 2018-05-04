@@ -35,7 +35,7 @@
           <b-form-input
             v-model="items.operatorName"
             type="text"
-            placeholder="Enter application name"
+            placeholder="Enter Name"
             :plaintext="!isEdit"
             required
           ></b-form-input>
@@ -67,7 +67,7 @@
           <b-form-input
             v-model="items.deptName"
             type="text"
-            placeholder="Enter application name"
+            placeholder="Enter deptName"
             :plaintext="!isEdit"
             required
           ></b-form-input>
@@ -84,7 +84,7 @@
           <b-form-input
             v-model="items.email"
             type="text"
-            placeholder="Enter application name"
+            placeholder="Enter email"
             :plaintext="!isEdit"
             required
           ></b-form-input>
@@ -92,17 +92,14 @@
 
         <!-- 전화번호 -->
         <b-form-fieldset
+          label="전화번호"
           :horizontal="true">
-          <template slot="label">
-            전화번호
-          </template>
 
           <b-form-input
             v-model="items.telephoneNumber"
             type="text"
-            placeholder="Enter application name"
+            placeholder="Enter telephoneNumber"
             :plaintext="!isEdit"
-            required
           ></b-form-input>
         </b-form-fieldset>
 
@@ -117,7 +114,7 @@
           <b-form-input
             v-model="items.cellphoneNumber"
             type="text"
-            placeholder="Enter application name"
+            placeholder="Enter cellphoneNumber"
             :plaintext="!isEdit"
             required
           ></b-form-input>
@@ -140,11 +137,11 @@
             track-by="groupId"
             :multiple="true"
             :showLabels="false"
-            :options="code.groupCode"
+            :options="code.groupList"
             :loading="isLoad.groupCode"
             @select="groupSelect"
             @remove="groupRemove"
-            placeholder="그룹 선택"
+            placeholder="Select group"
           ></multiselect>
 
           <div class="badge-list" v-else>
@@ -175,7 +172,7 @@
             :loading="isLoad.serviceCode"
             @select="serviceSelect"
             @remove="serviceRemove"
-            placeholder="Select service type"
+            placeholder="Select service"
             :disabled="groupSelectPlatform"
           ></multiselect>
 
@@ -256,7 +253,7 @@
             label="탈퇴일시"
             :horizontal="true">
             <b-form-input
-              :value="items.createId"
+              :value="items.deleteDateTime"
               plaintext
               type="text"
             ></b-form-input>
@@ -279,7 +276,7 @@
             label="승인자"
             :horizontal="true">
             <b-form-input
-              :value="items.createId"
+              :value="items.joinApprovalId"
               plaintext
               type="text"
             ></b-form-input>
@@ -317,7 +314,7 @@
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" :to="{ name: 'Operator 관리' }">목록</b-button>
-      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
+      <b-button type="button" variant="primary" @click="onEdit" v-if="this.items.operatorStateCode !== 'OPERATOR_STATE_03'">수정</b-button>
     </div>
   </div>
 </template>
@@ -348,6 +345,7 @@
           operatorStateCode: null,
           operatorStateName: null,
           operatorState: null,
+          deleteDateTime: null,
           accountLockYn:null,
           operatorGroupList: [],
           groupList:[],
@@ -396,7 +394,7 @@
       groupList: {
         get () {
           return this.items.groupList.length > 0
-            ? this.items.groupList.map(val => this.code.groupCode.find(obj => obj.groupId === val))
+            ? this.items.groupList.map(val => this.code.groupList.find(obj => obj.groupId === val))
             : [];
         },
         set (newValue) {
@@ -412,8 +410,8 @@
           deptName: this.items.deptName !== null,
           email: this.items.email !== null,
           cellphoneNumber: this.items.cellphoneNumber !== null,
-          groupList: this.code.groupList.length && this.items.groupList.length,
-          serviceList: this.code.serviceList.length && this.items.groupList.length,
+          groupList: !this.groupList.length,
+          serviceList: !this.serviceList.length
         }
       }
 
@@ -439,8 +437,10 @@
           this.items.serviceList = serviceList;
           if(this.items.operatorStateCode === 'OPERATOR_STATE_02'){
             this.items.operatorState = true;
+            this.items.deleteDateTime = '-';
           }else{
             this.items.operatorState = false;
+            this.items.deleteDateTime = this.items.modifyDateTime;
           }
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
@@ -460,7 +460,7 @@
         this.$https.get('/setting/operators/groups')
           .then((res) => {
             this.isLoad.groupCode = false;
-            this.code.groupCode = res.data.items;
+            this.code.groupList = res.data.items;
           });
 
     },
@@ -483,7 +483,9 @@
           operatorName: this.items.operatorName,
           deptName: this.items.deptName,
           email: this.items.email,
-          cellphoneNumber: this.items.cellphoneNumber
+          cellphoneNumber: this.items.cellphoneNumber,
+          groupList: this.items.groupList,
+          serviceList: this.items.serviceList
         }
         const validate = this.$valid.all(validationItems);
         this.inValidForm = !validate;
@@ -514,7 +516,6 @@
             .catch((error) => {
               console.log(error);
             });
-
         }
       },
 
@@ -559,6 +560,9 @@
           //전체선택
           this.groupSelectPlatform = true;
           this.serviceList = [{serviceId: 0, serviceName: '전체'}]
+          // this.code.serviceCode.forEach(obj =>{
+          //   obj.$isDisabled = true;
+          // })
         }
       },
 

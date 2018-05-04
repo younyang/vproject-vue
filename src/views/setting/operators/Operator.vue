@@ -193,7 +193,7 @@
     data (){
       return {
         fields: {
-          operatorId: {label: 'ID'},
+          loginId: {label: 'ID'},
           operatorName: {label: '이름', 'class': 'text-left'},
           companyName: {label: '회사명', 'class': 'text-left'},
           deptName: {label: '부서', 'class': 'text-left'},

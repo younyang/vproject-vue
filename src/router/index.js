@@ -407,6 +407,12 @@ export default new Router({
                   path: 'approval',
                   name: 'Approval 관리',
                   component: lazyLoading('setting/operators/Approval')
+                },
+                {
+                  path: 'approval/:id',
+                  name: 'Approval 상세',
+                  props: true,
+                  component: lazyLoading('setting/operators/ApprovalDetail')
                 }
               ]
             }
