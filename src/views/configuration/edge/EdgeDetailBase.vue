@@ -105,12 +105,11 @@
           </b-button>
         </b-form-fieldset>
 
-        <!-- Domain -->
+        <!-- Domain
         <b-form-fieldset
           label="Domain"
           :horizontal="true">
 
-          <!-- domain View list -->
           <div
             v-if="serviceDomainList.length"
             class="form-in-view mt-2">
@@ -125,8 +124,7 @@
             </b-form-fieldset>
           </div>
         </b-form-fieldset>
-
-        <!-- 사용여부 -->
+        사용여부
         <b-form-fieldset
           label="사용여부"
           description="※ 미사용 선택 시, DNS(GTM) 설정 정보가 삭제됩니다."
@@ -146,7 +144,7 @@
           >{{ items.edgeUseYn ? '사용' : '미사용' }}
           </span>
         </b-form-fieldset>
-
+        -->
         <!-- 변경이력 -->
         <b-form-fieldset
           v-if="isEdit"
@@ -219,7 +217,7 @@
           </b-form-fieldset>
         </div>
 
-        <!-- 배포상태
+        <!-- 배포상태-->
         <b-form-fieldset
           label="배포상태"
           :horizontal="true">
@@ -232,7 +230,7 @@
           >
           <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
         </b-form-fieldset>
-        -->
+
       </b-form>
     </b-collapse>
 
@@ -449,8 +447,7 @@
       },
 
       isEditableServiceType (){
-        return !this.isEdit && this.items.edgeRelayName !== 'Relay' &&
-          !this.items.serviceTypeCode.find(code => code === 'SERVICE_TYPE_0103');
+        return !this.isEdit && this.items.edgeRelayName !== 'Relay';
       },
 
       // validate
@@ -488,10 +485,7 @@
       const fetchCodeService = (res) => {
         this.isLoad.serviceTypeCode = false;
         this.code.serviceTypeCodeAll = res.data.items;
-        this.code.serviceTypeCode = res.data.items.filter(({code}) => {
-          const number = code.split('_')[2];
-          return number.length === 4 && code !== 'SERVICE_TYPE_0103';
-        });
+        this.code.serviceTypeCode = res.data.items;
         return this.$https.get('/pops');
       };
       const fetchPoP = (res) => {

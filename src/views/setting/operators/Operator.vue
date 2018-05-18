@@ -434,7 +434,7 @@
       excelDownload(){
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
-        return window.location.href = '/api/excel/apps/download?q=' + q;
+        return window.location.href = '/api/setting/management/operators/excel/download?q=' + q;
       },
     }
   }

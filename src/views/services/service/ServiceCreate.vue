@@ -89,7 +89,7 @@
           }"
         >
           <template slot="serviceTypeCode" slot-scope="row">
-            {{ row.value.codeValChar1 }}
+            {{ row.value.codeName }}
           </template>
 
           <template slot="domainProtocolCode" slot-scope="row">
@@ -105,7 +105,7 @@
               placeholder="://"
             ></multiselect>
             <span class="font-text-alone">
-              <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.vessels.com
+              <strong class="text-primary">{{ row.item.serviceTypeCode.codeName | lowercase }}.{{ items.serviceName }}</strong>.ecdn.com
             </span>
           </template>
 
@@ -342,10 +342,7 @@
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
           this.code.serviceTypeCodeAll = res.data.items;
-          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
-            const codeSplit = code.split('_')[2];
-            return codeSplit.length === 4;
-          });
+          this.code.serviceTypeCode = res.data.items;
         });
       // Domain Protocol Code
       this.$https.get('/system/commonCode', {
@@ -371,10 +368,8 @@
           ...this.items,
           serviceDomainList: this.items.serviceDomainList.length ?
             this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
-              let code = serviceTypeCode.code;
-              let codeSplit = serviceTypeCode.code.split('_')[2];
               return {
-                serviceTypeCode: codeSplit.length === 4 ? code.slice(0,code.length-2) : code,
+                serviceTypeCode: serviceTypeCode.code,
                 domainProtocolCode: domainProtocolCode.code,
                 domainHashingTypeCode: domainHashingTypeCode.code
               }
@@ -391,7 +386,6 @@
             .catch((error) => {
               console.log(error);
             });
-
         }
       },
 
@@ -426,7 +420,9 @@
         if (this.items.sslCertUseYn){
           validateItems = {...validateItems, sslCert, sslCertKey, sslCertExpireDate };
         }
-        const validate = (this.$valid.all(validateItems) && this.serviceNameExists === 'success');
+
+        const validate = (this.$valid.all(validateItems) && this.serviceNameExists === 'success' &&
+                            this.items.serviceTypeCode.length > 0);
 
         this.inValidForm = !validate;
         return validate;
@@ -465,9 +461,7 @@
 
       getServiceDomain (item){
         const codeSplit = item.code.split('_')[2];
-        return codeSplit.length === 4 ?
-          this.code.serviceTypeCodeAll.find(({ code }) => item.code.slice(0, item.code.length - 2) === code)
-          : code;
+        return this.code.serviceTypeCodeAll.find(({ code }) => item.code.slice(0, item.code.length) === code);
       }
     }
   }

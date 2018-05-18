@@ -63,7 +63,7 @@
           ></multiselect>
         </b-form-fieldset>
       </div>
-
+      <!--
       <div class="form-row">
         <b-form-fieldset
           label="사용여부"
@@ -77,7 +77,7 @@
           ></multiselect>
         </b-form-fieldset>
 
-        <!--
+
         <b-form-fieldset
           label="배포상태"
           class="label-lg"
@@ -93,8 +93,8 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
-        -->
-      </div>
+
+      </div>-->
 
       <div class="form-row">
         <b-form-fieldset
@@ -211,11 +211,11 @@
           hostName: {label: 'Host Name', 'class': 'text-left'},
           edgeRelayName: {label: '구분'},
           serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
-          edgeDomainName: {label: 'Domain'},
+          //edgeDomainName: {label: 'Domain'},
           popName: {label: 'PoP'},
           createDateTime: {label: '등록일시'},
-          modifyDateTime: {label: '수정일시'},
-          edgeUseYn: {label: '사용여부'}
+          modifyDateTime: {label: '수정일시'}//,
+          //edgeUseYn: {label: '사용여부'}
         },
         items: [],
         pageInfo: {

@@ -90,7 +90,7 @@
                 placeholder="://"
               ></multiselect>
               <span class="font-text-alone">
-                <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.vessels.com
+                <strong class="text-primary">{{ row.item.serviceTypeCode.codeValChar1 | lowercase }}.{{ items.serviceName }}</strong>.ecdn.com
               </span>
             </template>
 
@@ -118,7 +118,7 @@
               :key="index"
               :horizontal="true">
               <span class="font-text-alone">
-                {{ obj.domainProtocolName }}<strong class="text-primary">{{ obj.serviceTypeName | lowercase }}.{{ items.serviceName }}</strong>.vessels.com
+                {{ obj.domainProtocolName }}<strong class="text-primary">{{ obj.serviceTypeName | lowercase }}.{{ items.serviceName }}</strong>.ecdn.com
               </span>
             </b-form-fieldset>
           </div>
@@ -638,10 +638,7 @@
       const fetchCodeService = (res) => {
         this.isLoad.serviceTypeCode = false;
         this.code.serviceTypeCodeAll = res.data.items;
-        this.code.serviceTypeCode = res.data.items.filter(({code}) => {
-          const number = code.split('_')[2];
-          return number.length === 4;
-        });
+        this.code.serviceTypeCode = res.data.items;
         return this.$https.get('/system/commonCode', { q: { groupCode: 'DOMAIN_PROTOCOL' } });
       };
 
@@ -693,10 +690,8 @@
           ...this.items,
           serviceDomainList: this.items.serviceDomainList.length ?
             this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
-              let code = serviceTypeCode.code;
-              let codeSplit = serviceTypeCode.code.split('_')[2];
               return {
-                serviceTypeCode: codeSplit.length === 4 ? code.slice(0,code.length-2) : code,
+                serviceTypeCode: serviceTypeCode.code,
                 domainProtocolCode: domainProtocolCode.code,
                 domainHashingTypeCode: domainHashingTypeCode.code
               }

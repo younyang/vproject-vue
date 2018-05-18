@@ -77,7 +77,7 @@
         ></multiselect>
       </b-form-fieldset>
 
-      <!-- Domain -->
+      <!-- Domain
       <b-form-fieldset
         label="Domain"
         :invalid-feedback="feedback.domain"
@@ -89,7 +89,7 @@
           :class="{'invalid': items.edgeDomainName === null }"
         ><strong>{{ items.edgeDomainName }}</strong></small>
 
-        <!-- domain View list -->
+        domain View list
         <div
           v-if="serviceDomainList.length"
           class="form-in-view mt-2">
@@ -103,9 +103,9 @@
               </span>
           </b-form-fieldset>
         </div>
-      </b-form-fieldset>
+      </b-form-fieldset>-->
 
-      <!-- 사용여부 -->
+      <!-- 사용여부
       <b-form-fieldset
         label="사용여부"
         description="※ 미사용 선택 시, DNS(GTM) 설정 정보가 삭제됩니다."
@@ -117,7 +117,7 @@
           off="미사용"
           v-model="items.edgeUseYn"
         ></c-switch>
-      </b-form-fieldset>
+      </b-form-fieldset>-->
     </b-form>
 
     <div class="page-btn">
@@ -140,7 +140,7 @@
         items: {
           edgeId : null,
           popId : null,
-          edgeDomainName : null,
+          //edgeDomainName : null,
           edgeRelayYn : false,
           edgeUseYn : true,
           serviceTypeCode: []
@@ -179,11 +179,11 @@
             : [];
         }
       },
-
+      /*
       serviceDomainList () {
         const serviceDomainList = this.serviceTypeCode.map(({ codeValChar1 }) => codeValChar1);
         return [...new Set(serviceDomainList)];
-      },
+      },*/
 
       // validation
       valid (){
@@ -221,10 +221,7 @@
         })
         .then((res) => {
           this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
-            const codeSplit = code.split('_')[2];
-            return codeSplit.length === 4;
-          });
+          this.code.serviceTypeCode = res.data.items;
         });
 
       // PoP List
@@ -238,13 +235,14 @@
     methods: {
       onSubmit (){
         this.items.edgeRelayYn = (this.items.edgeRelayName === 'Relay');
-        const { edgeId, popId, edgeDomainName, edgeRelayYn, edgeUseYn, serviceTypeCode } = this.items;
-        const validate = this.$valid.all({ popId, edgeDomainName, serviceTypeCode });
+        this.items.edgeUseYn = true;
+        const { edgeId, popId, edgeRelayYn, edgeUseYn, serviceTypeCode } = this.items;
+        const validate = this.$valid.all({ popId, serviceTypeCode });
         this.inValidForm = !validate;
 
         // POST
         this.$https.post('/edges', {
-            edgeId, popId, edgeDomainName, edgeRelayYn, edgeUseYn, serviceTypeCode
+            edgeId, popId, edgeRelayYn, edgeUseYn, serviceTypeCode
           })
           .then(() => {
             this.$router.push({

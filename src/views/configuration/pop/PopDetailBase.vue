@@ -308,7 +308,7 @@
     </div>
 
     <div class="page-btn" v-else>
-      <span v-if="!isProcessComplete">
+      <span v-if="isProcessComplete">
         <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
         <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
         <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
@@ -475,9 +475,9 @@
         return this.items.serviceNames !== null ? this.items.serviceNames.split(',') : []
       },
       isProcessComplete (){
-        return (this.items.processStateCode !== null &&
+        return (this.items.processStateCode == null || (
                 this.items.processStateCode !== '' &&
-                this.items.processStateCode === 'PROCESS_STATE_02')
+                this.items.processStateCode === 'PROCESS_STATE_02'))
       },
 
       // validation
@@ -545,7 +545,10 @@
       },
 
       onSubmit (){
-        const validate = this.$valid.all(this.items);
+
+        const { popCtprvnCode, popSigCode, qualitySolutionTeamCode, dataCenterCode, modifyHistReason } = this.items;
+        const submitItems = { popCtprvnCode, popSigCode, qualitySolutionTeamCode, dataCenterCode, modifyHistReason };
+        const validate = this.$valid.all(submitItems);
         this.inValidForm = !validate;
 
         if (validate){

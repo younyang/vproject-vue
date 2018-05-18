@@ -115,13 +115,6 @@
       </div>
     </b-form>
 
-
-    <section class="board-btn">
-      <b-button type="button" variant="primary" @click="excelDownload">
-        엑셀 다운로드
-      </b-button>
-    </section>
-
     <section class="board">
       <b-table
         hover
