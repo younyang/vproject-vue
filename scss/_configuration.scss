@@ -89,15 +89,15 @@ $error-color: #f0534c;
 .monitorWrap {
   > .monitor {
     float: left;
-    width: calc(20% + 1px);
-    height: 135px;
+    width: calc(25% + 1px);
+    height: 180px;
     border: 1px solid $line-color;
     margin: -1px 0 0 -1px;
   }
 
   .thumb {
     position: relative;
-    height: 100px;
+    height: 150px;
 
     .fa {
       position: absolute;

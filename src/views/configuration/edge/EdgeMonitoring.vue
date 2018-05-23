@@ -29,13 +29,40 @@
           <b-button type="reset" variant="outline-secondary" @click="onReset" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
           <b-button type="button" variant="primary" @click="fetchList" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
         </div>
-
+        <!--
         <b-table
           show-empty
           :items="datas"
           :fields="fields"
         >
         </b-table>
+      -->
+        <table class="table table-striped table-hover">
+      		<thead>
+      			<tr>
+      				<th>
+      					<label class="form-checkbox">
+          <input type="checkbox" v-model="selectAll" @click="select">
+          <i class="form-icon"></i>
+        </label>
+      				</th>
+      				<th>Edge</th>
+      				<th>IP</th>
+      			</tr>
+      		</thead>
+      		<tbody>
+      			<tr v-for="i in datas">
+      				<td>
+      					<label class="form-checkbox">
+          					<input type="checkbox" :value="i.edgeId" v-model="selected">
+      						<i class="form-icon"></i>
+        					</label>
+      				</td>
+      				<td>{{i.edgeId}}</td>
+      				<td>{{i.ip}}</td>
+      			</tr>
+      		</tbody>
+      	</table>
 
         <div class="page-btn">
           <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
@@ -45,11 +72,13 @@
       <!-- Thumnail -->
       <div class="col-9">
         <div class="monitorWrap">
-          <div class="monitor" v-for="val in [0,1,2,3,4,5,6,7,8,9]">
+          <div class="monitor" v-for="val in this.items.edgeList">
             <div class="thumb">
-              <i v-if="val%2 === 0" class="fa fa-exclamation-triangle"></i>
+              <video class="video-js" autoplay controls preload="auto" data-setup="{}">
+                <source :src="'http://'+val.ip+'/demo/clear/tos_360_v.mp4'" type='video/mp4'>
+              </video>
             </div>
-            <span class="title">Edge-0{{ val }}</span>
+            <span class="title">{{ val.ip }}/{{ val.hostName }}</span>
           </div>
         </div>
       </div>
@@ -67,9 +96,12 @@
           ip: {label: 'IP', 'class': 'text-left'},
         },
         datas: [],
+        selected: [],
+		    selectAll: false,
         items: {
           popId : null,
-          edgeCount : 0
+          edgeCount : 0,
+          edgeList : []
         },
         queryParams: {},
         searchItem: {
@@ -107,7 +139,19 @@
 
     methods: {
       onSubmit (){
-
+        this.items.edgeList = [];
+        if(this.selected.length > 0){
+          const edgeIds = this.selected;
+          this.$https.put(`/edges/monitoring`, { edgeIds })
+            .then((res) => {
+              this.items.edgeList = res.data.items;
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+        //console.log(this.selected.length);
+        //console.log(this.selected);
       },
 
       onReset (){
@@ -147,7 +191,16 @@
             this.datas = res.data.items;
             //console.log(res.data.items);
           });
-      }
+      },
+
+      select() {
+  			this.selected = [];
+  			if (!this.selectAll) {
+  				for (let i in this.datas) {
+  					this.selected.push(this.datas[i].edgeId);
+  				}
+  			}
+  		}
 
     }
   }
