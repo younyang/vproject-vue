@@ -166,5 +166,25 @@ export default {
         }*/,
       ]
     }
+    ,
+    {
+      name: 'System',
+      url: '/system',
+      icon: 'icon-share',
+      children: [
+        /*{
+          name: 'CommonCode',
+          url: '/system/commonCode'
+        },*/
+        {
+          name: 'Scheduler',
+          url: '/system/scheduler'
+        },
+        {
+          name: 'Scheduler-Result',
+          url: '/system/schedulerResult'
+        }
+      ]
+    }
   ]
 }

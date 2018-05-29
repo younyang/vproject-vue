@@ -467,6 +467,45 @@ export default new Router({
               component: lazyLoading('apis/adaptor/Adaptor')
             }
           ]
+        },
+        {
+          path: 'system',
+          redirect: '/system/scheduler',
+          name: 'System',
+          component: {
+            render (c) {
+              return c('router-view')
+            }
+          },
+          children: [
+            {
+              path: 'scheduler',
+              name: 'Scheduler 관리',
+              component: lazyLoading('system/scheduler/Scheduler')
+            },
+            {
+              path: 'scheduler/create',
+              name: 'Scheduler 등록',
+              component: lazyLoading('system/scheduler/SchedulerCreate')
+            },
+            {
+              path: 'scheduler/:id',
+              name: 'Scheduler 상세',
+              props: true,
+              component: lazyLoading('system/scheduler/SchedulerDetail')
+            },
+            {
+              path: 'schedulerResult',
+              name: 'Scheduler-Result 목록',
+              component: lazyLoading('system/schedulerResult/SchedulerResult')
+            },
+            {
+              path: 'schedulerResult/:id',
+              name: 'Scheduler-Result 상세',
+              props: true,
+              component: lazyLoading('system/schedulerResult/SchedulerResultDetail')
+            }
+          ]
         }
       ]
     },
