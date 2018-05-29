@@ -422,7 +422,7 @@
       excelDownload(){
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
-        return window.location.href = '/api/excel/services/download?q=' + q;
+        return window.location.href = '/api/excel/apis/download?q=' + q;
       },
     }
   }
