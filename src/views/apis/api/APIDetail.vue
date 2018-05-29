@@ -1,8 +1,12 @@
 <template>
   <div class="animated fadeIn">
-    <div>
-      EDGE > Edge 목록 조회 CREATED
-    </div>
+    <content-header
+      :apiService="items.serviceCodeName"
+      :apiName="items.apiName"
+      :apiStatus="items.apiStateCodeName"
+      :name="name">
+    </content-header>
+
     <div class="collapse-title">
       <b-button class="btn-collapse" v-b-toggle.formDefault>
         <i class="fa"></i>
@@ -11,7 +15,7 @@
     </div>
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
-        <!-- Service -->
+        <!-- Service 선택 -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.select"
           :horizontal="true">
@@ -36,14 +40,14 @@
             plaintext
           ></b-form-input>
         </b-form-fieldset>
+
         <!-- API Name -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            API명<i class="require" v-if="isEdit">*</i>
+            API 명<i class="require" v-if="isEdit">*</i>
           </template>
-
           <b-form-input
             v-model="items.apiName"
             type="text"
@@ -52,6 +56,7 @@
             required
           ></b-form-input>
         </b-form-fieldset>
+
         <div class="form-row">
           <!-- HTTP Method -->
           <b-form-fieldset
@@ -66,19 +71,25 @@
               :showLabels="false"
               :options="code.httpMethodCode"
               :loading="isLoad.httpMethodCode"
-              :class="{'invalid': !valid.httpMethodCode}"
+              :class="{'invalid': !valid.httpMethodCode }"
               track-by="code"
               label="codeName"
+              style="width:156px"
+              @select="onSelectHttpMethod"
               placeholder="선택"
             ></multiselect>
+            <b-form-checkbox
+              class="ml-1"
+              v-if="items.httpMethodCode === 'HTTP_METHOD_03' && isEdit"
+              v-model="items.multipartYn"
+            >Multipart 사용</b-form-checkbox>
             <b-form-input
-              v-else
+              v-if="!isEdit"
               :value="items.httpMethodCodeName"
               type="text"
               plaintext
             ></b-form-input>
           </b-form-fieldset>
-
           <!-- Version -->
           <b-form-fieldset
             :invalid-feedback="$valid.msg.require"
@@ -86,16 +97,17 @@
             <template slot="label">
               Version<i class="require" v-if="isEdit">*</i>
             </template>
-
+            <span class="form-text-alone">v</span>
             <b-form-input
               v-model="items.apiVersion"
+              style="width: 80px;"
               type="text"
-              placeholder="Enter apiVersion"
               :plaintext="!isEdit"
               required
             ></b-form-input>
           </b-form-fieldset>
         </div>
+
         <div class="form-row">
           <!-- Adaptor -->
           <b-form-fieldset
@@ -110,9 +122,10 @@
               :showLabels="false"
               :options="code.adaptorCode"
               :loading="isLoad.adaptorCode"
-              :class="{'invalid': !valid.adaptorCode}"
+              :class="{'invalid': !valid.adaptorCode }"
               track-by="code"
               label="codeName"
+              style="width:156px"
               placeholder="선택"
             ></multiselect>
             <b-form-input
@@ -128,18 +141,20 @@
             :invalid-feedback="$valid.msg.select"
             :horizontal="true">
             <template slot="label">
-              API 구분<i v-if="isEdit" class="require">*</i>
+              API 구분
             </template>
             <multiselect
               v-if="isEdit"
               v-model="apiSectionCode"
+              class="noEmpty"
+              :allowEmpty="false"
               :showLabels="false"
+              :searchable="false"
               :options="code.apiSectionCode"
               :loading="isLoad.apiSectionCode"
-              :class="{'invalid': !valid.apiSectionCode}"
               track-by="code"
               label="codeName"
-              placeholder="선택"
+              style="width:156px"
             ></multiselect>
             <b-form-input
               v-else
@@ -149,22 +164,59 @@
             ></b-form-input>
           </b-form-fieldset>
         </div>
+
         <!-- Northbound URL -->
         <b-form-fieldset
+          class="inline"
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
             Northbound URL<i class="require" v-if="isEdit">*</i>
           </template>
 
+          <span v-if="isEdit">
+            <multiselect
+              v-model="protocolCode"
+              label="codeName"
+              class="protocol noEmpty"
+              :allowEmpty="false"
+              :showLabels="false"
+              :searchable="false"
+              :options="code.protocolCode"
+              :loading="isLoad.protocolCode"
+              placeholder="://"
+            ></multiselect>
+            <b-form-input
+              v-model="nbHost"
+              type="text"
+              disabled
+            ></b-form-input>
+            /v
+            <b-form-input
+              v-model="items.apiVersion"
+              type="text"
+              style="width: 80px"
+              disabled
+            ></b-form-input>
+            /
+            <b-form-input
+              v-model="nbParams"
+              type="text"
+              @input="onInputParams"
+              required
+            ></b-form-input>
+          </span>
+
           <b-form-input
+            v-else
             v-model="items.nbBaseUrl"
             type="text"
             placeholder=""
-            :plaintext="!isEdit"
+            plaintext
             required
           ></b-form-input>
         </b-form-fieldset>
+
         <!-- Southbound URL -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
@@ -344,14 +396,81 @@
         name: 'API 상세',
         originItems: {},
         items: {
-          modifyHistReason: ''
+          apiId: 10000034,
+          apiName: '가상 서버 삭제',
+          serviceCode: 'API_SERVICE_11',
+          serviceCodeName: 'GTM',
+          serviceId: 10011,
+          adaptorCode: 'API_ADAPTOR_01',
+          adaptorCodeName: 'gtmAdaptor',
+          adaptorId: 11,
+          nbBaseUrl: 'http://1.255.87.65/gtm/v1.0/mgmt/tm/gtm/server/common/virtual-servers/{virtualServerName}',
+          apiVersion: '1.0',
+          sbBaseUrl: 'https://#deployIp#/mgmt/tm/gtm/server/~Common~#gtmServerName#/virtual-servers/{virtualServerName}',
+          httpMethodCode: 'HTTP_METHOD_04',
+          httpMethodCodeName: 'DELETE',
+          apiStateCode: 'API_STATE_03',
+          apiStateCodeName: 'Published',
+          apiSectionCode: 'API_SECTION_01',
+          apiSectionCodeName: 'Public',
+          apiUseYn: true,
+          histBeginDateTime: null,
+          apiRequestInfo: {
+            contentTypeList: ['CONTENT_TYPE_01'],
+            headers: [{
+              name: 'x-vessel-appKey',
+              dataTypeCode: 'DATA_TYPE_01',
+              mandatoryYn: true,
+              checked: false
+            }],
+            pathParameters: [{
+              name: 'virtualServerName',
+              dataTypeCode: 'DATA_TYPE_01',
+              mandatoryYn: true,
+              checked: false
+            }],
+            queryStringParameters: [{
+              name: 'deployIp',
+              dataTypeCode: 'DATA_TYPE_01',
+              mandatoryYn: true,
+              checked: false
+            }, {
+              name: 'gtmServerName',
+              dataTypeCode: 'DATA_TYPE_01',
+              mandatoryYn: true,
+              checked: false
+            }],
+            payloads: null,
+            contentType: null
+          },
+          apiResponseInfo: {
+            contentTypeList: ['ACCEPT_TYPE_01'],
+            headers: [],
+            sampleCodes: [{
+                contentTypeCode: 'ACCEPT_TYPE_01',
+                sampleCode: ''
+            }]
+          }
         },
         code: {
           serviceCode: [],
-          adaptorCode: [],
           httpMethodCode: [],
-          apiStateCode: [],
-          apiSectionCode: []
+          adaptorCode: [],
+          apiSectionCode : [],
+          protocolCode: [],
+          contentTypeList: [],
+          acceptCode: [],
+          dataTypeCode: []
+        },
+        isLoad: {
+          serviceCode: true,
+          httpMethodCode: true,
+          adaptorCode: true,
+          apiSectionCode : true,
+          protocolCode : true,
+          contentTypeList : true,
+          acceptCode: true,
+          dataTypeCode: true
         },
         history: {
           fields: {
@@ -367,16 +486,8 @@
             totalCount: 1
           }
         },
-        isLoad: {
-          serviceCode: false,
-          adaptorCode: false,
-          httpMethodCode: false,
-          apiStateCode: false,
-          apiSectionCode: false
-        },
         isEdit: false,
         isModalHistory: false,
-
         modal: {
           open: false,
           type: 'done',
@@ -397,33 +508,87 @@
           this.items.serviceCode = newValue !== null ? newValue.code : null;
         }
       },
-      adaptorCode: {
+      httpMethodCode: {
         get () {
-          return this.code.adaptorCode.find(obj => obj.code === this.searchItem.adaptorCode) || null;
+          return this.code.httpMethodCode.find(obj => obj.code === this.items.httpMethodCode) || null;
         },
         set (newValue) {
-          this.searchItem.adaptorCode = newValue !== null ? newValue.code : null;
+          this.items.httpMethodCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      adaptorCode: {
+        get () {
+          return this.code.adaptorCode.find(obj => obj.code === this.items.adaptorCode) || null;
+        },
+        set (newValue) {
+          this.items.adaptorCode = newValue !== null ? newValue.code : null;
         }
       },
       apiSectionCode: {
         get () {
-          return this.code.apiSectionCode.find(obj => obj.code === this.searchItem.apiSectionCode) || null;
+          return this.code.apiSectionCode.find(obj => obj.code === this.items.apiSectionCode) || null;
         },
         set (newValue) {
-          this.searchItem.apiSectionCode = newValue !== null ? newValue.code : null;
+          this.items.apiSectionCode = newValue !== null ? newValue.code : null;
         }
       },
-      apiStateCode: {
+      protocolCode: {
         get () {
-          return this.code.apiStateCode.find(obj => obj.code === this.searchItem.apiStateCode) || null;
+          return this.code.protocolCode.find(obj => obj.code === this.items.protocolCode) || null;
         },
         set (newValue) {
-          this.searchItem.apiStateCode = newValue !== null ? newValue.code : null;
+          this.items.protocolCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      contentTypeList: {
+        get () {
+          return this.items.apiRequestInfo.contentTypeList.length > 0
+            ? this.items.apiRequestInfo.contentTypeList.map(val => this.code.contentTypeList.find(obj => obj.code === val))
+            : [];
+        },
+        set (newValue) {
+          this.items.apiRequestInfo.contentTypeList = newValue.length > 0
+            ? newValue.map(obj => obj.code)
+            : [];
+        }
+      },
+      acceptCode: {
+        get () {
+          return this.items.apiResponseInfo.contentTypeList.length > 0
+            ? this.items.apiResponseInfo.contentTypeList.map(val => this.code.acceptCode.find(obj => obj.code === val))
+            : [];
+        },
+        set (newValue) {
+          this.items.apiResponseInfo.contentTypeList = newValue.length > 0
+            ? newValue.map(obj => obj.code)
+            : [];
+        }
+      },
+
+      nbHost: {
+        get () {
+          const serviceCode = this.code.serviceCode.find(({ code }) => code === this.items.serviceCode);
+          const serviceName = (serviceCode) ? serviceCode.codeValChar1 : '';
+          return `apis.vessel.com/${serviceName}`
+        },
+        set (newValue) {
+          this.items.nbHost = newValue;
+        }
+      },
+
+      // validation
+      valid (){
+        return {
+          serviceCode: this.items.serviceCode !== null,
+          httpMethodCode: this.items.httpMethodCode !== null,
+          adaptorCode: this.items.adaptorCode !== null,
+          //apiSectionCode: this.items.apiSectionCode !== null,
+          contentTypeList: this.items.apiRequestInfo.contentTypeList.length
         }
       }
     },
 
-    created (){
+    mounted (){
       // History
       const historyId = this.$route.query.histories;
       this.detailUrl = historyId !== undefined ? `/apiManagement/apis/${this.id}/histories/${historyId}` : `/apiManagement/apis/${this.id}`;
@@ -432,46 +597,88 @@
         document.querySelector('body.app').classList.add('history-mode');
       }
 
-      const fetchCode = () => this.$https.get('/system/commonCode', {q: { groupCode: 'API_SERVICE' }});
-
-      const fetchCodeService = (res) => {
+      // Service Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'API_SERVICE' }
+      })
+      .then((res) => {
         this.isLoad.serviceCode = false;
         this.code.serviceCode = res.data.items;
-        return this.$https.get('/system/commonCode', {q: { groupCode: 'HTTP_METHOD' }});
-      }
+      });
 
-      const fetchCodeHttpMethod = (res) => {
+      // HTTP Method Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'HTTP_METHOD' }
+      })
+      .then((res) => {
         this.isLoad.httpMethodCode = false;
         this.code.httpMethodCode = res.data.items;
-        return this.$https.get('/system/commonCode', {q: { groupCode: 'API_ADAPTOR' }});
-      }
+      });
 
-      const fetchCodeAdaptor = (res) => {
+      // Adaptor Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'API_ADAPTOR' }
+      })
+      .then((res) => {
         this.isLoad.adaptorCode = false;
         this.code.adaptorCode = res.data.items;
-        return this.$https.get('/system/commonCode', {q: { groupCode: 'API_SECTION' }})
-      }
+      });
 
-      const fetchCodeApiSection = (res) => {
+      // API Section Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'API_SECTION' }
+      })
+      .then((res) => {
         this.isLoad.apiSectionCode = false;
         this.code.apiSectionCode = res.data.items;
-        return this.$https.get(this.detailUrl);
-      }
+      });
 
-      fetchCode()
-        .then(fetchCodeService)
-        .then(fetchCodeHttpMethod)
-        .then(fetchCodeAdaptor)
-        .then(fetchCodeApiSection)
-        .then(this.fetchDetail);
+      // Domain Protocol Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'DOMAIN_PROTOCOL' }
+      })
+      .then((res) => {
+        this.isLoad.protocolCode = false;
+        this.code.protocolCode = res.data.items;
+      });
+
+      // Request Content-Type Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'CONTENT_TYPE' }
+      })
+      .then((res) => {
+        this.isLoad.contentTypeList = false;
+        this.code.contentTypeList = res.data.items;
+      });
+
+      // Response Accept Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'ACCEPT_TYPE' }
+      })
+      .then((res) => {
+        this.isLoad.acceptCode = false;
+        this.code.acceptCode = res.data.items;
+      });
+
+      // Request Data Type Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'DATA_TYPE' }
+      })
+      .then((res) => {
+        this.isLoad.dataTypeCode = false;
+        this.code.dataTypeCode = res.data.items;
+      });
+
+      // Detail Data
+      this.$https.get(this.detailUrl)
+        .then(res => {
+          this.items = res.data.items;
+          this.setUrlParams();
+          this.originItems = JSON.parse(JSON.stringify(this.items));
+        });
     },
 
     methods: {
-      fetchDetail (res){
-        this.items = res.data.items;
-        this.originItems = JSON.parse(JSON.stringify(this.items));
-      },
-
       onEdit (){
         this.isEdit = true;
       },
@@ -479,6 +686,7 @@
       onView (){
         this.isEdit = false;
         this.items = JSON.parse(JSON.stringify(this.originItems));
+        this.setUrlParams();
       },
 
       onSubmit (){
@@ -514,6 +722,11 @@
             this.history.items = res.data.items;
           });
       },
+
+      setUrlParams (){
+        const { nbBaseUrl, nbHost, apiVersion } = this.items;
+        this.nbParams = nbBaseUrl
+      }
 
     }
   }

@@ -888,6 +888,16 @@ section.board {
 }
 
 
+/**
+ * AG Grid
+ */
+.ag-theme-balham {
+  width: 100%;
+  height: 345px;
+  box-sizing: border-box;
+}
+
+
 
 /**
  * Table
@@ -1220,6 +1230,14 @@ section.board {
     margin: 0;
     border-bottom: 1px solid $line-color;
   }
+  .form-group.inline {
+    .form-control,
+    .multiselect {
+      vertical-align: middle;
+    }
+  }
+
+
   .col-form-legend,
   .col-form-label {
     padding-top: calc(0.8rem - 1px * 2);
@@ -1261,6 +1279,15 @@ section.board {
       vertical-align: middle;
     }
   }
+
+  .invalid-codes {
+    border: 3px solid #f86c6b;
+  }
+
+  .invalid-codes ~ .invalid-feedback {
+    display: block;
+  }
+
 
   &.was-validated {
     .form-control:valid:not(.is-invalid) ~ .invalid-feedback,

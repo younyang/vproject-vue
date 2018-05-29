@@ -22,6 +22,9 @@ export default {
 
   @import "~highcharts/css/highcharts";
 
+  @import "~ag-grid/dist/styles/ag-grid.css";
+  @import "~ag-grid/dist/styles/ag-theme-balham.css";
+
 
   // Import Main styles for this application
   @import "./scss/style";

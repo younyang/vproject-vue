@@ -39,7 +39,7 @@
         <b-form-fieldset
           label="Version"
           :horizontal="true">
-          <b-form-input type="text" style="width:70px" v-model="searchItem.apiVersion"></b-form-input>
+          <b-form-input type="text" style="width:130px" v-model="searchItem.apiVersion"></b-form-input>
         </b-form-fieldset>
 
         <b-form-fieldset
@@ -69,6 +69,7 @@
 
         <b-form-fieldset
           label="API 구분"
+          class="label-lg"
           :horizontal="true">
           <multiselect
             v-model="apiSectionCode"
@@ -101,6 +102,7 @@
 
         <b-form-fieldset
           label="사용여부"
+          class="label-lg"
           :horizontal="true">
           <multiselect
             v-model="searchItem.apiUseYn"
@@ -153,71 +155,42 @@
     </section>
 
     <section class="board">
-      <b-table
-        hover
-        show-empty
-        :items="items"
+      <ag-grid
         :fields="fields"
-        @row-clicked="details"
-      >
-        <template slot="serviceTypeName" slot-scope="row">
-          <span class="badge" v-for="val in row.value">
-            {{ val }}
-          </span>
-        </template>
-        <template slot="apiUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
-      </b-table>
-    </section>
-
-    <section class="board-article d-flex justify-content-between">
-      <b-form inline>
-        <multiselect
-          :value="pageInfo.size"
-          :allowEmpty="false"
-          :showLabels="false"
-          :searchable="false"
-          :options="pageOptions"
-          @input="onRowSelect"
-          class="inline sm"
-        ></multiselect>
-        <label class="ml-sm-2">Row Per Page</label>
-      </b-form>
-
-      <b-pagination
-        :value="pageInfo.page"
-        :total-rows="pageInfo.totalCount"
-        :per-page="pageInfo.size"
-        @input="onPagination"
-        class="mt-2"
-      ></b-pagination>
+        :items="items"
+        :onRowSelected="onRowSelected"
+      ></ag-grid>
     </section>
   </div>
 </template>
 
 <script>
-  import moment from 'moment'
+  import moment from 'moment';
+  import AgGrid from '@/components/Grid';
 
   export default {
     name: 'services',
     components: {
-      //  ListContent
+      AgGrid
     },
     data (){
       return {
-        fields: {
-          apiId: {label: 'ID'},
-          serviceCodeName: {label: '서비스명', 'class': 'text-left'},
-          apiName: {label: 'API명', 'class': 'text-left'},
-          nbBaseUrl: {label: 'Northbound URL', 'class': 'text-left'},
-          apiVersion: {label: 'Version'},
-          httpMethodCodeName: {label: 'Method'},
-          apiStateCodeName: {label: '상태'},
-          adaptorCodeName: {label: 'Adaptor'},
-          apiSectionCodeName: {label: 'API 구분'},
-          createDateTime: {label: '등록일시'},
-          modifyDateTime: {label: '수정일시'},
-          apiUseYn: {label: '사용여부'}
-        },
+        gridOptions: {},
+
+        fields: [
+          { headerName: 'ID', field: 'apiId' },
+          { headerName: '서비스명', field: 'serviceCodeName' },
+          { headerName: 'API명', field: 'apiName' },
+          { headerName: 'Northbound URL', field: 'nbBaseUrl' },
+          { headerName: 'Version', field: 'apiVersion' },
+          { headerName: 'Method', field: 'httpMethodCodeName' },
+          { headerName: '상태', field: 'apiStateCodeName' },
+          { headerName: 'Adaptor', field: 'adaptorCodeName' },
+          { headerName: 'API 구분', field: 'apiSectionCodeName' },
+          { headerName: '등록일시', field: 'createDateTime' },
+          { headerName: '수정일시', field: 'modifyDateTime' },
+          { headerName: '사용여부', field: 'apiUseYn' },
+        ],
         items: [],
         pageInfo: {
           page: 1,
@@ -331,6 +304,7 @@
     },
 
     created (){
+
       this.fetchList();
 
       this.$https.get('/system/commonCode', {q: { groupCode: 'API_SERVICE' }})
@@ -372,14 +346,15 @@
     },
 
     methods: {
-      details (item) {
+      onRowSelected (item){
         this.$router.push({ name: 'API 상세', params: { id: item.apiId }})
+
       },
 
       fetchList (params = {}){
         const defaultParams = {
-          page: this.pageInfo.page,
-          size: this.pageInfo.size,
+          //page: this.pageInfo.page,
+          //size: this.pageInfo.size,
           q: this.queryParams
         };
 
