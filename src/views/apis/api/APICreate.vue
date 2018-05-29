@@ -123,6 +123,7 @@
           :horizontal="true">
           <multiselect
             v-model="protocolCode"
+            track-by="code"
             label="codeName"
             class="protocol noEmpty"
             :allowEmpty="false"
@@ -165,7 +166,7 @@
           ></b-form-input>
         </b-form-fieldset>
 
-        <!-- Southbound URL(Test) -->
+        <!-- Southbound URL(Test)
         <b-form-fieldset
           label="Southbound URL(Test)"
           :horizontal="true">
@@ -174,6 +175,7 @@
             type="text"
           ></b-form-input>
         </b-form-fieldset>
+        -->
 
         <!-- 사용여부 -->
         <b-form-fieldset
@@ -765,9 +767,6 @@
           return pardeCodes;
         };
 
-
-
-
         const submitItems = {
           ...this.items,
           nbBaseUrl: `${protocolName}${nbHost}/v${apiVersion}/${this.nbParams}`,
@@ -784,7 +783,7 @@
           }: {
             contentTypeList: [],
             headers: [],
-            sampleCodes: []
+            sampleCodes: parseSampleCodes(apiResponseInfo.sampleCodes)
           }
         };
         const validate = this.validate(submitItems);
@@ -818,7 +817,6 @@
         this.items[type][item].splice(index, 1);
       },
 
-
       onInputParams (text){
         const match = text.match(/\{([^{}]+)\}/g);
         if (!match) {
@@ -848,11 +846,13 @@
           adaptorCode,
           apiVersion,
           apiSectionCode,
+          apiResponseInfoUseYn,
           nbBaseUrl,
           sbBaseUrl,
           apiRequestInfo,
         } = submitItems;
         const { contentTypeList, headers } = apiRequestInfo;
+        const isValidSampleCodes = !apiResponseInfoUseYn ? true : this.valid.sampleCodes;
 
         let validateItems = {
           apiName,
@@ -866,7 +866,7 @@
           contentTypeList,
           headers
         };
-        const validate = (this.$valid.all(validateItems) && this.items.apiRequestInfo.headers.length > 0 && this.valid.sampleCodes);
+        const validate = (this.$valid.all(validateItems) && this.items.apiRequestInfo.headers.length > 0 && isValidSampleCodes);
         this.inValidForm = !validate;
         return validate;
       }

@@ -97,13 +97,21 @@
             <template slot="label">
               Version<i class="require" v-if="isEdit">*</i>
             </template>
-            <span class="form-text-alone">v</span>
+            <span v-if="isEdit">
+               <span class="form-text-alone">v</span>
+              <b-form-input
+                v-model="items.apiVersion"
+                style="width: 80px;"
+                type="text"
+                required
+              ></b-form-input>
+            </span>
             <b-form-input
-              v-model="items.apiVersion"
+              v-else
+              :value="`v${items.apiVersion}`"
               style="width: 80px;"
               type="text"
-              :plaintext="!isEdit"
-              required
+              plaintext
             ></b-form-input>
           </b-form-fieldset>
         </div>
@@ -177,6 +185,7 @@
           <span v-if="isEdit">
             <multiselect
               v-model="protocolCode"
+              track-by="code"
               label="codeName"
               class="protocol noEmpty"
               :allowEmpty="false"
@@ -211,9 +220,7 @@
             v-else
             v-model="items.nbBaseUrl"
             type="text"
-            placeholder=""
             plaintext
-            required
           ></b-form-input>
         </b-form-fieldset>
 
@@ -228,14 +235,30 @@
           <b-form-input
             v-model="items.sbBaseUrl"
             type="text"
-            placeholder=""
             :plaintext="!isEdit"
             required
           ></b-form-input>
         </b-form-fieldset>
-        <!-- API State -->
-        <!-- API UseYn -->
 
+        <!-- 사용여부 -->
+        <b-form-fieldset
+          label="사용여부"
+          :horizontal="true">
+          <c-switch
+            v-if="isEdit"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
+            v-model="items.apiUseYn"
+          ></c-switch>
+          <b-badge
+            v-else
+            pill
+            :variant="items.apiUseYn ? 'success' : 'secondary'">
+            {{ items.apiUseYn ? '사용' : '미사용' }}
+          </b-badge>
+        </b-form-fieldset>
       </b-form>
     </b-collapse>
 
@@ -247,10 +270,226 @@
     </div>
     <b-collapse id="formRequest" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
-        <!-- Content-type -->
+        <!-- Content-Type -->
+        <b-form-fieldset
+          :invalid-feedback="$valid.msg.select"
+          :horizontal="true">
+          <template slot="label">
+            Content-Type<i class="require" v-if="isEdit">*</i>
+          </template>
+
+          <multiselect
+            v-if="isEdit"
+            v-model="contentTypeList"
+            class="multiple"
+            :class="{'invalid': !valid.contentTypeList }"
+            :multiple="true"
+            :showLabels="false"
+            :options="code.contentTypeList"
+            :loading="isLoad.contentTypeList"
+            track-by="code"
+            label="codeName"
+          ></multiselect>
+          <div v-if="!isEdit && contentTypeList.length" class="badge-list">
+            <span class="badge sm" v-for="item in contentTypeList">
+              {{ item.codeName }}
+            </span>
+          </div>
+        </b-form-fieldset>
+
         <!-- Header -->
+        <b-form-fieldset
+          :horizontal="true">
+          <template slot="label">
+            Header<i class="require" v-if="isEdit">*</i>
+          </template>
+
+          <b-table
+            class="sub"
+            show-empty
+            :items="items.apiRequestInfo.headers"
+            :fields="fields"
+          >
+            <template slot="name" slot-scope="row">
+              <b-form-input
+                v-if="isEdit"
+                v-model="row.item.name"
+                type="text"
+                required
+              ></b-form-input>
+              <span v-else class="form-text-alone"
+              >{{ row.item.name }}</span>
+              <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+            </template>
+            <template slot="dataTypeCode" slot-scope="row">
+              <multiselect
+                v-if="isEdit"
+                v-model="row.item.dataTypeCode"
+                label="codeName"
+                class="noEmpty"
+                :allowEmpty="false"
+                :showLabels="false"
+                :searchable="false"
+                :options="code.dataTypeCode"
+                :loading="isLoad.dataTypeCode"
+              ></multiselect>
+              <span class="form-text-alone"
+                v-if="!isEdit && row.item.dataTypeCode && typeof row.item.dataTypeCode === 'object'"
+              >{{ row.item.dataTypeCode.codeName }}</span>
+            </template>
+
+            <template slot="mandatoryYn" slot-scope="row">
+              <c-switch
+                v-if="isEdit"
+                type="text"
+                class="v-switch"
+                on="Y"
+                off="N"
+                v-model="row.item.mandatoryYn"
+              ></c-switch>
+              <b-badge
+                v-else
+                pill
+                :variant="row.item.mandatoryYn ? 'success' : 'secondary'">
+                {{ row.item.mandatoryYn ? 'Y' : 'N' }}
+              </b-badge>
+            </template>
+
+            <template slot="action" slot-scope="row" v-if="isEdit">
+              <span class="ico">
+                <button type="button" v-if="row.index === 0" @click="onAddRow('apiRequestInfo','headers')"><i class="fa fa-plus-circle"></i></button>
+                <button type="button" v-if="row.index > 0" @click="onDelRow('apiRequestInfo','headers', row.index)"><i class="fa fa-times-circle"></i></button>
+              </span>
+            </template>
+          </b-table>
+        </b-form-fieldset>
+
+
         <!-- Path Parameter -->
+        <b-form-fieldset
+          label="Path Parameter"
+          :horizontal="true">
+
+          <b-table
+            class="sub"
+            show-empty
+            :items="items.apiRequestInfo.pathParameters"
+            :fields="{
+              name: {label: 'Name', 'class': 'text-left', thStyle: { width: '500px'}},
+              dataTypeCode: {label: 'Type', thStyle: { width: '250px'}},
+              mandatoryYn: {label: 'Mandatory'}
+            }"
+          >
+            <template slot="name" slot-scope="row">
+              <b-form-input
+                v-if="isEdit"
+                v-model="row.item.name"
+                type="text"
+                disabled
+              ></b-form-input>
+              <span v-else class="form-text-alone"
+              >{{ row.item.name }}</span>
+            </template>
+            <template slot="dataTypeCode" slot-scope="row">
+              <multiselect
+                v-if="isEdit"
+                v-model="row.item.dataTypeCode"
+                label="codeName"
+                class="noEmpty"
+                :allowEmpty="false"
+                :showLabels="false"
+                :searchable="false"
+                :options="code.dataTypeCode"
+                :loading="isLoad.dataTypeCode"
+              ></multiselect>
+              <span class="form-text-alone"
+                    v-if="!isEdit && row.item.dataTypeCode && typeof row.item.dataTypeCode === 'object'"
+              >{{ row.item.dataTypeCode.codeName }}</span>
+            </template>
+
+            <template slot="mandatoryYn" slot-scope="row">
+              <c-switch
+                v-if="isEdit"
+                type="text"
+                class="v-switch"
+                on="Y"
+                off="N"
+                v-model="row.item.mandatoryYn"
+              ></c-switch>
+              <b-badge
+                v-else
+                pill
+                :variant="row.item.mandatoryYn ? 'success' : 'secondary'">
+                {{ row.item.mandatoryYn ? 'Y' : 'N' }}
+              </b-badge>
+            </template>
+          </b-table>
+        </b-form-fieldset>
+
         <!-- Querystring Parameter -->
+        <b-form-fieldset
+          label="QueryString<br>Parameter"
+          :horizontal="true">
+
+          <b-table
+            class="sub"
+            show-empty
+            :items="items.apiRequestInfo.queryStringParameters"
+            :fields="fields"
+          >
+            <template slot="name" slot-scope="row">
+              <b-form-input
+                v-if="isEdit"
+                v-model="row.item.name"
+                type="text"
+                required
+              ></b-form-input>
+              <span v-else class="form-text-alone"
+              >{{ row.item.name }}</span>
+              <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+            </template>
+            <template slot="dataTypeCode" slot-scope="row">
+              <multiselect
+                v-if="isEdit"
+                v-model="row.item.dataTypeCode"
+                label="codeName"
+                class="noEmpty"
+                :allowEmpty="false"
+                :showLabels="false"
+                :searchable="false"
+                :options="code.dataTypeCode"
+                :loading="isLoad.dataTypeCode"
+              ></multiselect>
+              <span class="form-text-alone"
+                    v-if="!isEdit && row.item.dataTypeCode && typeof row.item.dataTypeCode === 'object'"
+              >{{ row.item.dataTypeCode.codeName }}</span>
+            </template>
+
+            <template slot="mandatoryYn" slot-scope="row">
+              <c-switch
+                v-if="isEdit"
+                type="text"
+                class="v-switch"
+                on="Y"
+                off="N"
+                v-model="row.item.mandatoryYn"
+              ></c-switch>
+              <b-badge
+                v-else
+                pill
+                :variant="row.item.mandatoryYn ? 'success' : 'secondary'">
+                {{ row.item.mandatoryYn ? 'Y' : 'N' }}
+              </b-badge>
+            </template>
+
+            <template slot="action" slot-scope="row" v-if="isEdit">
+              <span class="ico">
+                <button type="button" v-if="row.index === 0" @click="onAddRow('apiRequestInfo','queryStringParameters')"><i class="fa fa-plus-circle"></i></button>
+                <button type="button" v-if="row.index > 0" @click="onDelRow('apiRequestInfo','queryStringParameters', row.index)"><i class="fa fa-times-circle"></i></button>
+              </span>
+            </template>
+          </b-table>
+        </b-form-fieldset>
       </b-form>
     </b-collapse>
 
@@ -261,12 +500,151 @@
       </b-button>
     </div>
     <b-collapse id="formResponse" visible>
-      <b-form class="formView" :validated="inValidForm" novalidate>
-        <!-- Accept -->
-        <!-- Header -->
-        <!-- Sample Code -->
+      <b-form class="formView">
+        <!-- 사용여부 -->
+        <b-form-fieldset
+          label="사용여부"
+          :horizontal="true">
+          <c-switch
+            v-if="isEdit"
+            type="text"
+            class="v-switch"
+            on="사용"
+            off="미사용"
+            v-model="items.apiResponseInfoUseYn"
+          ></c-switch>
+          <b-badge
+            v-else
+            pill
+            :variant="items.apiResponseInfoUseYn ? 'success' : 'secondary'">
+            {{ items.apiResponseInfoUseYn ? '사용' : '미사용' }}
+          </b-badge>
+        </b-form-fieldset>
+
+        <div v-if="items.apiResponseInfoUseYn">
+          <!-- Accept -->
+          <b-form-fieldset
+            label="Accept"
+            :horizontal="true">
+            <multiselect
+              v-if="isEdit"
+              v-model="acceptCode"
+              class="multiple"
+              :multiple="true"
+              :showLabels="false"
+              :options="code.acceptCode"
+              :loading="isLoad.acceptCode"
+              track-by="code"
+              label="codeName"
+            ></multiselect>
+            <div
+              v-if="!isEdit && acceptCode.length"
+              class="badge-list"
+            >
+              <span class="badge sm" v-for="item in acceptCode">
+                {{ item.codeName }}
+              </span>
+            </div>
+          </b-form-fieldset>
+
+          <!-- Headers -->
+          <b-form-fieldset
+            label="Header"
+            :horizontal="true">
+            <b-table
+              class="sub"
+              show-empty
+              :items="items.apiResponseInfo.headers"
+              :fields="fields"
+            >
+              <template slot="name" slot-scope="row">
+                <b-form-input
+                  v-if="isEdit"
+                  v-model="row.item.name"
+                  type="text"
+                  required
+                ></b-form-input>
+                <span v-else class="form-text-alone"
+                >{{ row.item.name }}</span>
+                <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+              </template>
+              <template slot="dataTypeCode" slot-scope="row">
+                <multiselect
+                  v-if="isEdit"
+                  v-model="row.item.dataTypeCode"
+                  label="codeName"
+                  class="noEmpty"
+                  :allowEmpty="false"
+                  :showLabels="false"
+                  :searchable="false"
+                  :options="code.dataTypeCode"
+                  :loading="isLoad.dataTypeCode"
+                ></multiselect>
+                <span class="form-text-alone"
+                      v-if="!isEdit && row.item.dataTypeCode && typeof row.item.dataTypeCode === 'object'"
+                >{{ row.item.dataTypeCode.codeName }}</span>
+              </template>
+
+              <template slot="mandatoryYn" slot-scope="row">
+                <c-switch
+                  v-if="isEdit"
+                  type="text"
+                  class="v-switch"
+                  on="Y"
+                  off="N"
+                  v-model="row.item.mandatoryYn"
+                ></c-switch>
+                <b-badge
+                  v-else
+                  pill
+                  :variant="row.item.mandatoryYn ? 'success' : 'secondary'">
+                  {{ row.item.mandatoryYn ? 'Y' : 'N' }}
+                </b-badge>
+              </template>
+
+              <template slot="action" slot-scope="row" v-if="isEdit">
+                <span class="ico">
+                  <button type="button" v-if="row.index === 0" @click="onAddRow('apiResponseInfo','headers')"><i class="fa fa-plus-circle"></i></button>
+                  <button type="button" v-if="row.index > 0" @click="onDelRow('apiResponseInfo','headers', row.index)"><i class="fa fa-times-circle"></i></button>
+                </span>
+              </template>
+            </b-table>
+          </b-form-fieldset>
+
+          <!-- Sample Code -->
+          <b-form-fieldset
+            label="Sample Code"
+            :invalid-feedback="$valid.msg.codes"
+            :horizontal="true">
+            <div :class="{'invalid-codes': !valid.sampleCodes }">
+              <code-mirror
+                :isEdit="isEdit"
+                v-model="items.apiResponseInfo.sampleCodes"
+              ></code-mirror>
+            </div>
+          </b-form-fieldset>
+        </div>
       </b-form>
     </b-collapse>
+
+    <b-form
+      v-if="isEdit"
+      class="formView mt-4"
+      :validated="inValidForm"
+      novalidate
+    >
+      <!-- 변경이력 -->
+      <b-form-fieldset
+        label="변경이력<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <b-form-textarea
+          v-model="items.modifyHistReason"
+          required
+          :rows="6">
+        </b-form-textarea>
+      </b-form-fieldset>
+    </b-form>
 
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
@@ -333,6 +711,10 @@
       <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
       <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
       <b-button type="button" variant="outline-secondary" :to="{ name: 'API 관리' }">목록</b-button>
+      <b-button type="button" variant="outline-secondary"
+                @click="onDeploy"
+                v-if="deployStatusName !== ''"
+      >{{ deployStatusName }}</b-button>
       <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
 
@@ -370,7 +752,10 @@
       <div class="d-block text-center">
         <p>{{ modal.msg }}</p>
       </div>
-      <div slot="modal-footer" class="mx-auto">
+      <div slot="modal-footer" class="mx-auto" v-if="modal.alert">
+        <b-button type="button" variant="primary" @click="modal.open = false">닫기</b-button>
+      </div>
+      <div slot="modal-footer" class="mx-auto" v-else>
         <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
         <b-button type="button" variant="outline-secondary" @click="modal.open = false">취소</b-button>
       </div>
@@ -380,15 +765,17 @@
 </template>
 
 <script>
-  import moment from 'moment'
-  import ContentHeader from '@/components/ContentHeader'
-  import cSwitch from '@/components/Switch'
+  import moment from 'moment';
+  import ContentHeader from '@/components/ContentHeader';
+  import cSwitch from '@/components/Switch';
+  import CodeMirror from '@/components/CodeMirror';
   export default {
     name: 'api',
     props: ['id', 'histories'],
     components: {
       ContentHeader,
-      cSwitch
+      cSwitch,
+      CodeMirror
     },
 
     data (){
@@ -396,61 +783,43 @@
         name: 'API 상세',
         originItems: {},
         items: {
-          apiId: 10000034,
-          apiName: '가상 서버 삭제',
-          serviceCode: 'API_SERVICE_11',
-          serviceCodeName: 'GTM',
-          serviceId: 10011,
-          adaptorCode: 'API_ADAPTOR_01',
-          adaptorCodeName: 'gtmAdaptor',
-          adaptorId: 11,
-          nbBaseUrl: 'http://1.255.87.65/gtm/v1.0/mgmt/tm/gtm/server/common/virtual-servers/{virtualServerName}',
-          apiVersion: '1.0',
-          sbBaseUrl: 'https://#deployIp#/mgmt/tm/gtm/server/~Common~#gtmServerName#/virtual-servers/{virtualServerName}',
-          httpMethodCode: 'HTTP_METHOD_04',
-          httpMethodCodeName: 'DELETE',
-          apiStateCode: 'API_STATE_03',
-          apiStateCodeName: 'Published',
-          apiSectionCode: 'API_SECTION_01',
-          apiSectionCodeName: 'Public',
-          apiUseYn: true,
-          histBeginDateTime: null,
+          apiName: null,
+          serviceCode: null,
+          httpMethodCode: null,
+          adaptorCode: null,
+          multipartYn: false,
+          apiVersion: null,
+          apiSectionCode: null,
+          nbBaseUrl: null,
+          sbBaseUrl: null,
+          apiUseYn: false,
+          apiResponseInfoUseYn: false,
+          nbHost: null,
+          protocolCode: null,
           apiRequestInfo: {
-            contentTypeList: ['CONTENT_TYPE_01'],
+            contentTypeList: [],
             headers: [{
-              name: 'x-vessel-appKey',
-              dataTypeCode: 'DATA_TYPE_01',
-              mandatoryYn: true,
-              checked: false
+              name: null,
+              dataTypeCode: null,
+              mandatoryYn: true
             }],
-            pathParameters: [{
-              name: 'virtualServerName',
-              dataTypeCode: 'DATA_TYPE_01',
-              mandatoryYn: true,
-              checked: false
-            }],
+            pathParameters: [],
             queryStringParameters: [{
-              name: 'deployIp',
-              dataTypeCode: 'DATA_TYPE_01',
-              mandatoryYn: true,
-              checked: false
-            }, {
-              name: 'gtmServerName',
-              dataTypeCode: 'DATA_TYPE_01',
-              mandatoryYn: true,
-              checked: false
-            }],
-            payloads: null,
-            contentType: null
+              name: null,
+              dataTypeCode: null,
+              mandatoryYn: true
+            }]
           },
           apiResponseInfo: {
-            contentTypeList: ['ACCEPT_TYPE_01'],
-            headers: [],
-            sampleCodes: [{
-                contentTypeCode: 'ACCEPT_TYPE_01',
-                sampleCode: ''
-            }]
-          }
+            contentTypeList: [],
+            headers: [{
+              name: null,
+              dataTypeCode: null,
+              mandatoryYn: true
+            }],
+            sampleCodes: []
+          },
+          modifyHistReason: null
         },
         code: {
           serviceCode: [],
@@ -460,7 +829,8 @@
           protocolCode: [],
           contentTypeList: [],
           acceptCode: [],
-          dataTypeCode: []
+          dataTypeCode: [],
+          apiStatusCode: []
         },
         isLoad: {
           serviceCode: true,
@@ -495,6 +865,7 @@
           action (){}
         },
 
+        nbParams: null,
         inValidForm: false
       }
     },
@@ -576,6 +947,21 @@
         }
       },
 
+      fields (){
+        const fields = {
+          name: {label: 'Name', 'class': 'text-left', thStyle: { width: '500px'}},
+          dataTypeCode: {label: 'Type', thStyle: { width: '250px'}},
+          mandatoryYn: {label: 'Mandatory'},
+        };
+        return this.isEdit ? { ...fields, action: {label: '#'}} : fields;
+      },
+
+      deployStatusName (){
+        return this.items.apiStateCodeName === 'Created' ? 'Deployed' :
+          this.items.apiStateCodeName === 'Deployed' ? 'Published' :
+          this.items.apiStateCodeName === 'Published' ? 'Deprecated' : ''
+      },
+
       // validation
       valid (){
         return {
@@ -583,7 +969,8 @@
           httpMethodCode: this.items.httpMethodCode !== null,
           adaptorCode: this.items.adaptorCode !== null,
           //apiSectionCode: this.items.apiSectionCode !== null,
-          contentTypeList: this.items.apiRequestInfo.contentTypeList.length
+          contentTypeList: this.items.apiRequestInfo.contentTypeList.length,
+          sampleCodes: true
         }
       }
     },
@@ -597,122 +984,274 @@
         document.querySelector('body.app').classList.add('history-mode');
       }
 
-      // Service Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'API_SERVICE' }
-      })
-      .then((res) => {
-        this.isLoad.serviceCode = false;
-        this.code.serviceCode = res.data.items;
-      });
-
-      // HTTP Method Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'HTTP_METHOD' }
-      })
-      .then((res) => {
-        this.isLoad.httpMethodCode = false;
-        this.code.httpMethodCode = res.data.items;
-      });
-
-      // Adaptor Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'API_ADAPTOR' }
-      })
-      .then((res) => {
-        this.isLoad.adaptorCode = false;
-        this.code.adaptorCode = res.data.items;
-      });
-
-      // API Section Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'API_SECTION' }
-      })
-      .then((res) => {
-        this.isLoad.apiSectionCode = false;
-        this.code.apiSectionCode = res.data.items;
-      });
-
-      // Domain Protocol Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'DOMAIN_PROTOCOL' }
-      })
-      .then((res) => {
-        this.isLoad.protocolCode = false;
-        this.code.protocolCode = res.data.items;
-      });
-
-      // Request Content-Type Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'CONTENT_TYPE' }
-      })
-      .then((res) => {
-        this.isLoad.contentTypeList = false;
-        this.code.contentTypeList = res.data.items;
-      });
-
-      // Response Accept Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'ACCEPT_TYPE' }
-      })
-      .then((res) => {
-        this.isLoad.acceptCode = false;
-        this.code.acceptCode = res.data.items;
-      });
-
-      // Request Data Type Code
-      this.$https.get('/system/commonCode', {
-        q: { groupCode: 'DATA_TYPE' }
-      })
-      .then((res) => {
-        this.isLoad.dataTypeCode = false;
-        this.code.dataTypeCode = res.data.items;
-      });
-
-      // Detail Data
-      this.$https.get(this.detailUrl)
-        .then(res => {
-          this.items = res.data.items;
-          this.setUrlParams();
-          this.originItems = JSON.parse(JSON.stringify(this.items));
+      // fetch Code
+      this.$https.get('/system/commonCode', { q: { groupCode: 'API_SERVICE' } })
+        .then((res) => {
+          this.isLoad.serviceCode = false;
+          this.code.serviceCode = res.data.items;
         });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'HTTP_METHOD' } })
+        .then((res) => {
+          this.isLoad.httpMethodCode = false;
+          this.code.httpMethodCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'API_ADAPTOR' } })
+        .then((res) => {
+          this.isLoad.adaptorCode = false;
+          this.code.adaptorCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'API_SECTION' } })
+        .then((res) => {
+          this.isLoad.apiSectionCode = false;
+          this.code.apiSectionCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'DOMAIN_PROTOCOL' } })
+        .then((res) => {
+          this.isLoad.protocolCode = false;
+          this.code.protocolCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'CONTENT_TYPE' } })
+        .then((res) => {
+          this.isLoad.contentTypeList = false;
+          this.code.contentTypeList = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'ACCEPT_TYPE' } })
+        .then((res) => {
+          this.isLoad.acceptCode = false;
+          this.code.acceptCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'DATA_TYPE' } })
+        .then((res) => {
+          this.isLoad.dataTypeCode = false;
+          this.code.dataTypeCode = res.data.items;
+        });
+      this.$https.get('/system/commonCode', { q: { groupCode: 'API_STATE' } })
+        .then((res) => {
+          this.code.apiStatusCode = res.data.items;
+        });
+      this.$https.get(this.detailUrl).then(this.fetchDetail);
     },
 
     methods: {
       onEdit (){
         this.isEdit = true;
+        const { apiRequestInfo, apiResponseInfo } = this.items;
+        const pushItems = {
+          name: null,
+          dataTypeCode: this.code.dataTypeCode[0],
+          mandatoryYn: true
+        };
+        if (!apiRequestInfo.queryStringParameters.length){
+          apiRequestInfo.queryStringParameters.push(pushItems);
+        }
+        if (!apiResponseInfo.headers.length){
+          apiResponseInfo.headers.push(pushItems);
+        }
       },
 
       onView (){
         this.isEdit = false;
         this.items = JSON.parse(JSON.stringify(this.originItems));
         this.setUrlParams();
+        this.setDataTypeCodes();
+      },
+
+      fetchDetail (res){
+        this.items = res.data.items;
+        this.originItems = JSON.parse(JSON.stringify(this.items));
+        this.setUrlParams();
+        this.setDataTypeCodes();
       },
 
       onSubmit (){
-        const validate = this.$valid.all(this.items);
-        this.inValidForm = !validate;
+        const { nbHost, apiVersion, apiRequestInfo, apiResponseInfo, apiResponseInfoUseYn } = this.items;
+        const protocolName = this.protocolCode.codeName;
+        const getCode = (arr) => (!arr.length ||
+        (arr.length && (arr[0].name === null || arr[0].name === ''))) ? [] :
+          arr.map(({ name, dataTypeCode, mandatoryYn }) => ({
+            name,
+            dataTypeCode: dataTypeCode.code,
+            mandatoryYn
+          }));
+        const parseSampleCodes = (codes) => {
+          let pardeCodes;
+          try {
+            pardeCodes = codes === '' ? [] : JSON.parse(codes);
+            this.valid.sampleCodes = true;
+          }
+          catch(exception){
+            pardeCodes = [];
+            this.valid.sampleCodes = false;
+          }
+          if (pardeCodes.constructor !== Array){
+            pardeCodes = [];
+            this.valid.sampleCodes = false;
+          }
+          return pardeCodes;
+        };
+
+        const submitItems = {
+          ...this.items,
+          nbBaseUrl: `${protocolName}${nbHost}/v${apiVersion}/${this.nbParams}`,
+          apiRequestInfo: {
+            ...this.items.apiRequestInfo,
+            headers: getCode(apiRequestInfo.headers),
+            pathParameters: getCode(apiRequestInfo.pathParameters),
+            queryStringParameters: getCode(apiRequestInfo.queryStringParameters)
+          },
+          apiResponseInfo: apiResponseInfoUseYn ? {
+            ...this.items.apiResponseInfo,
+            headers: getCode(apiResponseInfo.headers),
+            sampleCodes: parseSampleCodes(apiResponseInfo.sampleCodes)
+          }: {
+            contentTypeList: [],
+            headers: [],
+            sampleCodes: parseSampleCodes(apiResponseInfo.sampleCodes)
+          }
+        };
+        const validate = this.validate(submitItems);
+        // PUT
         if (validate){
-          this.$https.put(`/apiManagement/apis/${this.id}`, this.items)
+          this.$https.put(`/apiManagement/apis/${this.id}`, submitItems)
             .then(() => {
-              this.$router.go(this.$router.currentRoute);
+              this.onSuccess();
             })
             .catch((error) => {
               console.log(error);
             });
-
         }
       },
 
-      onDelete (){
+      onSuccess (){
+        if (this.isEdit){
+          this.onView();
+        }
+        if (this.modal.open){
+          this.modal.open = false;
+        }
+        this.$https.get(this.detailUrl).then(this.fetchDetail);
+      },
 
+      onDelete (){
+        const message = this.items.apiUseYn ?
+          `사용 중인 경우, 삭제할 수 없습니다.
+           사용여부 변경 후 다시 시도해주세요` : 'API를 삭제하시겠습니까?';
+        this.modal = {
+          open: true,
+          type: 'error',
+          msg: message,
+          alert: this.items.apiUseYn,
+          action: this.onDeleteData
+        };
+      },
+
+      onDeleteData (){
+        this.$https.delete(`/apiManagement/apis/${this.id}`)
+          .then(() => {
+            this.$router.push({ name: 'API 관리' });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+
+      onDeploy (){
+        this.modal = {
+          open: true,
+          type: 'done',
+          msg: `${this.deployStatusName} 상태로 변경하시겠습니까?`,
+          action: this.onDeployData
+        };
+      },
+
+      onDeployData (){
+        const status = this.code.apiStatusCode.find(({ codeName }) => codeName === this.deployStatusName);
+        if (status){
+          const apiStateCode = status.code;
+          this.$https.put(`/apiManagement/apis/${this.id}/status?apiStateCode=${apiStateCode}`)
+            .then(this.onSuccess)
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      },
+
+      onSelectHttpMethod ({ code }){
+        if (code !== 'HTTP_METHOD_03'){
+          this.items.multipartYn = false;
+        }
+      },
+
+      onAddRow (type, item, data = {}){
+        this.items[type][item].push(Object.assign({}, {
+          name: '',
+          dataTypeCode: this.code.dataTypeCode[0],
+          mandatoryYn: true
+        }, data));
+      },
+
+      onDelRow (type, item, index){
+        this.items[type][item].splice(index, 1);
+      },
+
+      onInputParams (text){
+        const match = text.match(/\{([^{}]+)\}/g);
+        if (!match) {
+          this.items.apiRequestInfo.pathParameters = [];
+          return;
+        }
+        const matchName = match.map(text => text.split('{').join('').split('}').join(''));
+        const params = this.items.apiRequestInfo.pathParameters.map(obj => ({...obj}));
+
+        this.items.apiRequestInfo.pathParameters = matchName.map(name => {
+          const isContain = params.length ?
+            params.find(obj => obj.name === name)
+            : false;
+          return (isContain) ? isContain : {
+            name,
+            dataTypeCode: this.code.dataTypeCode[0],
+            mandatoryYn: true
+          }
+        });
       },
 
       validate (submitItems){
+        const {
+          apiName,
+          serviceCode,
+          httpMethodCode,
+          adaptorCode,
+          apiVersion,
+          apiSectionCode,
+          apiResponseInfoUseYn,
+          nbBaseUrl,
+          sbBaseUrl,
+          apiRequestInfo,
+          modifyHistReason
+        } = submitItems;
+        const { contentTypeList, headers } = apiRequestInfo;
+        const isValidSampleCodes = !apiResponseInfoUseYn ? true : this.valid.sampleCodes;
+
+        let validateItems = {
+          apiName,
+          serviceCode,
+          httpMethodCode,
+          adaptorCode,
+          apiVersion,
+          apiSectionCode,
+          nbBaseUrl,
+          sbBaseUrl,
+          contentTypeList,
+          headers,
+          modifyHistReason
+        };
+        const validate = (this.$valid.all(validateItems) && this.items.apiRequestInfo.headers.length > 0 && isValidSampleCodes);
+        this.inValidForm = !validate;
+        return validate;
       },
 
       getHistoryLink (rowId){
-        return `#/apis/apis/${this.id}?histories=${rowId}`
+        return `#/apis/api/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
@@ -724,10 +1263,26 @@
       },
 
       setUrlParams (){
-        const { nbBaseUrl, nbHost, apiVersion } = this.items;
-        this.nbParams = nbBaseUrl
-      }
+        const { nbBaseUrl, apiVersion } = this.items;
+        this.nbParams = nbBaseUrl.split(`${apiVersion}/`)[1];
+      },
 
+      setDataTypeCodes (){
+        const { apiRequestInfo, apiResponseInfo } = this.items;
+        const setCode = (arr) => (!arr.length ||
+        (arr.length && (arr[0].name === null || arr[0].name === ''))) ? [] :
+          arr.map(({ name, dataTypeCode, mandatoryYn }) => ({
+            name,
+            dataTypeCode: this.code.dataTypeCode.find(obj => obj.code === dataTypeCode),
+            mandatoryYn
+          }));
+        apiRequestInfo.headers = setCode(apiRequestInfo.headers);
+        apiRequestInfo.pathParameters = setCode(apiRequestInfo.pathParameters);
+        apiRequestInfo.queryStringParameters = setCode(apiRequestInfo.queryStringParameters);
+        apiResponseInfo.headers = setCode(apiResponseInfo.headers);
+
+        apiResponseInfo.sampleCodes = JSON.stringify(apiResponseInfo.sampleCodes, null, 4);
+      }
     }
   }
 </script>

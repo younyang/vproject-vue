@@ -2,10 +2,12 @@
   <div class="codemirror">
     <!-- codemirror -->
     <codemirror
+      v-if="isEdit"
       :value="valueString"
       :options="cmOption"
       @input="onCmCodeChange"
     ></codemirror>
+    <pre v-else class="code" style="height:150px">{{ valueString }}</pre>
   </div>
 </template>
 
@@ -57,7 +59,17 @@
       codemirror
     },
 
-    props: ['value'],
+    props: {
+      value: {
+        default: []
+      },
+
+      isEdit: {
+        type: Boolean,
+        default: true
+      }
+
+    },
 
     data() {
       return {
@@ -85,7 +97,7 @@
     },
 
     created() {
-      this.valueString = (typeof this.value === 'string') ? this.value : JSON.stringify(this.value);
+      this.valueString = typeof this.value === 'string' ? this.value : JSON.stringify(this.value, null, 4);
     },
 
     mounted() {
