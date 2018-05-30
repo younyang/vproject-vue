@@ -274,7 +274,7 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
-          <template slot="histMgmtId" slot-scope="row">
+          <template slot="scheduleHistId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
         </b-table>
@@ -346,7 +346,7 @@
             createId: {label: '등록/수정자', 'class': 'text-left'},
             histBeginDateTime: {label: '등록/수정일시'},
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
-            histMgmtId: {label: '보기'}
+            scheduleHistId: {label: '보기'}
           },
           items: [],
           pageInfo: {
@@ -626,7 +626,7 @@
       },
 
       getHistoryLink (rowId){
-        return `#/configuration/referrers/referrer/${this.id}?histories=${rowId}`
+        return `#/system/scheduler/${this.id}?histories=${rowId}`
       },
 
       showHistory () {
