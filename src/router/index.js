@@ -413,7 +413,39 @@ export default new Router({
                   name: 'Approval 상세',
                   props: true,
                   component: lazyLoading('setting/operators/ApprovalDetail')
-                }
+                },
+              ]
+            },
+            {
+              path: 'notifications',
+              redirect: 'setting/notifications',
+              name: 'Notification',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                {
+                  path: 'notification',
+                  name: 'Notification 관리',
+                  component: lazyLoading('setting/notification/Notification')
+                },
+                {
+                  path: 'notification/:id',
+                  name: 'Notification 상세',
+                  props: true,
+                  component: lazyLoading('setting/notification/NotificationDetail')
+                },
+                {
+                  path: 'send',
+                  name: '전송 내역 관리',
+                  component: lazyLoading('setting/notification/Send')
+                },
+                {
+                  path: 'send/:id',
+                  name: '전송 내역 상세',
+                  props: true,
+                  component: lazyLoading('setting/notification/SendDetail')
+                },
               ]
             }
           ]

@@ -144,6 +144,20 @@ export default {
               url: '/settings/operators/approval'
             }
           ]
+        },
+        {
+          name: 'Notifications',
+          url: '/settings/notifications',
+          children: [
+            {
+              name: 'Notification 관리',
+              url: '/settings/notifications/notification'
+            },
+            {
+              name: '전송 내역 관리',
+              url: '/settings/notifications/send'
+            }
+          ]
         }
       ]
     },
