@@ -3,32 +3,32 @@
     <b-form class="searchBox" @reset="onReset">
       <div class="form-row">
         <b-form-fieldset
-          label="검색어"
+          label="알림 구분"
           class="inline"
           :horizontal="true">
           <multiselect
-            v-model="searchType"
+            v-model="componentTypeCode"
             label="codeName"
-            class="noEmpty"
-            :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
-            :options="code.searchType"
+            :loading="isLoad.componentTypeCode"
+            :options="code.componentTypeCode"
+            track-by="code"
+            placeholder="전체"
           ></multiselect>
-          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="회사명"
+          label="알림 방법"
           class="label-lg"
           :horizontal="true">
           <multiselect
-            v-model="companyCode"
+            v-model="alarmTypeCode"
+            label="codeName"
             :showLabels="false"
             :searchable="false"
-            :options="code.companyCode"
-            :loading="isLoad.companyCode"
-            label="codeName"
+            :options="code.alarmTypeCode"
+            :loading="isLoad.alarmTypeCode"
             track-by="code"
             placeholder="전체"
           ></multiselect>
@@ -37,7 +37,7 @@
 
       <div class="form-row">
         <b-form-fieldset
-          label="그룹"
+          label="수신 그룹"
           :horizontal="true">
           <multiselect
             v-model="groupId"
@@ -52,47 +52,14 @@
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="서비스"
+          label="사용여부"
           class="label-lg"
           :horizontal="true">
           <multiselect
-            v-model="serviceId"
+            v-model="searchItem.alarmPolicyUseYn"
             :showLabels="false"
             :searchable="false"
-            :options="code.serviceId"
-            :loading="isLoad.serviceId"
-            label="serviceName"
-            track-by="serviceId"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
-      </div>
-
-      <div class="form-row">
-        <b-form-fieldset
-          label="계정잠김여부"
-          :horizontal="true">
-          <multiselect
-            v-model="searchItem.accountLockYn"
-            :showLabels="false"
-            :searchable="false"
-            :options="['잠김', '정상']"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="상태"
-          class="label-lg"
-          :horizontal="true">
-          <multiselect
-            v-model="operatorStateCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.operatorStateCode"
-            :loading="isLoad.operatorStateCode"
-            label="codeName"
-            track-by="code"
+            :options="['사용', '미사용']"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -143,17 +110,11 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="operatorServiceNames" slot-scope="row">
+        <template slot="groupNames" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
-        <template slot="operatorGroupNames" slot-scope="row">
-          <span class="badge" v-for="val in row.value">
-            {{ val }}
-          </span>
-        </template>
-        <template slot="accountLockYn" slot-scope="row">{{row.value? '잠김':'정상'}}</template>
       </b-table>
     </section>
 
@@ -193,17 +154,12 @@
     data (){
       return {
         fields: {
-          loginId: {label: 'ID'},
-          operatorName: {label: '이름', 'class': 'text-left'},
-          companyName: {label: '회사명', 'class': 'text-left'},
-          deptName: {label: '부서', 'class': 'text-left'},
-          operatorGroupNames:{label: '그룹', 'class': 'text-left'},
-          operatorServiceNames: {label: '서비스', 'class': 'text-left'},
-          email: {label: '이메일', 'class': 'text-left'},
-          joinApprovalDatetime: {label: '가입승인일시'},
-          modifyDateTime: {label: '수정일시'},
-          accountLockYn: {label: '계정잠김여부'},
-          operatorStateName: {label: '상태'}
+          serverType: {label: 'ServerType', 'class': 'text-left'},
+          alarmPolicyCompCount: {label: '알림 설정', 'class': 'text-left'},
+          groupNames: {label: '수신 그룹', 'class': 'text-left'},
+          alarmTypeName: {label: '알림 방법', 'class': 'text-left'},
+          modifyDatetime:{label: '수정일', 'class': 'text-left'},
+          alarmPolicyUseYnName: {label: '사용여부', 'class': 'text-left'},
         },
         items: [],
         pageInfo: {
@@ -217,27 +173,19 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'operatorId',
-          searchKeyword: null,
-          companyCode: null,
+          componentTypeCode: null,
+          alarmPolicyUseYn: null,
+          alarmTypeCode: null,
           groupId: null,
-          serviceId: null,
-          accountLockYn: null,
-          operatorStateCode: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
         code: {
-          searchType: [{
-                code: 'operatorId',
-            codeName: 'ID'
-          },{
-                code: 'operatorName',
-            codeName: '이름'
-          },{
-                code: 'email',
-            codeName: '이메일'
+          componentTypeCode: [],
+          alarmTypeCode: [{
+                code: 'ALARM_TYPE_CODE_01',
+            codeName: 'Email'
           }],
           searchDateType: [{
             code: 'createDate',
@@ -246,59 +194,23 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          companyCode: [],
           groupId:[],
-          serviceId:[],
-          operatorStateCode:[]
         },
         isLoad: {
-          companyCode: false,
+          componentTypeCode:false,
+          alarmTypeCode: false,
           groupId: false,
-          serviceId: false,
-          operatorStateCode: false
         }
       }
     },
 
     computed: {
-      searchType: {
-        get () {
-          return this.code.searchType.find(obj => obj.code === this.searchItem.searchType) || null;
-        },
-        set (newValue) {
-          this.searchItem.searchType = newValue !== null ? newValue.code : null;
-        }
-      },
-      companyCode: {
-        get () {
-          return this.code.companyCode.find(obj => obj.code === this.searchItem.companyCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.companyCode = newValue !== null ? newValue.code : null;
-        }
-      },
       groupId: {
         get () {
           return this.code.groupId.find(obj => obj.code === this.searchItem.groupId) || null;
         },
         set (newValue) {
           this.searchItem.groupId = newValue !== null ? newValue.groupId : null;
-        }
-      },
-      serviceId: {
-        get () {
-          return this.code.serviceId.find(obj => obj.code === this.searchItem.serviceId) || null;
-        },
-        set (newValue) {
-          this.searchItem.serviceId = newValue !== null ? newValue.serviceId : null;
-        }
-      },
-      operatorStateCode: {
-        get () {
-          return this.code.operatorStateCode.find(obj => obj.code === this.searchItem.operatorStateCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.operatorStateCode = newValue !== null ? newValue.code : null;
         }
       },
       searchDateType: {
@@ -308,45 +220,47 @@
         set (newValue) {
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
+      },
+      componentTypeCode: {
+        get () {
+          return this.code.componentTypeCode.find(obj => obj.code === this.searchItem.componentTypeCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.componentTypeCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      alarmTypeCode: {
+        get () {
+          return this.code.alarmTypeCode.find(obj => obj.code === this.searchItem.alarmTypeCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.alarmTypeCode = newValue !== null ? newValue.code : null;
+        }
       }
     },
 
     created (){
       this.fetchList();
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'COMPANY' }
-        })
+      this.$https.get('/setting/operators/groups')
         .then((res) => {
-          this.isLoad.companyCode = false;
-          this.code.companyCode = res.data.items;
+          this.isLoad.groupId = false;
+          this.code.groupId = res.data.items;
         });
 
-        this.$https.get('/setting/operators/groups')
-          .then((res) => {
-            this.isLoad.groupId = false;
-            this.code.groupId = res.data.items;
-          });
-
-        this.$https.get('/setting/operators/services')
-          .then((res) => {
-            this.isLoad.serviceId = false;
-            this.code.serviceId = res.data.items;
-          });
-
-        this.$https.get('/system/commonCode', {
-            q: { groupCode: 'OPERATOR_STATE' }
-          })
-          .then((res) => {
-            this.isLoad.operatorStateCode = false;
-            this.code.operatorStateCode = res.data.items;
-          });
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'COMPONENT_TYPE' }
+        })
+        .then((res) => {
+          this.isLoad.componentTypeCode = false;
+          this.code.componentTypeCode = res.data.items;
+        });
     },
 
     methods: {
       details (item) {
         this.$router.push({
-          name: 'Operator 상세',
-          params: { id: item.operatorId }
+          name: 'Notification 상세',
+          params: { id: item.alarmPolicyId }
         })
       },
 
@@ -357,24 +271,11 @@
           q: this.queryParams
         };
 
-        this.$https.get('/setting/management/operators', {...defaultParams, ...params})
+        this.$https.get('/monitoring/policies', {...defaultParams, ...params})
           .then((res) => {
             // Setting API Service Name
-
             this.items = res.data.items.map(obj => {
-              // obj.operatorServiceNames = (obj.operatorServiceList) ? obj.operatorServiceList.serviceName : [];
-              // obj.operatorServiceNames = ['11','22'];
-              const operatorServiceNames = [];
-              const operatorGroupNames = [];
-              obj.operatorServiceList.forEach( obj => {
-                operatorServiceNames.push(obj.serviceName)
-              })
-              obj.operatorServiceNames = operatorServiceNames;
-              obj.operatorGroupList.forEach( obj => {
-                operatorGroupNames.push(obj.groupName)
-              })
-              obj.operatorGroupNames = operatorGroupNames;
-              // console.log(this.items.operatorServiceNames);
+              obj.groupNames = (obj.groupNames) ? obj.groupNames.split(',') : [];
               return obj
             });
             this.pageInfo = res.data.pageInfo;
@@ -400,8 +301,8 @@
         // UseYn data convert
         Object.keys(this.searchItem).forEach(key => {
           if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = (key === 'accountLockYn' )
-              ? (this.searchItem[key] === '잠김')
+            this.queryParams[key] = (key === 'alarmPolicyUseYn' )
+              ? (this.searchItem[key] === '사용')
               : this.searchItem[key];
           }
         });
@@ -411,13 +312,7 @@
 
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
-          if (key === 'searchType'){
-            this.searchItem[key] = 'operatorId';
-          } else if (key === 'searchDateType') {
-            this.searchItem[key] = 'createDate';
-          } else {
-            this.searchItem[key] = null;
-          }
+          this.searchItem[key] = null;
         });
         this.queryParams = {};
         this.fetchList();
