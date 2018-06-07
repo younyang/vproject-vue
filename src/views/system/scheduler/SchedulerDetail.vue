@@ -506,7 +506,7 @@
       // Detail Data
       this.$https.get(detailUrl)
         .then((res) => {
-          this.items = { ...this.items, ...res.data.items, referrerId: this.id };
+          this.items = { ...this.items, ...res.data.items, scheduleId: this.id };
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
     },
