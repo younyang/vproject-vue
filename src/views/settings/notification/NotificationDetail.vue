@@ -9,7 +9,6 @@
 
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
-
         <!-- ServerType -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
@@ -17,14 +16,20 @@
           <template slot="label">
             ServerType<i class="require" v-if="isEdit">*</i>
           </template>
-
-          <b-form-input
-            v-model="items.serverType"
-            type="text"
-            placeholder="Enter Name"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
+          <span
+          v-if="!isEdit">
+            {{items.serverType}}
+          </span>
+          <multiselect
+            v-model="componentTypeCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.componentTypeCode"
+            :loading="isLoad.componentTypeCode"
+            label="codeName"
+            track-by="code"
+            v-else
+          ></multiselect>
         </b-form-fieldset>
 
         <!-- 수신그룹 -->
@@ -34,12 +39,22 @@
             수신그룹<i class="require" v-if="isEdit">*</i>
           </template>
 
-          <b-form-input
-            v-model="items.groupNames"
-            type="text"
-            plaintext
-            required
-          ></b-form-input>
+            <b-form-select
+              multiple
+              :select-size="4"
+              v-model="items.selectGroupList"
+              :options="getSelectGroupNames()"
+            ></b-form-select>
+              <button title="추가" @click="" class="btn btn-outline-secondary" data-original-title="추가"></button>
+              <button title="제거" @click="" class="btn btn-outline-secondary" data-original-title="제거"></button>
+            <b-form-select
+              multiple
+              :select-size="10"
+              v-model="items.possibleGroupList"
+              :options="getPossibleGroupNames()"
+            ></b-form-select>
+
+
         </b-form-fieldset>
 
         <!--알림방법 -->
@@ -49,14 +64,9 @@
           <template slot="label">
             알림 방법<i class="require" v-if="isEdit">*</i>
           </template>
-
-          <b-form-input
-            v-model="items.alarmTypeName"
-            type="text"
-            placeholder="Enter deptName"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
+          <span>
+            {{ items.alarmTypeName }}
+          </span>
         </b-form-fieldset>
 
         <!-- 상태 -->
@@ -66,16 +76,21 @@
           <template slot="label">
             상태<i class="require" v-if="isEdit">*</i>
           </template>
-
-          <b-form-input
-            v-model="items.alarmPolicyUseYn"
+          <c-switch
+            v-if="isEdit"
             type="text"
-            placeholder="Enter deptName"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
+            class="v-switch"
+            on="사용"
+            off="미사용"
+            v-model="items.alarmPolicyUseYn"
+          ></c-switch>
+          <span
+            v-else
+            class="badge"
+            :class="{'primary' : items.alarmPolicyUseYn }">
+            {{ items.alarmPolicyUseYn ? '사용' : '미사용' }}
+          </span>
         </b-form-fieldset>
-      </b-form>
       </b-form>
     </b-collapse>
 
@@ -94,16 +109,45 @@
             :items="items.alarmPolicyCompList"
             :fields="fields"
           >
-          <template slot="alarmPolicyId" slot-scope="row">
-            {{row.value? 'check': 'notCheck'}}
-            <span v-if="isEdit">
+            <!-- 항목 -->
+            <template slot="policyTypeName" slot-scope="row">
               <b-form-checkbox
-                v-model="row.item.alarmPolicyId"
-                :disabled="caseSeq !== cache.caseSeq"
-                @change="onChecked(row.item, '1')"
+                v-if="isEdit"
+                v-model="row.item.alarmPolicyCompUseYn"
+                @change="onChecked(row.item)"
               ></b-form-checkbox>
-            </span>
-          </template>
+              <span v-if="row.item.alarmPolicyCompUseYn&&!isEdit"> &nbsp;*&nbsp;</span>
+              <span v-else >&nbsp;&nbsp;&nbsp;</span>
+              {{row.item.policyTypeName}}
+            </template>
+            <!-- 임계치 -->
+            <template slot="policyThreshold" slot-scope="row">
+              <span v-if="isEdit">
+                <b-form-input
+                  v-model="row.item.policyThreshold"
+                  type="number"
+                  style="width: 80px;"
+                  placeholder="Enter deptName"
+                  :disabled="!row.item.alarmPolicyCompUseYn"
+                  required
+                ></b-form-input>이상
+              </span>
+              <span v-else>{{ row.item.policyThreshold }} 이상</span>
+            </template>
+            <!-- 지속시간 -->
+            <template slot="policyDurationTime" slot-scope="row">
+              <span v-if="isEdit">
+                <b-form-input
+                  v-model="row.item.policyDurationTime"
+                  type="number"
+                  style="width: 80px;"
+                  placeholder="Enter deptName"
+                  :disabled="!row.item.alarmPolicyCompUseYn"
+                  required
+                ></b-form-input>{{row.item.policyDurationTimeUnitName}}
+              </span>
+              <span v-else>{{ row.item.policyDurationTime }} {{ row.item.policyDurationTimeUnitName }}</span>
+            </template>
           </b-table>
         </section>
       </b-form>
@@ -148,8 +192,8 @@
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
-      <b-button type="button" variant="outline-secondary" :to="{ name: 'Operator 관리' }">목록</b-button>
-      <b-button type="button" variant="primary" @click="onEdit" v-if="this.items.operatorStateCode !== 'OPERATOR_STATE_03'">수정</b-button>
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Notification 관리' }">목록</b-button>
+      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
   </div>
 </template>
@@ -171,30 +215,35 @@
         originItems: {},
         fields: {
           policyTypeCode: {label: '구분'},
-          alarmPolicyId : {lavel: '체크'},
-          policyTypeName: {label: '항목'},
-          policyThreshold: {label: '임계치'},
-          policyDurationTime: {label: '지속시간'},
+          policyTypeName: {label: '항목','class': 'text-left'},
+          policyThreshold: {label: '임계치','class': 'text-left'},
+          policyDurationTime: {label: '지속시간','class': 'text-left'},
         },
         items: {
           alarmPolicyId : null,
           serviceType : null,
+          componentTypeCode : null,
           groupNames : [],
           alarmTypeName : null,
+          alarmTypeCode : null,
           alarmPolicyUseYn : null,
           modifyDatetime : null,
           modifyId : null,
-          alarmPolicyCompList:[],
-          alarmPolicyGroupList:[]
+          alarmPolicyCompList : [],
+          alarmPolicyGroupList : [],
+          checkList : [],
+          groupIds : [],
+          selectGroupList : [],
+          possibleGroupList : []
         },
         code: {
-          groupList: [],
-          serviceList: []
+          componentTypeCode : [],
+          groupId : []
         },
 
         isLoad: {
-          groupCode: true,
-          serviceCode: true
+          componentTypeCode: false,
+          groupId : false
         },
 
         isEdit: false,
@@ -207,13 +256,19 @@
           action (){}
         },
 
-        inValidForm: false,
-        groupSelectPlatform: false,
-        serviceSelectAll: false
+        inValidForm: false
       }
     },
 
     computed: {
+      componentTypeCode: {
+        get () {
+          return this.code.componentTypeCode.find(obj => obj.code === this.items.componentTypeCode) || null;
+        },
+        set (newValue) {
+          this.items.componentTypeCode = newValue !== null ? newValue.code : null;
+        }
+      },
       valid (){
         return {
         }
@@ -223,12 +278,49 @@
 
     created (){
       const detailUrl = `/monitoring/policies/${this.id}`;
-
+      const checkList = [];
       // Detail Data
       this.$https.get(detailUrl)
         .then((res) => {
-          this.items = { ...this.items, ...res.data.items };
+          res.data.items.alarmPolicyCompList.forEach(obj => {
+            if(obj.alarmPolicyId){
+              obj.alarmPolicyCompUseYn = true;
+              checkList.push(obj);
+            }else{
+              obj.alarmPolicyCompUseYn = false;
+            }
+          });
+          this.items.checkList = checkList;
+          this.items = {
+            ...this.items
+            , ...res.data.items
+          };
           this.originItems = JSON.parse(JSON.stringify(this.items));
+        });
+      // ComponentTypeCode List
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'COMPONENT_TYPE' }
+        })
+        .then((res) => {
+          console.log(res);
+          this.isLoad.componentTypeCode = false;
+          this.code.componentTypeCode = res.data.items;
+        });
+      //AlarmTypeCode (Email 고정)
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'ALARM_TYPE_CODE' }
+        })
+        .then((res) => {
+          console.log(res);
+          this.items.alarmTypeCode = res.data.items.filter(({code}) => {
+            return code === 'ALARM_TYPE_CODE_01';
+          });
+        });
+      //전체 Group 목록
+      this.$https.get('/setting/operators/groups')
+        .then((res) => {
+          this.isLoad.groupId = false;
+          this.code.groupId = res.data.items;
         });
     },
 
@@ -246,12 +338,65 @@
       },
 
       onSubmit (){
+        // const {
+        //   componentTypeCode,
+        //   alarmTypeCode,
+        //   alarmPolicyUseYn,
+        //   checkList,
+        //   groupIds
+        // } = this.items;
 
+        // const validate = this.$valid.all();
+        // this.inValidForm = !(validate);
+        // if(validate){
+          this.$https.put(`/monitoring/policies/${this.id}`,this.items).then(() => {
+            this.$router.go(this.$router.currentRoute);
+          }).catch((error) => {
+            console.log(error)
+          })
+        // }
       },
 
       validate (submitItems){
+
       },
 
+      onChecked(item){
+        if(!item.alarmPolicyCompUseYn){
+          this.items.checkList.push(item);
+        }else{
+          this.items.checkList.forEach((obj, i) =>{
+            if(obj.policyTypeCode === item.policyTypeCode){
+              this.items.checkList.splice(i, 1)
+            }
+          })
+        }
+      },
+
+      getSelectGroupNames () {
+
+
+        return [
+          {
+            text:"zzzz",
+            value:"1"
+          },{
+            text:"zzddddzz",
+            value:"2"
+          }
+        ]
+      },
+
+      getPossibleGroupNames () {
+        const possibleGroupList = [];
+        this.code.groupId.forEach( obj => {
+          possibleGroupList.push({
+            text : obj.groupName,
+            value : obj.groupId
+          })
+        });
+        return possibleGroupList;
+      },
     }
   }
 </script>

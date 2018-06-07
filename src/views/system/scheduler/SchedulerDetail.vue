@@ -325,7 +325,7 @@
           scheduleDesc: null,
           scheduleClassName: null,
           execCycle: null,
-          modifyHistReason : "Scheduler 수정",
+          modifyHistReason : "",
           secondSelect : '0',
           minuteSelect: {code:'*', codeName:'매분'},
           hourSelect: {code:'*', codeName:'매시간'},
@@ -589,10 +589,17 @@
 
         // 실행주기 선택입력인 경우 데이터 가공
         this.setExecutionCycle();
+        const validationItems = {
+          scheduleName: this.items.scheduleName,
+          scheduleClassName: this.items.scheduleClassName,
+          execCycle: this.items.execCycle,
+          modifyHistReason: this.items.modifyHistReason,
+          useYn: this.items.useYn
+        }
 
-        const validate = (this.$valid.all(this.items) && this.scheduleNameExists === 'success');
+        const validate = (this.$valid.all(validationItems) && (!this.isReScheduleName || this.scheduleNameExists === 'success'));
+        
         this.inValidForm = !validate;
-
         if (validate){
           this.$https.put(`/system/schedules/${this.id}`, this.items)
             .then(() => {

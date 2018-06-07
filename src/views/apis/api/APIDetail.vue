@@ -714,7 +714,7 @@
                 @click="onDeploy"
                 v-if="deployStatusName !== ''"
       >{{ deployStatusName }}</b-button>
-      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
+      <b-button v-if="items.apiStateCode !== 'API_STATE_04'" type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
 
     <!-- History Modal -->
