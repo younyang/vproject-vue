@@ -95,6 +95,15 @@ Vue.prototype.$https = {
 };
 
 
+const EventBus = new Vue();
+Object.defineProperties(Vue.prototype, {
+  $eventBus: {
+    get: function () {
+      return EventBus;
+    }
+  }
+});
+
 
 Vue.filter('capitalize', function (value) {
   if (!value) return ''

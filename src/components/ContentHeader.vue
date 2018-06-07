@@ -2,12 +2,12 @@
   <div class="page-sub-title">
     <h2 v-if="title !== ''"><i></i> {{ title }} <small v-if="small !== ''">{{ small }}</small></h2>
     <h2 v-if="apiName !== ''">
-      <i></i> {{ apiService }} &gt;
-      <span>{{ apiName }}</span>
+      <i></i> {{ apiService }}
+      <span class="apiName"><em class="icon-arrow-right"></em> {{ apiName }}</span>
       <b-badge
-        pill
+        class="ins"
         :variant="apiStatusVariant">
-        {{ apiStatus }}
+        {{ apiStatus.toUpperCase() }}
       </b-badge>
     </h2>
 

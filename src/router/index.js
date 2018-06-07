@@ -386,7 +386,7 @@ export default new Router({
           children:[
             {
               path: 'operators',
-              redirect: 'setting/operators',
+              redirect: 'settings/operators',
               name: 'Operators',
               component: {
                 render (c) { return c('router-view') }
@@ -395,30 +395,45 @@ export default new Router({
                 {
                   path: 'operator',
                   name: 'Operator 관리',
-                  component: lazyLoading('setting/operators/Operator')
+                  component: lazyLoading('settings/operators/Operator')
                 },
                 {
                   path: 'operator/:id',
                   name: 'Operator 상세',
                   props: true,
-                  component: lazyLoading('setting/operators/OperatorDetail')
+                  component: lazyLoading('settings/operators/OperatorDetail')
                 },
                 {
                   path: 'approval',
                   name: 'Approval 관리',
-                  component: lazyLoading('setting/operators/Approval')
+                  component: lazyLoading('settings/operators/Approval')
                 },
                 {
                   path: 'approval/:id',
                   name: 'Approval 상세',
                   props: true,
-                  component: lazyLoading('setting/operators/ApprovalDetail')
+                  component: lazyLoading('settings/operators/ApprovalDetail')
                 },
               ]
             },
             {
+              path: 'menu',
+              name: 'Menu 관리',
+              component: lazyLoading('settings/Menu')
+            },
+            {
+              path: 'group',
+              name: 'Group 관리',
+              component: lazyLoading('settings/Group')
+            },
+            {
+              path: 'menuGroup',
+              name: 'Menu-Group 관리',
+              component: lazyLoading('settings/MenuGroup')
+            },
+            {
               path: 'notifications',
-              redirect: 'setting/notifications',
+              redirect: 'settings/notifications',
               name: 'Notification',
               component: {
                 render (c) { return c('router-view') }
@@ -427,24 +442,24 @@ export default new Router({
                 {
                   path: 'notification',
                   name: 'Notification 관리',
-                  component: lazyLoading('setting/notification/Notification')
+                  component: lazyLoading('settings/notification/Notification')
                 },
                 {
                   path: 'notification/:id',
                   name: 'Notification 상세',
                   props: true,
-                  component: lazyLoading('setting/notification/NotificationDetail')
+                  component: lazyLoading('settings/notification/NotificationDetail')
                 },
                 {
                   path: 'send',
                   name: '전송 내역 관리',
-                  component: lazyLoading('setting/notification/Send')
+                  component: lazyLoading('settings/notification/Send')
                 },
                 {
                   path: 'send/:id',
                   name: '전송 내역 상세',
                   props: true,
-                  component: lazyLoading('setting/notification/SendDetail')
+                  component: lazyLoading('settings/notification/SendDetail')
                 },
               ]
             }

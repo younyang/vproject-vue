@@ -266,6 +266,17 @@ h3.content-title {
       left:0;
       top:14px;
     }
+
+    .apiName {
+      font-weight: 100;
+      em {
+        font-size: 11px;
+      }
+    }
+    .badge {
+      vertical-align: middle;
+      margin-left: 10px;
+    }
   }
   .sub-navs {
     float: right;
@@ -522,6 +533,18 @@ span.ico {
 
   &.primary {
     background: $primary-color;
+  }
+  &.badge-created {
+    background: #888888;
+  }
+  &.badge-deployed {
+    background: #ff6400;
+  }
+  &.badge-published {
+    background: #2482e4;
+  }
+  &.badge-deprecated {
+    background: #daa12e;
   }
 }
 
@@ -909,6 +932,13 @@ section.board {
   margin: 0;
   border-top: 1px solid $primary-color;
   border-bottom: 1px solid $line-color;
+
+  .table-view {
+    visibility: visible;
+  }
+  .table-hidden {
+    visibility: hidden;
+  }
 
   thead th {
     border: 0;
@@ -1372,6 +1402,9 @@ section.board {
     .multiselect {
       max-width: 90%;
     }
+    .badge {
+      margin: 0;
+    }
   }
 }
 
@@ -1515,4 +1548,70 @@ section.board {
  */
 .text-muted{
   color:#777 !important;
+}
+
+
+/**
+ * Tree Menu
+ */
+.tree-area {
+  border: 1px solid $border-color;
+  border-radius: 3px;
+
+  .tree-btn {
+    min-height: 42px;
+    padding: 10px;
+    text-align: right;
+    border-bottom: 1px solid $border-color;
+
+    &:after {
+      clear: both;
+      display: block;
+      content: ''
+    }
+
+    .btn {
+      vertical-align: top;
+    }
+
+    .float-left {
+      margin: 0 3px -2px 0;
+    }
+  }
+
+  > .tree-default {
+    padding: 10px;
+    height: 533px;
+    overflow: auto;
+  }
+
+  .tree-default .tree-icon,
+  .tree-default .tree-node {
+    background-image: url(../img/tree.png);
+  }
+  .tree-default .tree-last {
+    background: transparent;
+  }
+
+  > .drag-area {
+    height: 533px;
+    overflow: auto;
+  }
+
+  .drag-item {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    margin: -1px -1px 0 -1px;
+    cursor: pointer;
+
+    &.selected {
+      background: #50e2fc;
+    }
+
+    &.sortable-ghost {
+      border: 1px dashed #aaa;
+      background: #f0f0f0;
+    }
+  }
 }

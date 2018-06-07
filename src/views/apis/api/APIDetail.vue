@@ -92,7 +92,6 @@
           </b-form-fieldset>
           <!-- Version -->
           <b-form-fieldset
-            :invalid-feedback="$valid.msg.require"
             :horizontal="true">
             <template slot="label">
               Version<i class="require" v-if="isEdit">*</i>
@@ -103,7 +102,7 @@
                 v-model="items.apiVersion"
                 style="width: 80px;"
                 type="text"
-                required
+                disabled
               ></b-form-input>
             </span>
             <b-form-input
@@ -1237,7 +1236,6 @@
           serviceCode,
           httpMethodCode,
           adaptorCode,
-          apiVersion,
           apiSectionCode,
           nbBaseUrl,
           sbBaseUrl,

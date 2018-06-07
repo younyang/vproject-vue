@@ -2,7 +2,7 @@
   <div class="app">
     <AppHeader/>
     <div class="app-body">
-      <Sidebar :navItems="nav"/>
+      <Sidebar />
       <main class="main">
         <div class="page-title">
           <h1>{{ name }}</h1>
@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import nav from '../_nav'
 import { Header as AppHeader, Sidebar, Footer as AppFooter, Breadcrumb } from '@/components/'
 
 export default {
@@ -29,7 +28,7 @@ export default {
   },
   data () {
     return {
-      nav: nav.items
+      nav: []
     }
   },
 
@@ -40,6 +39,14 @@ export default {
     list () {
       return this.$route.matched.slice(0,3)
     }
+  },
+
+  mounted (){
+    this.$https.get('/setting/admin/menu')
+      .then(res => {
+        this.nav = [res.data.items];
+        this.$eventBus.$emit('menu', this.nav);
+      })
   }
 }
 </script>

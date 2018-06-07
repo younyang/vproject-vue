@@ -3,41 +3,43 @@
     <nav class="sidebar-nav">
       <ul class="nav">
         <template v-for="(item, index) in navItems">
-          <template v-if="item.children">
-            <!-- First level dropdown -->
-            <SidebarNavDropdown :name="item.name" :url="item.url" :icon="item.icon">
-              <template v-for="(childL1, index) in item.children">
-                <template v-if="childL1.children">
-                  <!-- Second level dropdown -->
-                  <SidebarNavDropdown :name="childL1.name" :url="childL1.url" :icon="childL1.icon">
-                    <template v-for="(childL2, index) in childL1.children">
-                      <template v-if="childL2.children">
-                        <!-- Third level dropdown -->
-                        <SidebarNavDropdown :name="childL2.name" :url="childL2.url" :icon="childL2.icon">
-                          <li class="nav-item" v-for="(childL3, index) in childL2.children">
-                            <SidebarNavLink :name="childL3.name" :url="childL3.url" :icon="childL3.icon" :badge="childL3.badge" :variant="item.variant"/>
+          <template v-if="item.subMenuList.length">
+
+            <SidebarNavDropdown :name="item.menuName" :url="item.linkUrl" :icon="icon">
+              <template v-for="(childL1, index) in item.subMenuList">
+                <template v-if="childL1.subMenuList.length">
+
+                  <SidebarNavDropdown :name="childL1.menuName" :url="childL1.linkUrl" :icon="icon">
+                    <template v-for="(childL2, index) in childL1.subMenuList">
+                      <template v-if="childL2.subMenuList.length">
+
+                        <SidebarNavDropdown :name="childL2.menuName" :url="childL2.linkUrl" :icon="icon">
+                          <li class="nav-item" v-for="(childL3, index) in childL2.subMenuList">
+                            <SidebarNavLink :name="childL3.menuName" :url="childL3.linkUrl" :icon="icon" />
                           </li>
                         </SidebarNavDropdown>
                       </template>
                       <template v-else>
-                        <SidebarNavItem :classes="item.class">
-                          <SidebarNavLink :name="childL2.name" :url="childL2.url" :icon="childL2.icon" :badge="childL2.badge" :variant="item.variant"/>
+                        <SidebarNavItem>
+                          <SidebarNavLink :name="childL2.menuName" :url="childL2.linkUrl" :icon="icon" />
                         </SidebarNavItem>
                       </template>
                     </template>
                   </SidebarNavDropdown>
                 </template>
                 <template v-else>
-                  <SidebarNavItem :classes="item.class">
-                    <SidebarNavLink :name="childL1.name" :url="childL1.url" :icon="childL1.icon" :badge="childL1.badge" :variant="item.variant"/>
+                  <SidebarNavItem>
+                    <SidebarNavLink :name="childL1.menuName" :url="childL1.linkUrl" :icon="icon" />
                   </SidebarNavItem>
                 </template>
               </template>
             </SidebarNavDropdown>
+
           </template>
+
           <template v-else>
-            <SidebarNavItem :classes="item.class">
-              <SidebarNavLink :name="item.name" :url="item.url" :icon="item.icon" :badge="item.badge" :variant="item.variant"/>
+            <SidebarNavItem>
+              <SidebarNavLink :name="item.menuName" :url="item.linkUrl" :icon="icon" />
             </SidebarNavItem>
           </template>
         </template>
@@ -53,10 +55,9 @@
   export default {
     name: 'sidebar',
     props: {
-      navItems: {
-        type: Array,
-        required: true,
-        default: () => []
+      icon: {
+        type: String,
+        default: 'icon-grid'
       }
     },
     components: {
@@ -64,10 +65,35 @@
       SidebarNavLink,
       SidebarNavItem
     },
+
+    data (){
+      return {
+        navItems: []
+      }
+    },
+
+    created (){
+      this.$eventBus.$on('menu', this.onReceiveMenu);
+    },
+
     methods: {
       handleClick (e) {
-        e.preventDefault()
+        e.preventDefault();
         e.target.parentElement.classList.toggle('open')
+      },
+
+      onReceiveMenu (nav){
+        const filterMenu = (list) => {
+          const filter = list.filter(obj => {
+            if (obj.subMenuList.length) {
+              obj.subMenuList = filterMenu(obj.subMenuList);
+            }
+            return (obj.menuUseYn)
+          })
+          return filter;
+        };
+
+        this.navItems = filterMenu(nav[0].subMenuList)
       }
     }
   }
