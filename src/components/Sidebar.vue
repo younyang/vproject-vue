@@ -9,19 +9,19 @@
               <template v-for="(childL1, index) in item.subMenuList">
                 <template v-if="childL1.subMenuList.length">
 
-                  <SidebarNavDropdown :name="childL1.menuName" :url="childL1.linkUrl" :icon="icon">
+                  <SidebarNavDropdown :name="childL1.menuName" :url="childL1.linkUrl">
                     <template v-for="(childL2, index) in childL1.subMenuList">
                       <template v-if="childL2.subMenuList.length">
 
-                        <SidebarNavDropdown :name="childL2.menuName" :url="childL2.linkUrl" :icon="icon">
+                        <SidebarNavDropdown :name="childL2.menuName" :url="childL2.linkUrl">
                           <li class="nav-item" v-for="(childL3, index) in childL2.subMenuList">
-                            <SidebarNavLink :name="childL3.menuName" :url="childL3.linkUrl" :icon="icon" />
+                            <SidebarNavLink :name="childL3.menuName" :url="childL3.linkUrl" />
                           </li>
                         </SidebarNavDropdown>
                       </template>
                       <template v-else>
                         <SidebarNavItem>
-                          <SidebarNavLink :name="childL2.menuName" :url="childL2.linkUrl" :icon="icon" />
+                          <SidebarNavLink :name="childL2.menuName" :url="childL2.linkUrl" />
                         </SidebarNavItem>
                       </template>
                     </template>
@@ -29,7 +29,7 @@
                 </template>
                 <template v-else>
                   <SidebarNavItem>
-                    <SidebarNavLink :name="childL1.menuName" :url="childL1.linkUrl" :icon="icon" />
+                    <SidebarNavLink :name="childL1.menuName" :url="childL1.linkUrl" />
                   </SidebarNavItem>
                 </template>
               </template>

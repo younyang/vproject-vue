@@ -1,441 +1,608 @@
 <template>
   <div class="animated fadeIn">
-    <b-form class="searchBox" @reset="onReset">
-      <div class="form-row">
-        <b-form-fieldset
-          label="검색어"
-          class="inline"
-          :horizontal="true">
-          <multiselect
-            v-model="searchType"
-            label="codeName"
-            class="noEmpty"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.searchType"
-          ></multiselect>
-          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
-        </b-form-fieldset>
+    <div class="row">
+      <div class="col-6">
+        <!-- Menu Tree -->
+        <div class="tree-area">
+          <div class="tree-btn">
+            <multiselect
+              style="width: 180px"
+              v-model="groups"
+              track-by="groupId"
+              label="groupName"
+              class="noEmpty float-left"
+              :allowEmpty="false"
+              :showLabels="false"
+              :searchable="false"
+              :options="code.groups"
+              :loading="isLoad.groups"
+              @select="onChangeGroup"
+            ></multiselect>
 
-        <b-form-fieldset
-          label="회사명"
-          class="label-lg"
-          :horizontal="true">
-          <multiselect
-            v-model="companyCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.companyCode"
-            :loading="isLoad.companyCode"
-            label="codeName"
-            track-by="code"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
+            <b-button type="button" variant="in-table" @click="onExpandAll">모두 열기</b-button>
+            <b-button type="button" variant="in-table" @click="onCollapseAll">모두 닫기</b-button>
+          </div>
+
+          <v-jstree
+            ref="tree"
+            :data="menus"
+            :whole-row="true"
+            :collapse="true"
+            text-field-name="menuName"
+            value-field-name="menuId"
+            children-field-name="subMenuList"
+            @item-click="onItemClick">
+            <template slot-scope="_">
+              <div>
+                <i :class="_.vm.themeIconClasses" role="presentation" v-if="!_.model.loading"></i>
+                {{ _.model.menuPermissionCode }}
+                {{_.model.menuName}}
+                <span v-if="_.model.menuId !== 1">
+                  <b-button
+                    type="button"
+                    data-id="read"
+                    :variant="_.model.menuPermissionCode === 'MENU_PERMISSION_01' ? 'primary' : 'outline-secondary'"
+                    @click="onSetAuth(_.model)"
+                  >읽기</b-button>
+                  <b-button
+                    type="button"
+                    data-id="read"
+                    :variant="_.model.menuPermissionCode === 'MENU_PERMISSION_02' ? 'primary' : 'outline-secondary'"
+                    @click="onSetAuth(_.model)"
+                  >쓰기</b-button>
+                </span>
+              </div>
+            </template>
+          </v-jstree>
+        </div>
       </div>
+      <div class="col-6">
+        <div class="collapse-title">
+          <b-button class="btn-collapse" v-b-toggle.formDefault>
+            <i class="fa"></i>
+            기본정보
+          </b-button>
+        </div>
 
-      <div class="form-row">
-        <b-form-fieldset
-          label="그룹"
-          :horizontal="true">
-          <multiselect
-            v-model="groupId"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.groupId"
-            :loading="isLoad.groupId"
-            label="groupName"
-            track-by="groupId"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
+        <b-collapse id="formDefault" visible>
+          <b-form class="formView" :validated="inValidForm" novalidate>
+            <input type="hidden" :value="items.menuId">
 
-        <b-form-fieldset
-          label="서비스"
-          class="label-lg"
-          :horizontal="true">
-          <multiselect
-            v-model="serviceId"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.serviceId"
-            :loading="isLoad.serviceId"
-            label="serviceName"
-            track-by="serviceId"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
+            <!-- 메뉴명 -->
+            <b-form-fieldset
+              :invalid-feedback="$valid.msg.require"
+              :horizontal="true">
+              <template slot="label">
+                메뉴명<i v-if="isEdit" class="require">*</i>
+              </template>
+              <b-form-input
+                v-model="items.menuName"
+                type="text"
+                :plaintext="!isEdit"
+                required
+              ></b-form-input>
+            </b-form-fieldset>
+
+            <!-- 링크 URL -->
+            <b-form-fieldset
+              :invalid-feedback="$valid.msg.require"
+              :horizontal="true">
+              <template slot="label">
+                링크 URL<i v-if="isEdit" class="require">*</i>
+              </template>
+              <b-form-input
+                v-model="items.linkUrl"
+                type="text"
+                :plaintext="!isEdit"
+                required
+              ></b-form-input>
+            </b-form-fieldset>
+
+            <!-- 메뉴권한설정 -->
+            <b-form-fieldset
+              :invalid-feedback="$valid.msg.select"
+              :horizontal="true">
+              <template slot="label">
+                메뉴권한설정<i v-if="isEdit" class="require">*</i>
+              </template>
+              <b-form-radio-group
+                v-if="isEdit"
+                :options="code.menuPermissionCode"
+                v-model="items.menuPermissionCode"
+              ></b-form-radio-group>
+              <b-form-input
+                v-else
+                :value="menuPermissionCodeText"
+                type="text"
+                plaintext
+              ></b-form-input>
+            </b-form-fieldset>
+
+            <!-- 노출여부 -->
+            <b-form-fieldset
+              label="노출여부"
+              :horizontal="true">
+              <c-switch
+                v-if="isEdit"
+                type="text"
+                class="v-switch"
+                on="노출"
+                off="미노출"
+                v-model="items.menuExposureYn"
+              ></c-switch>
+              <span
+                v-else
+                class="badge"
+                :class="{'primary' : items.menuExposureYn }"
+              >{{ items.menuId !== 1 ? items.menuExposureYn ? '사용' : '미사용' : '--' }}
+              </span>
+            </b-form-fieldset>
+
+            <!-- 사용여부 -->
+            <b-form-fieldset
+              label="사용여부"
+              :horizontal="true">
+              <c-switch
+                v-if="isEdit"
+                type="text"
+                class="v-switch"
+                on="사용"
+                off="미사용"
+                v-model="items.menuUseYn"
+              ></c-switch>
+              <span
+                v-else
+                class="badge"
+                :class="{'primary' : items.menuUseYn }"
+              >{{ items.menuId !== 1 ? items.menuUseYn ? '사용' : '미사용' : '--' }}
+              </span>
+            </b-form-fieldset>
+
+            <!-- 설명 -->
+            <b-form-fieldset
+              label="설명"
+              :horizontal="true">
+              <b-form-textarea
+                v-model="items.menuDesc"
+                :rows="6"
+                :no-resize="true"
+                :plaintext="!isEdit"
+              ></b-form-textarea>
+            </b-form-fieldset>
+          </b-form>
+        </b-collapse>
+
+        <!-- 처리이력 -->
+        <div class="collapse-title" v-if="!isEdit">
+          <b-button class="btn-collapse" v-b-toggle.formHistory>
+            <i class="fa"></i>
+            처리이력
+          </b-button>
+        </div>
+        <b-collapse id="formHistory" visible v-if="!isEdit">
+          <b-form class="formView">
+            <div class="form-row">
+              <!-- 등록일 -->
+              <b-form-fieldset
+                label="등록일시"
+                :horizontal="true">
+                <b-form-input
+                  :value="items.createDateTime"
+                  plaintext
+                  type="text"
+                ></b-form-input>
+              </b-form-fieldset>
+              <!-- 등록자 -->
+              <b-form-fieldset
+                label="등록자"
+                :horizontal="true">
+                <b-form-input
+                  :value="items.createId"
+                  plaintext
+                  type="text"
+                ></b-form-input>
+              </b-form-fieldset>
+            </div>
+
+            <div class="form-row">
+              <!-- 수정일 -->
+              <b-form-fieldset
+                label="수정일시"
+                :horizontal="true">
+                <b-form-input
+                  :value="items.modifyDateTime"
+                  plaintext
+                  type="text"
+                ></b-form-input>
+              </b-form-fieldset>
+              <!-- 수정자 -->
+              <b-form-fieldset
+                label="수정자"
+                :horizontal="true">
+                <b-form-input
+                  :value="items.modifyId"
+                  plaintext
+                  type="text"
+                ></b-form-input>
+              </b-form-fieldset>
+            </div>
+          </b-form>
+        </b-collapse>
+
+        <div class="page-btn" v-if="isEdit && items.menuId !== 1">
+          <b-button type="button" variant="outline-secondary" @click="onCancel">취소</b-button>
+          <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+        </div>
+
+        <div class="page-btn" v-if="!isEdit && items.menuId !== 1">
+          <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
+        </div>
       </div>
+    </div>
 
-      <div class="form-row">
-        <b-form-fieldset
-          label="계정잠김여부"
-          :horizontal="true">
-          <multiselect
-            v-model="searchItem.accountLockYn"
-            :showLabels="false"
-            :searchable="false"
-            :options="['잠김', '정상']"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <b-form-fieldset
-          label="상태"
-          class="label-lg"
-          :horizontal="true">
-          <multiselect
-            v-model="operatorStateCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.operatorStateCode"
-            :loading="isLoad.operatorStateCode"
-            label="codeName"
-            track-by="code"
-            placeholder="전체"
-          ></multiselect>
-        </b-form-fieldset>
+    <!-- Message Alert Modal -->
+    <b-modal title="Message" size="sm" v-model="modal.open" :class="`modal-${modal.type}`">
+      <div class="d-block text-center">
+        <p>{{ modal.msg }}</p>
       </div>
-
-      <div class="form-row">
-        <b-form-fieldset
-          label="기간"
-          class="inline date"
-          :horizontal="true">
-          <multiselect
-            v-model="searchDateType"
-            label="codeName"
-            :allowEmpty="false"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.searchDateType"
-          ></multiselect>
-
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input> ~
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateTo"></b-form-input>
-
-          <b-button class="btn-day" @click="onCalendar('today')">오늘</b-button>
-          <b-button class="btn-day" @click="onCalendar(7, 'days')">7일</b-button>
-          <b-button class="btn-day" @click="onCalendar(1, 'month')">1개월</b-button>
-          <b-button class="btn-day" @click="onCalendar(3, 'month')">3개월</b-button>
-          <b-button class="btn-day" @click="onCalendar('reset')">전체</b-button>
-        </b-form-fieldset>
+      <div slot="modal-footer" class="mx-auto" v-if="modal.alert">
+        <b-button type="button" variant="primary" @click="modal.open = false">닫기</b-button>
       </div>
-      <div class="search-btn">
-        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
-        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
+      <div slot="modal-footer" class="mx-auto" v-else>
+        <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
+        <b-button type="button" variant="outline-secondary" @click="modal.open = false">취소</b-button>
       </div>
-    </b-form>
-
-
-    <section class="board-btn">
-      <b-button type="button" variant="primary" @click="excelDownload">
-        엑셀 다운로드
-      </b-button>
-    </section>
-
-    <section class="board">
-      <b-table
-        hover
-        show-empty
-        :items="items"
-        :fields="fields"
-        @row-clicked="details"
-      >
-        <template slot="operatorServiceNames" slot-scope="row">
-          <span class="badge" v-for="val in row.value">
-            {{ val }}
-          </span>
-        </template>
-        <template slot="operatorGroupNames" slot-scope="row">
-          <span class="badge" v-for="val in row.value">
-            {{ val }}
-          </span>
-        </template>
-        <template slot="accountLockYn" slot-scope="row">{{row.value? '잠김':'정상'}}</template>
-      </b-table>
-    </section>
-
-    <section class="board-article d-flex justify-content-between">
-      <b-form inline>
-        <multiselect
-          :value="pageInfo.size"
-          :allowEmpty="false"
-          :showLabels="false"
-          :searchable="false"
-          :options="pageOptions"
-          @input="onRowSelect"
-          class="inline sm"
-        ></multiselect>
-        <label class="ml-sm-2">Row Per Page</label>
-      </b-form>
-
-      <b-pagination
-        :value="pageInfo.page"
-        :total-rows="pageInfo.totalCount"
-        :per-page="pageInfo.size"
-        @input="onPagination"
-        class="mt-2"
-      ></b-pagination>
-    </section>
+    </b-modal>
   </div>
 </template>
 
 <script>
-  import moment from 'moment'
+  import VJstree from 'vue-jstree'
+  import cSwitch from '@/components/Switch'
 
   export default {
-    name: 'services',
+    name: 'menuAdmin',
     components: {
-      //  ListContent
+      VJstree,
+      cSwitch
     },
     data (){
       return {
-        fields: {
-          loginId: {label: 'ID'},
-          operatorName: {label: '이름', 'class': 'text-left'},
-          companyName: {label: '회사명', 'class': 'text-left'},
-          deptName: {label: '부서', 'class': 'text-left'},
-          operatorGroupNames:{label: '그룹', 'class': 'text-left'},
-          operatorServiceNames: {label: '서비스', 'class': 'text-left'},
-          email: {label: '이메일', 'class': 'text-left'},
-          joinApprovalDatetime: {label: '가입승인일시'},
-          modifyDateTime: {label: '수정일시'},
-          accountLockYn: {label: '계정잠김여부'},
-          operatorStateName: {label: '상태'}
+        originItems: {},
+        menus: [],
+        groups: [],
+        menuGroups: [],
+        nodes: false,
+        items: {
+          menuId: 1,
+          menuName : null,
+          linkUrl : null,
+          menuPermissionCode : null,
+          menuExposureYn : false,
+          menuDesc : null,
+          menuLevel : null,
+          menuUseYn : false,
+          criteriaMenuId : null,
+          criteriaMenuLevel : null
         },
-        items: [],
-        pageInfo: {
-          page: 1,
-          size: 10,
-          resultCount: 1,
-          totalCount: 1
-        },
-        pageOptions: [10, 20, 50, 100],
 
-        queryParams: {},
-
-        searchItem: {
-          searchType: 'operatorId',
-          searchKeyword: null,
-          companyCode: null,
-          groupId: null,
-          serviceId: null,
-          accountLockYn: null,
-          operatorStateCode: null,
-          searchDateType: 'createDate',
-          searchDateFrom: null,
-          searchDateTo: null
-        },
         code: {
-          searchType: [{
-                code: 'operatorId',
-            codeName: 'ID'
-          },{
-                code: 'operatorName',
-            codeName: '이름'
-          },{
-                code: 'email',
-            codeName: '이메일'
-          }],
-          searchDateType: [{
-            code: 'createDate',
-            codeName: '등록일'
-          },{
-            code: 'modifyDate',
-            codeName: '수정일'
-          }],
-          companyCode: [],
-          groupId:[],
-          serviceId:[],
-          operatorStateCode:[]
+          groups: [],
+          menuPermissionCode: []
         },
+
         isLoad: {
-          companyCode: false,
-          groupId: false,
-          serviceId: false,
-          operatorStateCode: false
-        }
+          groups: true
+        },
+
+        modal: {
+          open: false,
+          type: 'done',
+          msg: '',
+          action (){}
+        },
+
+        isEdit: false,
+        isCreate: false,
+        inValidForm: false
       }
     },
 
     computed: {
-      searchType: {
-        get () {
-          return this.code.searchType.find(obj => obj.code === this.searchItem.searchType) || null;
-        },
-        set (newValue) {
-          this.searchItem.searchType = newValue !== null ? newValue.code : null;
-        }
-      },
-      companyCode: {
-        get () {
-          return this.code.companyCode.find(obj => obj.code === this.searchItem.companyCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.companyCode = newValue !== null ? newValue.code : null;
-        }
-      },
-      groupId: {
-        get () {
-          return this.code.groupId.find(obj => obj.code === this.searchItem.groupId) || null;
-        },
-        set (newValue) {
-          this.searchItem.groupId = newValue !== null ? newValue.groupId : null;
-        }
-      },
-      serviceId: {
-        get () {
-          return this.code.serviceId.find(obj => obj.code === this.searchItem.serviceId) || null;
-        },
-        set (newValue) {
-          this.searchItem.serviceId = newValue !== null ? newValue.serviceId : null;
-        }
-      },
-      operatorStateCode: {
-        get () {
-          return this.code.operatorStateCode.find(obj => obj.code === this.searchItem.operatorStateCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.operatorStateCode = newValue !== null ? newValue.code : null;
-        }
-      },
-      searchDateType: {
-        get () {
-          return this.code.searchDateType.find(obj => obj.code === this.searchItem.searchDateType) || null;
-        },
-        set (newValue) {
-          this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
-        }
+      menuPermissionCodeText (){
+        const menuPermission = this.code.menuPermissionCode.find(({ value }) => value === this.items.menuPermissionCode);
+        return menuPermission ? menuPermission.text : ''
       }
     },
 
     created (){
-      this.fetchList();
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'COMPANY' }
-        })
+      // Groups
+      this.$https.get('/setting/admin/groups')
         .then((res) => {
-          this.isLoad.companyCode = false;
-          this.code.companyCode = res.data.items;
+          this.code.groups = res.data.items;
+          this.isLoad.groups = false;
+          this.groups = { ...this.code.groups[0] };
+          this.fetchMenuGroup(this.groups.groupId);
         });
 
-        this.$https.get('/setting/operators/groups')
-          .then((res) => {
-            this.isLoad.groupId = false;
-            this.code.groupId = res.data.items;
-          });
+      // Menu Permission Code
+      this.$https.get('/system/commonCode', {
+        q: { groupCode: 'MENU_PERMISSION' }
+      })
+        .then((res) => {
+          this.code.menuPermissionCode = res.data.items.map(({ code, codeName }) => ({
+            value: code,
+            text: codeName
+          }));
+        });
 
-        this.$https.get('/setting/operators/services')
-          .then((res) => {
-            this.isLoad.serviceId = false;
-            this.code.serviceId = res.data.items;
-          });
-
-        this.$https.get('/system/commonCode', {
-            q: { groupCode: 'OPERATOR_STATE' }
-          })
-          .then((res) => {
-            this.isLoad.operatorStateCode = false;
-            this.code.operatorStateCode = res.data.items;
-          });
+      this.fetchMenu();
     },
 
     methods: {
-      details (item) {
-        this.$router.push({
-          name: 'Operator 상세',
-          params: { id: item.operatorId }
-        })
-      },
-
-      fetchList (params = {}){
-        const defaultParams = {
-          page: this.pageInfo.page,
-          size: this.pageInfo.size,
-          q: this.queryParams
-        };
-
-        this.$https.get('/setting/management/operators', {...defaultParams, ...params})
-          .then((res) => {
-            // Setting API Service Name
-
-            this.items = res.data.items.map(obj => {
-              // obj.operatorServiceNames = (obj.operatorServiceList) ? obj.operatorServiceList.serviceName : [];
-              // obj.operatorServiceNames = ['11','22'];
-              const operatorServiceNames = [];
-              const operatorGroupNames = [];
-              obj.operatorServiceList.forEach( obj => {
-                operatorServiceNames.push(obj.serviceName)
-              })
-              obj.operatorServiceNames = operatorServiceNames;
-              obj.operatorGroupList.forEach( obj => {
-                operatorGroupNames.push(obj.groupName)
-              })
-              obj.operatorGroupNames = operatorGroupNames;
-              // console.log(this.items.operatorServiceNames);
-              return obj
-            });
-            this.pageInfo = res.data.pageInfo;
+      fetchMenuGroup (id){
+        this.$https.get(`/setting/admin/menuGroup/${id}`)
+          .then(res => {
+            console.log(res.data.items)
           });
+
       },
 
-      onCalendar (day, type){
-        this.searchItem.searchDateTo = moment().format('YYYY-MM-DD')
+      fetchMenu (id){
+        const uri = id ? `/setting/admin/menu/${id}` : `/setting/admin/menu`;
+        const action = id ? this.onFetchItem : (res) => {
+          if (this.menus.length) {
+            this.$eventBus.$emit('menu', [res.data.items]);
+          }else{
+            this.onFetchList([res.data.items]);
+          }
+        };
+        this.$https.get(uri).then(action);
+      },
 
-        if (day === 'today'){
-          this.searchItem.searchDateFrom = moment().format('YYYY-MM-DD')
-        } else if (day === 'reset'){
-          this.searchItem.searchDateFrom = null;
-          this.searchItem.searchDateTo = null;
-        } else {
-          this.searchItem.searchDateFrom = moment().subtract(day, type).format('YYYY-MM-DD');
+      onChangeGroup (item){
+        const id = item.groupId;
+        this.fetchMenuGroup(id);
+      },
+
+      onFetchList (nav){
+        this.menus = nav;
+        this.$refs.tree.initializeData(this.menus);
+        this.$refs.tree.onItemDrop = this.onItemDrop;
+        setTimeout(() => {
+          const node = this.$refs.tree.$children[0];
+          this.setSelectedMenu(node);
+        },0);
+      },
+
+      onFetchItem (res){
+        this.items = { ...res.data.items };
+        this.nodes.model = Object.assign(this.nodes.model, res.data.items);
+        this.originItems = JSON.parse(JSON.stringify(this.items));
+      },
+
+      onEdit (){
+        this.isEdit = true;
+        this.isCreate = false;
+      },
+
+      onView (noChange = true){
+        this.isEdit = false;
+        this.isCreate = false;
+        if (noChange){
+          this.items = JSON.parse(JSON.stringify(this.originItems));
         }
       },
 
-      onSearch (){
-        this.queryParams = {};
+      onCancel (){
+        if (this.items.menuId === 'add'){
+          this.onRemoveItem();
+        }else{
+          this.onView();
+        }
+      },
 
-        // UseYn data convert
-        Object.keys(this.searchItem).forEach(key => {
-          if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = (key === 'accountLockYn' )
-              ? (this.searchItem[key] === '잠김')
-              : this.searchItem[key];
+      onSubmit (){
+        const {
+          menuId,
+          menuName,
+          linkUrl,
+          menuPermissionCode,
+          menuExposureYn,
+          menuDesc,
+          menuLevel,
+          menuUseYn,
+          criteriaMenuId,
+          criteriaMenuLevel
+        } = this.items;
+
+        const submitItems = this.isCreate ? {
+          menuName,
+          linkUrl,
+          menuPermissionCode,
+          menuExposureYn,
+          menuDesc,
+          menuLevel,
+          menuUseYn,
+          criteriaMenuId,
+          criteriaMenuLevel
+        } : {
+          menuName,
+          linkUrl,
+          menuPermissionCode,
+          menuExposureYn,
+          menuDesc,
+          menuUseYn
+        };
+
+        const validate = this.$valid.all(submitItems);
+        const submitAction = (this.isCreate) ?
+          () => this.$https.post(`/setting/admin/menu`, submitItems) :
+          () => this.$https.put(`/setting/admin/menu/${menuId}`, submitItems);
+
+
+        this.inValidForm = !validate;
+
+        if (validate) {
+          submitAction()
+            .then((res) => {
+              const id = this.isCreate ? res.data.items : menuId;
+              this.onView(false);
+              this.modal.open = false;
+              this.fetchMenu();
+              this.fetchMenu(id);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      },
+
+      onDeleteData (){
+        this.items.criteriaMenuId = this.items.criteriaMenuId || 26
+        // Menu Delete
+        this.$https.delete(`/setting/admin/menu/${this.items.criteriaMenuId}/${this.items.menuId}`)
+          .then(() => {
+            this.setRemoveMenu();
+            this.fetchMenu();
+          });
+      },
+
+      onItemClick (node) {
+        if (this.items.menuId === 'add' && node.model.menuId !== 'add'){
+          this.items.menuId = node.model.menuId;
+          this.setRemoveMenu();
+          return;
+        }
+
+        this.nodes = node;
+        if (node.model.menuId !== 'add'){
+          this.fetchMenu(node.model.menuId);
+          return;
+        }
+        this.isEdit = true;
+        this.isCreate = true;
+      },
+
+      onSetAuth (e){
+        console.log(e);
+      },
+
+      onItemDrop (e, oriNode, oriItem) {
+        const tree = this.$refs.tree;
+        if (!tree.draggable || oriItem.dropDisabled) {
+          return false;
+        }
+        if (!tree.draggedElm || tree.draggedElm === e.target || tree.draggedElm.contains(e.target)) {
+          return;
+        }
+        if (tree.draggedItem) {
+          console.log(oriItem);
+          console.log(tree.draggedItem)
+        }
+        /*
+         if (this.draggedItem.parentItem === oriItem[this.childrenFieldName]
+         || this.draggedItem.item === oriItem
+         || (oriItem[this.childrenFieldName] && oriItem[this.childrenFieldName].findIndex(t => t.id === this.draggedItem.item.id) !== -1)) {
+         return;
+         }
+         if (!!oriItem[this.childrenFieldName]) {
+         oriItem[this.childrenFieldName].push(this.draggedItem.item)
+         } else {
+         oriItem[this.childrenFieldName] = [this.draggedItem.item]
+         }
+         oriItem.opened = true
+         var draggedItem = this.draggedItem
+         this.$nextTick(() => {
+         draggedItem.parentItem.splice(draggedItem.index, 1)
+         })
+         this.$emit("item-drop", oriNode, oriItem, draggedItem.item, e)
+         */
+
+
+      },
+
+
+      onAddItem (){
+        const { menuId, menuLevel } = this.items;
+        if (!this.nodes.model.addChild) {
+          return;
+        }
+        const addItem = {
+          menuId: 'add',
+          menuName: 'New Menu',
+          linkUrl : null,
+          menuPermissionCode : null,
+          menuExposureYn : true,
+          menuDesc : null,
+          menuLevel : parseInt(menuLevel) + 1,
+          menuUseYn : true,
+          criteriaMenuId : menuId,
+          criteriaMenuLevel : menuLevel
+        };
+
+        this.nodes.model.addChild(addItem);
+        this.items = { ...addItem };
+
+        setTimeout(() => {
+          const childIndex = this.nodes.$children.length - 1;
+          this.setSelectedMenu(this.nodes.$children[childIndex]);
+        },0)
+      },
+
+      onRemoveItem (){
+        if (this.items.menuId === 'add'){
+          this.setRemoveMenu();
+          return;
+        }
+        let hasChild = (this.nodes.$children.length);
+        let hasChildUseYn = false;
+
+        this.$refs.tree.handleRecursionNodeChilds(this.nodes, (node) => {
+          if (node.model && node.model.menuId !== this.items.menuId && node.model.menuUseYn){
+            hasChildUseYn = true;
           }
         });
-
-        this.fetchList({ page: 1 });
+        this.modal = {
+          open: true,
+          type: (hasChild && hasChildUseYn) ? 'error' : 'done',
+          msg: hasChild ?
+            hasChildUseYn ? '사용 중인 하위 메뉴가 있는 메뉴는 삭제할 수 없습니다.' :
+              `메뉴를 삭제하겠습니까?
+             삭제 시 하위 메뉴까지 모두 삭제됩니다.` :
+            '메뉴를 삭제하겠습니까?',
+          alert: (hasChild && hasChildUseYn),
+          action: this.onDeleteData
+        };
       },
 
-      onReset (){
-        Object.keys(this.searchItem).forEach((key) => {
-          if (key === 'searchType'){
-            this.searchItem[key] = 'operatorId';
-          } else if (key === 'searchDateType') {
-            this.searchItem[key] = 'createDate';
-          } else {
-            this.searchItem[key] = null;
-          }
-        });
-        this.queryParams = {};
-        this.fetchList();
+      onExpandAll (){
+        const firstItem = this.$refs.tree.$children[0];
+        if (firstItem) {
+          firstItem.model.openChildren();
+        }
       },
 
-      onRowSelect (size){
-        this.fetchList({ page: 1, size });
+      onCollapseAll (){
+        const firstItem = this.$refs.tree.$children[0];
+        if (firstItem) {
+          firstItem.model.closeChildren();
+        }
       },
 
-      onPagination (page){
-        this.fetchList({ page });
+      setSelectedMenu (node){
+        const { model } = node;
+        this.$refs.tree.handleSingleSelectItems(node, model);
+        this.onItemClick(node);
       },
 
-      excelDownload(){
-        const queryParams = JSON.stringify(this.queryParams);
-        const q = encodeURI(queryParams);
-        return window.location.href = '/api/setting/management/operators/excel/download?q=' + q;
-      },
+      setRemoveMenu (){
+        const currentIndex = this.nodes.parentItem.indexOf(this.nodes.model);
+        this.nodes.parentItem.splice(currentIndex, 1);
+        this.onView(false);
+        this.modal.open = false;
+        this.setSelectedMenu(this.nodes.$parent);
+      }
     }
   }
 </script>

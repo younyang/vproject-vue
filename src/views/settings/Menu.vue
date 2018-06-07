@@ -24,8 +24,15 @@
             text-field-name="menuName"
             value-field-name="menuId"
             children-field-name="subMenuList"
-            @item-click="onItemClick"
-          ></v-jstree>
+            @item-click="onItemClick">
+            <template slot-scope="_">
+              <div>
+                <i :class="_.vm.themeIconClasses" role="presentation" v-if="!_.model.loading"></i>
+                {{_.model.menuName}}
+                <span class="badge" v-if="_.model.menuId !== 1 && _.model.menuUseYn === false">미사용</span>
+              </div>
+            </template>
+          </v-jstree>
         </div>
       </div>
       <div class="col-8">
