@@ -1571,6 +1571,11 @@ section.board {
       content: ''
     }
 
+    .title {
+      float: left;
+      padding: 4px 0 3px 0;
+    }
+
     .btn {
       vertical-align: top;
     }
@@ -1593,6 +1598,35 @@ section.board {
   .tree-default .tree-last {
     background: transparent;
   }
+
+
+  .tree-default .tree-node {
+    position: relative;
+
+    .menu-btn {
+      position: absolute;
+      top: -1px;
+      right: 5px;
+      display: block;
+
+      .btn {
+        height: 20px;
+        padding: 2px 8px;
+        pointer-events: none !important;
+        cursor: default;
+      }
+
+      .btn-primary {
+        border: 1px solid $primary-color;
+      }
+    }
+  }
+
+  .tree-wholerow-ul .tree-anchor,
+  .tree-wholerow-ul .tree-icon {
+    position: static;
+  }
+
 
   > .drag-area {
     height: 533px;
