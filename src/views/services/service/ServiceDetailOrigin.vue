@@ -326,7 +326,8 @@
       const fetchCodeSection = (res) => {
         this.isLoad.originSectionCode = false;
         this.code.originSectionCode = res.data.items;
-        return this.$https.get(`${detailUrl}/types`);
+        //return this.$https.get(`${detailUrl}/types`);
+        return this.$https.get(`/services/${this.id}/origins/types`);
       };
 
       const fetchServiceType = (res) => {

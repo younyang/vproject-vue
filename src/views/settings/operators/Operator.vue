@@ -217,7 +217,7 @@
         queryParams: {},
 
         searchItem: {
-          searchType: 'operatorId',
+          searchType: 'loginId',
           searchKeyword: null,
           companyCode: null,
           groupId: null,
@@ -230,7 +230,7 @@
         },
         code: {
           searchType: [{
-                code: 'operatorId',
+                code: 'loginId',
             codeName: 'ID'
           },{
                 code: 'operatorName',
@@ -412,7 +412,7 @@
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
           if (key === 'searchType'){
-            this.searchItem[key] = 'operatorId';
+            this.searchItem[key] = 'loginId';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
           } else {
