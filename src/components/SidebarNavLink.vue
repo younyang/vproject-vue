@@ -1,6 +1,6 @@
 <template>
   <div v-if="isExternalLink">
-    <a :href="url" :class="classList">
+    <a :href="url" :class="classList" target="_blank">
       <i :class="icon"></i> {{name}}
       <b-badge v-if="badge && badge.text" :variant="badge.variant">{{badge.text}}</b-badge>
     </a>

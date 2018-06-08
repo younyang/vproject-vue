@@ -92,8 +92,20 @@
           })
           return filter;
         };
+        const list = nav[0].subMenuList.concat([{
+          menuName: 'Migration 작업목록',
+          menuUseYn: true,
+          linkUrl: 'http://172.20.1.105:5001/view/contents',
+          subMenuList: []
+        },{
+          menuName: 'Migration 대상목록',
+          menuUseYn: true,
+          linkUrl: 'http://172.20.1.105:5001/view/jobs',
+          subMenuList: []
+        }]);
 
-        this.navItems = filterMenu(nav[0].subMenuList)
+
+        this.navItems = filterMenu(list)
       }
     }
   }
