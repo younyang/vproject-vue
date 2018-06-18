@@ -24,6 +24,10 @@
       <!-- List -->
       <div class="col-3">
         <div class="monitor-search">
+          <b-form-input type="text" v-model="searchItem.filePath" placeholder="Enter File Path">
+          </b-form-input>
+        </div>
+        <div class="monitor-search">
           <b-form-input type="text" v-model="searchItem.searchKeyword" placeholder="Enter Search text">
           </b-form-input>
           <b-button type="reset" variant="outline-secondary" @click="onReset" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
@@ -74,9 +78,8 @@
         <div class="monitorWrap">
           <div class="monitor" v-for="val in this.items.edgeList">
             <div class="thumb">
-              <video class="video-js" autoplay controls preload="auto" data-setup="{}">
-                <source :src="'http://'+val.ip+'/demo/clear/tos_360_v.mp4'" type='video/mp4'>
-              </video>
+              <video class="video-js" controls autoplay preload="auto" data-ip="1.255.146.27"></video>
+              <!-- <video class="video-js" controls autoplay preload="auto" :data-ip="val.ip"></video> -->
             </div>
             <span class="title">{{ val.ip }}/{{ val.hostName }}</span>
           </div>
@@ -87,6 +90,7 @@
 </template>
 
 <script>
+  import shaka from 'shaka-player'
   export default {
     name: 'edgeMonitoring',
     data (){
@@ -106,17 +110,20 @@
         queryParams: {},
         searchItem: {
           searchKeyword: null,
-          popId: null
+          popId: null,
+          filePath: '/vod-test-bucket/55/master.m3u8' // TODO: 추후 초기화
+          //filePath: ''
         },
         code: {
           popId: []
         },
         isLoad: {
           popId: true
-        }
+        },
+        videoProtocol: 'https://',
+        licenseUrl: 'https://drm.kr.btv.into.guru/drm/v0.1/license/widevine'
       }
     },
-
     computed: {
       popId: {
         get () {
@@ -135,16 +142,46 @@
           this.isLoad.popId = false;
           this.code.popId = res.data.items;
         });
-    },
 
+      shaka.polyfill.installAll()
+      if (!shaka.Player.isBrowserSupported()) {
+        console.error('Browser not supported!')
+      }
+    },
     methods: {
       onSubmit (){
         this.items.edgeList = [];
-        if(this.selected.length > 0){
+        var searchFilePath = this.searchItem.filePath
+        if(this.selected.length > 0 && searchFilePath){
           const edgeIds = this.selected;
           this.$https.put(`/edges/monitoring`, { edgeIds })
             .then((res) => {
               this.items.edgeList = res.data.items;
+              this.$nextTick(function() {
+                var videos = document.getElementsByClassName('video-js')
+                Array.prototype.forEach.call(videos, video => {
+                  var player = new shaka.Player(video)
+                  window.player = player
+                  // Listen for error events.
+                  player.addEventListener('error', this.onErrorEventFromShaka)
+                  player.configure({
+                    drm: {
+                      servers: {
+                        'com.widevine.alpha': this.licenseUrl
+                      }
+                    }
+                  })
+                  /*
+                  contents url :
+                  https://1.255.146.27/vod-test-bucket/55/master.m3u8
+                  https://1.255.146.27/vod-test-bucket/M_341278_[프리미어]킬러의-보디가드[UHD]_0/M_341278_[프리미어]킬러의-보디가드[UHD]_0_[TV-UHD]_171020_TV[SD-S]/master.m3u8
+                  */
+                  player.load(this.videoProtocol + video.dataset.ip + '/' + searchFilePath).then(function () {
+                    // This runs if the asynchronous load is successful.
+                    console.log('The video has now been loaded!')
+                  }).catch(this.onErrorFromShaka)
+                })
+              });
             })
             .catch((error) => {
               console.log(error);
@@ -152,6 +189,14 @@
         }
         //console.log(this.selected.length);
         //console.log(this.selected);
+      },
+
+      onErrorEventFromShaka: function(event) {
+        this.onErrorFromShaka(event.detail)
+      },
+
+      onErrorFromShaka: function(error) {
+        console.error('Error code', error.code, 'object', error)
       },
 
       onReset (){
