@@ -10,30 +10,31 @@
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
 
-        <!-- Operator Id -->
+        <!-- AlarmPolicyId -->
         <b-form-fieldset
           :horizontal="true">
           <template slot="label">
-            ID<i class="require" v-if="isEdit">*</i>
+            ID
           </template>
 
           <b-form-input
-            v-model="items.loginId"
+            v-model="items.alarmPolicyId"
             type="text"
             plaintext
             required
           ></b-form-input>
         </b-form-fieldset>
-        <!-- Operator Name -->
+
+        <!-- Server Type -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            이름<i class="require" v-if="isEdit">*</i>
+            Server Type<i class="require" v-if="isEdit">*</i>
           </template>
 
           <b-form-input
-            v-model="items.operatorName"
+            v-model="items.serverType"
             type="text"
             placeholder="Enter Name"
             :plaintext="!isEdit"
@@ -41,280 +42,93 @@
           ></b-form-input>
         </b-form-fieldset>
 
-        <!-- Company Name -->
-        <b-form-fieldset
-          :horizontal="true">
-          <template slot="label">
-            회사명<i class="require" v-if="isEdit">*</i>
-          </template>
+        <div class="form-row">
+          <!-- Host Name -->
+          <b-form-fieldset
+            label="Host Name"
+            :horizontal="true">
+              {{items.hostName}}
+          </b-form-fieldset>
 
-          <b-form-input
-            v-model="items.companyName"
-            type="text"
-            plaintext
-            required
-          ></b-form-input>
-        </b-form-fieldset>
+          <!-- IP -->
+          <b-form-fieldset
+            label="IP"
+            :horizontal="true">
+            {{ items.ip }}
+          </b-form-fieldset>
+        </div>
 
-        <!-- Dept Name -->
-        <b-form-fieldset
-          :invalid-feedback="$valid.msg.require"
-          :horizontal="true">
-          <template slot="label">
-            부서<i class="require" v-if="isEdit">*</i>
-          </template>
+        <div class="form-row">
+          <!-- 알림 구분 -->
+          <b-form-fieldset
+            label="알림 구분"
+            :horizontal="true">
+              {{items.policyTypeName}}
+          </b-form-fieldset>
 
-          <b-form-input
-            v-model="items.deptName"
-            type="text"
-            placeholder="Enter deptName"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
-        </b-form-fieldset>
+          <!-- 임계치 -> 발생수치 -->
+          <b-form-fieldset
+            label="임계치 → 발생수치"
+            :horizontal="true">
+            <span>{{ items.policyThreshold }} → </span>
+            <span style="color:red;">{{ items.policyOutbreak }}</span>
+          </b-form-fieldset>
+        </div>
 
-        <!-- Email -->
-        <b-form-fieldset
-          :invalid-feedback="$valid.msg.require"
-          :horizontal="true">
-          <template slot="label">
-            이메일<i class="require" v-if="isEdit">*</i>
-          </template>
-
-          <b-form-input
-            v-model="items.email"
-            type="text"
-            placeholder="Enter email"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- 전화번호 -->
-        <b-form-fieldset
-          label="전화번호"
-          :horizontal="true">
-
-          <b-form-input
-            v-model="items.telephoneNumber"
-            type="text"
-            placeholder="Enter telephoneNumber"
-            :plaintext="!isEdit"
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- 휴대폰 -->
+        <!-- 수신 그룹 -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            휴대폰<i class="require" v-if="isEdit">*</i>
+            수신 그룹<i class="require" v-if="isEdit">*</i>
           </template>
 
-          <b-form-input
-            v-model="items.cellphoneNumber"
-            type="text"
-            placeholder="Enter cellphoneNumber"
-            :plaintext="!isEdit"
-            required
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- 그룹 -->
-        <b-form-fieldset
-          :invalid-feedback="$valid.msg.select"
-          :horizontal="true">
-          <template slot="label">
-            그룹<i class="require" v-if="isEdit">*</i>
-          </template>
-
-          <multiselect
-            v-model="groupList"
-            :class="{'invalid' : (valid.groupList)}"
-            v-if="isEdit"
-            class="multiple"
-            label="groupName"
-            track-by="groupId"
-            :multiple="true"
-            :showLabels="false"
-            :options="code.groupList"
-            :loading="isLoad.groupCode"
-            @select="groupSelect"
-            @remove="groupRemove"
-            placeholder="Select group"
-          ></multiselect>
-
-          <div class="badge-list" v-else>
-            <span class="badge sm" v-for="item in items.operatorGroupList">
-              {{ item.groupName }}
+          <div class="badge-list" >
+            <span class="badge sm" v-for="item in items.groupNames">
+              {{ item }}
             </span>
           </div>
         </b-form-fieldset>
 
-        <!-- 서비스 -->
+        <!-- 알림 방법 -->
         <b-form-fieldset
-          :invalid-feedback="$valid.msg.select"
+          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            서비스<i class="require" v-if="isEdit">*</i>
+            알림 방법<i class="require" v-if="isEdit">*</i>
           </template>
 
-          <multiselect
-            v-model="serviceList"
-            :class="{'invalid' : (valid.serviceList)}"
-            v-if="isEdit"
-            class="multiple"
-            label="serviceName"
-            track-by="serviceId"
-            :multiple="true"
-            :showLabels="false"
-            :options="code.serviceCode"
-            :loading="isLoad.serviceCode"
-            @select="serviceSelect"
-            @remove="serviceRemove"
-            placeholder="Select service"
-            :disabled="groupSelectPlatform"
-          ></multiselect>
-
-          <div class="badge-list" v-else>
-            <span class="badge sm" v-for="item in items.operatorServiceList">
-              {{ item.serviceName }}
-            </span>
-          </div>
+          <b-form-input
+            v-model="items.alarmTypeName"
+            type="text"
+            placeholder="Enter Name"
+            :plaintext="!isEdit"
+            required
+          ></b-form-input>
         </b-form-fieldset>
 
-        <div class="form-row">
-          <!-- 상태 -->
-          <b-form-fieldset
-            label="상태"
-            :horizontal="true">
-            <c-switch
-              v-if="isEdit"
-              type="text"
-              class="v-switch"
-              on="정상"
-              off="탈퇴"
-              v-model="items.operatorState"
-            ></c-switch>
-            <span
-            v-else
-              class="badge"
-              :class="{'primary' : items.operatorState }"
-            >{{ items.operatorState ? '정상' : '탈퇴' }}
-            </span>
-          </b-form-fieldset>
+        <!-- 전송일  -->
+        <b-form-fieldset
+          :invalid-feedback="$valid.msg.require"
+          :horizontal="true">
+          <template slot="label">
+            전송일<i class="require" v-if="isEdit">*</i>
+          </template>
 
-          <!-- 계정 잠김 여부 -->
-          <b-form-fieldset
-            label="계정 잠김 여부"
-            :horizontal="true">
-            <c-switch
-              v-if="isEdit"
-              type="text"
-              class="v-switch"
-              on="잠김"
-              off="정상"
-              v-model="items.accountLockYn"
-            ></c-switch>
-            <span
-            v-else
-              class="badge"
-              :class="{'primary' : items.accountLockYn }"
-            >{{ items.accountLockYn ? '잠김' : '정상' }}
-            </span>
-          </b-form-fieldset>
-        </div>
-      </b-form>
+          <b-form-input
+            v-model="items.createDatetime"
+            type="text"
+            placeholder="Enter Name"
+            :plaintext="!isEdit"
+            required
+          ></b-form-input>
+        </b-form-fieldset>
+
       </b-form>
     </b-collapse>
 
-    <!-- 처리이력 -->
-    <div class="collapse-title" v-if="!isEdit">
-      <b-button class="btn-collapse" v-b-toggle.formHistory>
-        <i class="fa"></i>
-        처리이력
-      </b-button>
-    </div>
-    <b-collapse id="formHistory" visible v-if="!isEdit">
-      <b-form class="formView">
-        <div class="form-row">
-          <!-- 가입신청일시 -->
-          <b-form-fieldset
-            label="가입신청일시"
-            :horizontal="true">
-            <b-form-input
-              :value="items.createDateTime"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-          <!-- 탈퇴일시 -->
-          <b-form-fieldset
-            label="탈퇴일시"
-            :horizontal="true">
-            <b-form-input
-              :value="items.deleteDateTime"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-        </div>
-
-        <div class="form-row">
-          <!-- 승인일시 -->
-          <b-form-fieldset
-            label="승인일시"
-            :horizontal="true">
-            <b-form-input
-              :value="items.createDateTime"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-          <!-- 승인자 -->
-          <b-form-fieldset
-            label="승인자"
-            :horizontal="true">
-            <b-form-input
-              :value="items.joinApprovalId"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-        </div>
-
-        <div class="form-row">
-          <!-- 수정일 -->
-          <b-form-fieldset
-            label="수정일시"
-            :horizontal="true">
-            <b-form-input
-              :value="items.modifyDateTime"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-          <!-- 수정자 -->
-          <b-form-fieldset
-            label="수정자"
-            :horizontal="true">
-            <b-form-input
-              :value="items.modifyId"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-        </div>
-      </b-form>
-    </b-collapse>
-
-    <div class="page-btn" v-if="isEdit">
-      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
-      <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
-    </div>
-    <div class="page-btn" v-else>
+    <div class="page-btn">
       <b-button type="button" variant="outline-secondary" :to="{ name: 'Operator 관리' }">목록</b-button>
-      <b-button type="button" variant="primary" @click="onEdit" v-if="this.items.operatorStateCode !== 'OPERATOR_STATE_03'">수정</b-button>
     </div>
   </div>
 </template>
@@ -419,29 +233,13 @@
 
 
     created (){
-      const detailUrl = `/setting/management/operators/${this.id}`;
+      const detailUrl = `/monitoring/policies/send/${this.id}`;
 
       // Detail Data
       this.$https.get(detailUrl)
         .then((res) => {
           this.items = { ...this.items, ...res.data.items };
-          const groupList = [];
-          const serviceList = [];
-          this.items.operatorGroupList.forEach( obj => {
-            groupList.push(obj.groupId)
-          });
-          this.items.operatorServiceList.forEach( obj => {
-            serviceList.push(obj.serviceId)
-          });
-          this.items.groupList = groupList;
-          this.items.serviceList = serviceList;
-          if(this.items.operatorStateCode === 'OPERATOR_STATE_02'){
-            this.items.operatorState = true;
-            this.items.deleteDateTime = '-';
-          }else{
-            this.items.operatorState = false;
-            this.items.deleteDateTime = this.items.modifyDateTime;
-          }
+          this.items.groupNames = this.items.groupNames.split(',')
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
 

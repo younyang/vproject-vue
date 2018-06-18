@@ -38,12 +38,12 @@
           <template slot="label">
             수신그룹<i class="require" v-if="isEdit">*</i>
           </template>
-
+          <div  v-if="!isEdit">
             <b-form-select
               multiple
               :select-size="4"
               v-model="items.selectGroupList"
-              :options="getSelectGroupNames()"
+              :options="items.selectGroup"
             ></b-form-select>
               <button title="추가" @click="" class="btn btn-outline-secondary" data-original-title="추가"></button>
               <button title="제거" @click="" class="btn btn-outline-secondary" data-original-title="제거"></button>
@@ -51,10 +51,14 @@
               multiple
               :select-size="10"
               v-model="items.possibleGroupList"
-              :options="getPossibleGroupNames()"
+              :options="items.possibleGroup"
             ></b-form-select>
-
-
+          </div>
+          <div class="badge-list" v-else>
+            <span class="badge sm" v-for="item in items.groupNames">
+              {{ item }}
+            </span>
+          </div>
         </b-form-fieldset>
 
         <!--알림방법 -->
@@ -223,7 +227,7 @@
           alarmPolicyId : null,
           serviceType : null,
           componentTypeCode : null,
-          groupNames : [],
+          groupNames : null,
           alarmTypeName : null,
           alarmTypeCode : null,
           alarmPolicyUseYn : null,
@@ -295,6 +299,7 @@
             ...this.items
             , ...res.data.items
           };
+          this.items.groupNames = this.items.groupNames.split(',');
           this.originItems = JSON.parse(JSON.stringify(this.items));
         });
       // ComponentTypeCode List
