@@ -34,30 +34,44 @@
 
         <!-- 수신그룹 -->
         <b-form-fieldset
-          :horizontal="true">
+          :horizontal="true" v-if="!isEdit">
           <template slot="label">
-            수신그룹<i class="require" v-if="isEdit">*</i>
+            수신그룹
           </template>
-          <div  v-if="!isEdit">
-            <b-form-select
-              multiple
-              :select-size="4"
-              v-model="items.selectGroupList"
-              :options="items.selectGroup"
-            ></b-form-select>
-              <button title="추가" @click="" class="btn btn-outline-secondary" data-original-title="추가"></button>
-              <button title="제거" @click="" class="btn btn-outline-secondary" data-original-title="제거"></button>
-            <b-form-select
-              multiple
-              :select-size="10"
-              v-model="items.possibleGroupList"
-              :options="items.possibleGroup"
-            ></b-form-select>
-          </div>
-          <div class="badge-list" v-else>
+          <div class="badge-list" >
             <span class="badge sm" v-for="item in items.groupNames">
               {{ item }}
             </span>
+          </div>
+        </b-form-fieldset>
+        <!-- 수신그룹 -->
+        <b-form-fieldset
+        description = "[!] Shift 버튼을 누른 상태에서 선택하면 여러 항목을 동시에 선택할 수 있습니다."
+          :horizontal="true" v-else>
+          <template slot="label">
+            수신그룹<i class="require">*</i>
+          </template>
+          <div v-if="isEdit">
+            <button title="select전체선택" @click="selectAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택"></button>
+            <b-form-select
+             style="width: 150px; height: 80px;"
+              multiple
+              :select-size="4"
+              @change="removePossibleGroup"
+              v-model="items.selectGroup"
+              :options="items.selectGroupListEdit"
+            ></b-form-select>
+              <button title="추가" @click="updateSelectGroup" class="btn btn-outline-secondary" data-original-title="추가"></button>
+              <button title="제거" @click="deleteSelectGroup" class="btn btn-outline-secondary" data-original-title="제거"></button>
+            <b-form-select
+              style="width: 150px; height: 80px;"
+              multiple
+              :select-size="10"
+              @change="removeSelectGroup"
+              v-model="items.possibleGroup"
+              :options="items.possibleGroupListEdit"
+            ></b-form-select>
+            <button title="possible전체선택" @click="possibleAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택"></button>
           </div>
         </b-form-fieldset>
 
@@ -237,8 +251,12 @@
           alarmPolicyGroupList : [],
           checkList : [],
           groupIds : [],
+          selectGroup : [],
+          possibleGroup : [],
           selectGroupList : [],
-          possibleGroupList : []
+          possibleGroupList : [],
+          selectGroupListEdit : [],
+          possibleGroupListEdit : []
         },
         code: {
           componentTypeCode : [],
@@ -354,7 +372,10 @@
         // const validate = this.$valid.all();
         // this.inValidForm = !(validate);
         // if(validate){
+          this.items.groupIds = this.items.selectGroupList;
+          console.log(this.items.groupIds)
           this.$https.put(`/monitoring/policies/${this.id}`,this.items).then(() => {
+
             this.$router.go(this.$router.currentRoute);
           }).catch((error) => {
             console.log(error)
@@ -378,19 +399,6 @@
         }
       },
 
-      getSelectGroupNames () {
-
-
-        return [
-          {
-            text:"zzzz",
-            value:"1"
-          },{
-            text:"zzddddzz",
-            value:"2"
-          }
-        ]
-      },
 
       getPossibleGroupNames () {
         const possibleGroupList = [];
@@ -402,6 +410,74 @@
         });
         return possibleGroupList;
       },
+
+      selectAllGroup (){
+        console.log(this.items.selectGroupList)
+        this.items.selectGroup.length == 0 ? this.items.selectGroup = this.items.selectGroupList : this.items.selectGroup = []
+      },
+
+      possibleAllGroup () {
+        this.items.possibleGroup.length == 0 ? this.items.possibleGroup = this.items.possibleGroupList : this.items.possibleGroup = []
+      },
+
+      updateSelectGroup () {
+        if(this.items.possibleGroup){
+          const data = [];
+          for(var i = 0; i < this.items.possibleGroupListEdit.length; i ++){
+            this.items.possibleGroup.forEach(obj2=> {
+              console.log(this.items.possibleGroupListEdit[i].value)
+              if(this.items.possibleGroupListEdit[i].value == obj2){
+                this.items.selectGroupListEdit.push(this.items.possibleGroupListEdit[i]);
+                this.items.possibleGroupListEdit.splice(i,1);
+              }
+            })
+          }
+          this.items.selectGroupList = [];
+          this.items.selectGroupListEdit.filter(({value}) => {
+            this.items.selectGroupList.push(value);
+          })
+          this.items.possibleGroupList = [];
+          this.items.possibleGroupListEdit.filter(({value}) => {
+            this.items.possibleGroupList.push(value);
+          })
+          this.items.selectGroup = [];
+          this.items.possibleGroup = [];
+
+        }
+      },
+
+      deleteSelectGroup () {
+        if(this.items.selectGroup){
+          const data = [];
+          for(var i = 0; i < this.items.selectGroupListEdit.length; i ++){
+            this.items.selectGroup.forEach(obj2=> {
+              if(this.items.selectGroupListEdit[i].value == obj2){
+                this.items.possibleGroupListEdit.push(this.items.selectGroupListEdit[i]);
+                this.items.selectGroupListEdit.splice(i,1);
+              }
+            })
+          }
+          this.items.selectGroupList = [];
+          this.items.selectGroupListEdit.filter(({value}) => {
+            this.items.selectGroupList.push(value);
+          })
+          this.items.possibleGroupList = [];
+          this.items.possibleGroupListEdit.filter(({value}) => {
+            this.items.possibleGroupList.push(value);
+          })
+          this.items.selectGroup = [];
+          this.items.possibleGroup = [];
+        }
+
+      },
+
+      removeSelectGroup () {
+        if(this.items.selectGroup) this.items.selectGroup = [];
+      },
+
+      removePossibleGroup () {
+        if(this.items.possibleGroup) this.items.possibleGroup = [];
+      }
     }
   }
 </script>
