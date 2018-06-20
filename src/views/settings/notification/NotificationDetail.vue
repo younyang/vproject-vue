@@ -52,7 +52,7 @@
             수신그룹<i class="require">*</i>
           </template>
           <div v-if="isEdit">
-            <button title="select전체선택" @click="selectAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택"></button>
+            <button title="select전체선택" @click="selectAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택">전체선택</button>
             <b-form-select
              style="width: 150px; height: 80px;"
               multiple
@@ -61,8 +61,8 @@
               v-model="items.selectGroup"
               :options="items.selectGroupListEdit"
             ></b-form-select>
-              <button title="추가" @click="updateSelectGroup" class="btn btn-outline-secondary" data-original-title="추가"></button>
-              <button title="제거" @click="deleteSelectGroup" class="btn btn-outline-secondary" data-original-title="제거"></button>
+              <button title="추가" @click="updateSelectGroup" class="btn btn-outline-secondary" data-original-title="추가">◀</button>
+              <button title="제거" @click="deleteSelectGroup" class="btn btn-outline-secondary" data-original-title="제거">▶</button>
             <b-form-select
               style="width: 150px; height: 80px;"
               multiple
@@ -71,7 +71,7 @@
               v-model="items.possibleGroup"
               :options="items.possibleGroupListEdit"
             ></b-form-select>
-            <button title="possible전체선택" @click="possibleAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택"></button>
+            <button title="possible전체선택" @click="possibleAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택">전체선택</button>
           </div>
         </b-form-fieldset>
 
@@ -361,26 +361,19 @@
       },
 
       onSubmit (){
-        // const {
-        //   componentTypeCode,
-        //   alarmTypeCode,
-        //   alarmPolicyUseYn,
-        //   checkList,
-        //   groupIds
-        // } = this.items;
-
-        // const validate = this.$valid.all();
-        // this.inValidForm = !(validate);
-        // if(validate){
-          this.items.groupIds = this.items.selectGroupList;
-          console.log(this.items.groupIds)
+        this.items.groupIds = this.items.selectGroupList;
+        const submitItems = {
+          ...this.items,
+        }
+        if(this.items.groupIds.length !== 0){
           this.$https.put(`/monitoring/policies/${this.id}`,this.items).then(() => {
-
             this.$router.go(this.$router.currentRoute);
           }).catch((error) => {
-            console.log(error)
           })
-        // }
+        }else{
+          alert("수신 그룹을 추가하세요.");
+        }
+
       },
 
       validate (submitItems){
