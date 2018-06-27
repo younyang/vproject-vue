@@ -64,8 +64,12 @@ export default {
               url: '/configuration/referrers/ipRestriction'
             },
             {
-              name: 'GEO IP',
-              url: '/configuration/referrers/geoIp'
+              name: 'GeoIP Miss',
+              url: '/configuration/referrers/geoIpMiss'
+            },
+            {
+              name: 'GeoIP Hit',
+              url: '/configuration/referrers/geoIpHit'
             },
             {
               name: 'One-Time URL',
