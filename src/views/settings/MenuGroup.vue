@@ -282,9 +282,8 @@
 
       onDeleteData (){
         this.modal.open = false;
-        /*
         const selectedMenus = this.selectedGroupMenus;
-        this.$https.delete(`/setting/admin/menuGroup/${this.groups.groupId}`,{
+        this.$https.put(`/setting/admin/menuGroup/${this.groups.groupId}`,{
           menuIdList: selectedMenus
         }).then(() => {
           this.modal.open = false;
@@ -292,7 +291,6 @@
             this.fetchMenuGroup(this.groups.groupId)
           }, 100)
         });
-        */
       },
 
       onExpandAll (){
