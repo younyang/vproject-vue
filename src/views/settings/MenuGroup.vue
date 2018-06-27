@@ -25,7 +25,7 @@
 
           <v-jstree
             ref="tree"
-            :data="menus"
+            :data="menuGroups"
             :whole-row="true"
             :collapse="true"
             show-checkbox
@@ -34,7 +34,7 @@
             text-field-name="menuName"
             value-field-name="menuId"
             children-field-name="subMenuList"
-            @item-click="onItemClick">
+            @item-click="onGroupItemClick">
             <template slot-scope="_">
               <div style="display: inherit">
                 <i :class="_.vm.themeIconClasses" role="presentation" v-if="!_.model.loading"></i>
@@ -139,6 +139,10 @@
         menus: [],
         groups: [],
         menuGroups: [],
+
+        selectedMenus: [],
+        selectedGroupMenus: [],
+
         nodes: false,
 
         code: {
@@ -194,7 +198,8 @@
       fetchMenuGroup (id){
         this.$https.get(`/setting/admin/menuGroup/${id}`)
           .then(res => {
-            console.log(res.data.items)
+            this.menuGroups = [res.data.items];
+            this.$refs.tree.initializeData(this.menuGroups);
           });
       },
 
@@ -202,7 +207,7 @@
         this.$https.get('/setting/admin/menu')
           .then(res => {
             this.menus = [res.data.items];
-            this.$refs.tree.initializeData(this.menus);
+            this.$refs.tree2.initializeData(this.menus);
           });
       },
 
@@ -211,76 +216,83 @@
         this.fetchMenuGroup(id);
       },
 
-
-      onDeleteData (){
-        this.items.criteriaMenuId = this.items.criteriaMenuId || 26
-        // Menu Delete
-        this.$https.delete(`/setting/admin/menu/${this.items.criteriaMenuId}/${this.items.menuId}`)
-          .then(() => {
-            this.setRemoveMenu();
-            this.fetchMenu();
-          });
-      },
-
       onSetAuth (obj, code){
-        //obj.menuPermissionCode = `MENU_PERMISSION_0${code}`;
+        const permissionCode = `MENU_PERMISSION_0${code}`;
+        this.$https.put(`/setting/admin/menuGroup/${this.groups.groupId}/${obj.menuId}`,{
+          menuPermissionCode: permissionCode
+        }).then(() => {
+          obj.menuPermissionCode = permissionCode;
+        });
       },
 
-      onItemClick (node) {
+      onGroupItemClick (node){
         this.nodes = node;
       },
 
-      onAddItem (){
-        const { menuId, menuLevel } = this.items;
-        if (!this.nodes.model.addChild) {
-          return;
+      onItemClick (node) {
+        const loopParent = (node) => {
+          const lists = node.$parent.$children.map(comp => comp.model);
+          const hasSelected = lists.find(({ selected }) => selected === true);
+
+          node.$parent.model.selected = (hasSelected !== undefined);
+          if (node.$parent.model.menuLevel > 1){
+            loopParent(node.$parent);
+          }
         }
-        const addItem = {
-          menuId: 'add',
-          menuName: 'New Menu',
-          linkUrl : null,
-          menuPermissionCode : null,
-          menuExposureYn : true,
-          menuDesc : null,
-          menuLevel : parseInt(menuLevel) + 1,
-          menuUseYn : true,
-          criteriaMenuId : menuId,
-          criteriaMenuLevel : menuLevel
+        loopParent(node);
+      },
+
+      onAddItem (){
+        this.selectedMenus = this.getSelectedMenus(this.menus);
+        const isSelect = (this.selectedMenus.length);
+        this.modal = {
+          open: true,
+          type: isSelect ? 'done' : 'error',
+          msg: isSelect ? '선택한 메뉴를 추가하시겠습니까?' : '선택된 메뉴가 없습니다',
+          alert: (!isSelect),
+          action: this.onAddSubmit
         };
+      },
 
-        this.nodes.model.addChild(addItem);
-        this.items = { ...addItem };
-
-        setTimeout(() => {
-          const childIndex = this.nodes.$children.length - 1;
-          this.setSelectedMenu(this.nodes.$children[childIndex]);
-        },0)
+      onAddSubmit (){
+        const selectedMenus = this.selectedMenus;
+        this.$https.post('/setting/admin/menuGroup',{
+          groupId : this.groups.groupId,
+          menuIdList: selectedMenus
+        }).then(() => {
+          this.modal.open = false;
+          setTimeout(() => {
+            this.fetchMenuGroup(this.groups.groupId)
+          }, 100)
+        });
       },
 
       onRemoveItem (){
-        if (this.items.menuId === 'add'){
-          this.setRemoveMenu();
-          return;
-        }
-        let hasChild = (this.nodes.$children.length);
-        let hasChildUseYn = false;
+        this.selectedGroupMenus = this.getSelectedMenus(this.menuGroups);
+        const isSelect = (this.selectedGroupMenus.length);
 
-        this.$refs.tree.handleRecursionNodeChilds(this.nodes, (node) => {
-          if (node.model && node.model.menuId !== this.items.menuId && node.model.menuUseYn){
-            hasChildUseYn = true;
-          }
-        });
         this.modal = {
           open: true,
-          type: (hasChild && hasChildUseYn) ? 'error' : 'done',
-          msg: hasChild ?
-            hasChildUseYn ? '사용 중인 하위 메뉴가 있는 메뉴는 삭제할 수 없습니다.' :
-              `메뉴를 삭제하겠습니까?
-             삭제 시 하위 메뉴까지 모두 삭제됩니다.` :
-            '메뉴를 삭제하겠습니까?',
-          alert: (hasChild && hasChildUseYn),
+          type: (isSelect) ? 'done' : 'error',
+          msg: isSelect ? '선택한 메뉴를 삭제하시겠습니까?' : '선택된 메뉴가 없습니다',
+          alert: (!isSelect),
           action: this.onDeleteData
         };
+      },
+
+      onDeleteData (){
+        this.modal.open = false;
+        /*
+        const selectedMenus = this.selectedGroupMenus;
+        this.$https.delete(`/setting/admin/menuGroup/${this.groups.groupId}`,{
+          menuIdList: selectedMenus
+        }).then(() => {
+          this.modal.open = false;
+          setTimeout(() => {
+            this.fetchMenuGroup(this.groups.groupId)
+          }, 100)
+        });
+        */
       },
 
       onExpandAll (){
@@ -295,7 +307,22 @@
         if (firstItem) {
           firstItem.model.closeChildren();
         }
-      }
+      },
+
+      getSelectedMenus (menus){
+        const selected = [];
+        const loop = (list) => list.forEach(obj => {
+          const child = obj.subMenuList;
+          if (obj.selected){
+            selected.push(obj.menuId);
+          }
+          if (child && child.length){
+            loop(child);
+          }
+        })
+        loop(menus);
+        return selected;
+      },
     }
   }
 </script>

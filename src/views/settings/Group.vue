@@ -307,11 +307,14 @@
     },
 
     methods: {
-      fetchGroup (){
+      fetchGroup (index = 0){
         const defaultParams = {
           q: { ...this.searchItem }
         };
-        this.$https.get('/setting/admin/groups', {...defaultParams }).then(this.onFetchList);
+        this.$https.get('/setting/admin/groups', {...defaultParams })
+          .then(res => {
+            this.onFetchList(res, index)
+          });
       },
 
       fetchNameExists (){
@@ -342,9 +345,9 @@
         });
       },
 
-      onFetchList (res){
+      onFetchList (res, index = 0){
         this.groups = res.data.items;
-        this.items = { ...res.data.items[0] };
+        this.items = { ...res.data.items[index] };
         this.originItems = JSON.parse(JSON.stringify(this.items));
       },
 
@@ -430,13 +433,16 @@
         this.items = { ...obj };
       },
 
-      onItemDrop () {
-        const sort = this.groups.map(({ groupId }, index) => ({ groupId, sortNumber: (index+1) }));
-        this.$https.put('/setting/admin/groups/sort', sort)
-          .then(() => {
-            this.searchItem.searchKeyword = '';
-            this.fetchGroup();
-          });
+      onItemDrop (item) {
+        const sortObj = this.groups[item.newIndex];
+        this.$https.put('/setting/admin/groups/sort', {
+          groupId: sortObj.groupId,
+          sortNumber: (item.newIndex + 1)
+        })
+        .then(() => {
+          this.searchItem.searchKeyword = '';
+          this.fetchGroup(item.newIndex);
+        });
       },
 
 

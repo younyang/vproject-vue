@@ -517,7 +517,7 @@ export default new Router({
         },
         {
           path: 'system',
-          redirect: '/system/scheduler',
+          redirect: '/system/commonCode',
           name: 'System',
           component: {
             render (c) {
@@ -525,6 +525,11 @@ export default new Router({
             }
           },
           children: [
+            {
+              path: 'commonCode',
+              name: 'Common Code',
+              component: lazyLoading('system/commonCode/CommonCode')
+            },
             {
               path: 'scheduler',
               name: 'Scheduler 관리',
