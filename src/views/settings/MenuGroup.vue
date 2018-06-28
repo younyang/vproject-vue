@@ -270,7 +270,7 @@
       onRemoveItem (){
         this.selectedGroupMenus = this.getSelectedMenus(this.menuGroups);
         const isSelect = (this.selectedGroupMenus.length);
-
+          console.log("test")
         this.modal = {
           open: true,
           type: (isSelect) ? 'done' : 'error',
