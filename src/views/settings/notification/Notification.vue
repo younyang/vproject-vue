@@ -100,6 +100,9 @@
       <b-button type="button" variant="primary" @click="excelDownload">
         엑셀 다운로드
       </b-button>
+      <b-button type="button" variant="primary" :to="{ name: 'Notification 등록' }">
+        등록
+      </b-button>
     </section>
 
     <section class="board">

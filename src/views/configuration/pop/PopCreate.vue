@@ -14,40 +14,49 @@
         ></b-form-input>
       </b-form-fieldset>
 
-      <!-- Host Name -->
-      <b-form-fieldset
-        label="Host Name(Prefix)<i class='require'>*</i>"
-        :invalid-feedback="feedback.popHostName"
-        :horizontal="true">
+      <div class="form-row">
+        <!-- Host Name -->
+        <b-form-fieldset
+          label="Host Name(Prefix)<i class='require'>*</i>"
+          :invalid-feedback="feedback.popHostName"
+          :horizontal="true">
 
-        <b-form-input
-          v-model="items.popHostName"
-          type="text"
-          placeholder="Enter PoP Host name"
-          :state="valid.popHostName"
-          @input="popHostNameExists = null"
-          required
-        ></b-form-input>
-        <b-button variant="in-table" @click="fetchNameExists">중복확인</b-button>
-        <span class="ico ml-2 mid" v-if="popHostNameExists !== null">
+          <b-form-input
+            v-model="items.popHostName"
+            type="text"
+            style="width:156px"
+            placeholder="Enter PoP Host name"
+            :state="valid.popHostName"
+            :disabled="this.isReInputed"
+            @input="popHostNameExists = null"
+            required
+          ></b-form-input>
+          <b-button v-if="!this.isReInputed" variant="in-table" @click="fetchNameExists">중복확인</b-button>
+          <b-button v-if="this.isReInputed" variant="in-table" @click="popHostNameExists=false">재입력</b-button>
+          <span class="ico ml-2 mid" v-if="popHostNameExists !== null">
           <i v-if="popHostNameExists === 'success'" class="fa fa-check-circle"></i>
           <i v-if="popHostNameExists === 'fail'" class="fa fa-times-circle"></i>
         </span>
-      </b-form-fieldset>
+        </b-form-fieldset>
 
-      <!-- Domain -->
-      <b-form-fieldset
-        label="Domain<i class='require'>*</i>"
-        :invalid-feedback="feedback.domain"
-        :horizontal="true">
-
-        <b-button variant="in-table" @click="fetchDomain">생성</b-button>
-        <small
-          class="form-text-alone ml-2"
-          :class="{'invalid': items.popDomainName === null }">
-          http(s)://<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-        </small>
-      </b-form-fieldset>
+        <!-- region code -->
+        <b-form-fieldset
+          label="지역 <i class='require'>*</i>"
+          :invalid-feedback="$valid.msg.select"
+          :horizontal="true">
+          <multiselect
+            v-model="geoCode"
+            :showLabels="false"
+            :options="code.geoCode"
+            :loading="isLoad.geoCode"
+            :class="{'invalid': !valid.geoCode }"
+            track-by="code"
+            label="codeName"
+            style="width:156px"
+            placeholder="선택"
+          ></multiselect>
+        </b-form-fieldset>
+      </div>
 
       <!-- data center -->
       <b-form-fieldset
@@ -64,42 +73,6 @@
           label="codeName"
           style="width:156px"
           placeholder="선택"
-        ></multiselect>
-      </b-form-fieldset>
-
-      <!-- 주소 -->
-      <b-form-fieldset
-        label="주소<i class='require'>*</i>"
-        :invalid-feedback="$valid.msg.select"
-        :horizontal="true">
-        <multiselect
-          v-model="popCtprvnCode"
-          :showLabels="false"
-          :searchable="false"
-          :options="code.popCtprvnCode"
-          :loading="isLoad.popCtprvnCode"
-          :class="{'invalid': !valid.popCtprvnCode }"
-          @select="onFirstAddress"
-          track-by="addressCode"
-          label="addressCodeName"
-          class="inline"
-          style="width:156px"
-          placeholder="선택"
-        ></multiselect>
-
-        <multiselect
-          v-if="popCtprvnCode"
-          v-model="popSigCode"
-          :showLabels="false"
-          :searchable="false"
-          :options="code.popSigCode"
-          :loading="isLoad.popSigCode"
-          :class="{'invalid': !valid.popSigCode }"
-          track-by="addressCode"
-          label="addressCodeName"
-          placeholder="선택"
-          class="inline"
-          style="width: 160px"
         ></multiselect>
       </b-form-fieldset>
 
@@ -124,14 +97,17 @@
         label="Bandwidth<i class='require'>*</i>"
         :invalid-feedback="$valid.msg.require"
         :horizontal="true">
+
         <cleave
-          :value.sync="items.bandwidth"
+          v-model="items.bandwidth"
           style="width: 156px;"
           class="form-control"
           :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
           required
         ></cleave>
+
       </b-form-fieldset>
+
 
 
       <!-- 사용여부 -->
@@ -158,38 +134,35 @@
 
 <script>
   import cSwitch from '@/components/Switch'
+
   export default {
     name: 'pops',
     components: {
       cSwitch
     },
 
-    data (){
+    data() {
       return {
         items: {
           popName: '',
           popHostName: '',
-          popDomainName: null,
-          popCtprvnCode : null,
-          popSigCode : null,
-          qualitySolutionTeamCode : null,
-          dataCenterCode : null,
-          referrerYn : false,
-          highReferrerYn : false,
-          bandwidth : 0,
-          popUseYn : true
+          geoCode: '',
+          qualitySolutionTeamCode: null,
+          dataCenterCode: null,
+          bandwidth: 0,
+          popUseYn: true,
+          referrerYn: false,
+          highReferrerYn: false,
         },
         code: {
-          popCtprvnCode: [],
-          popSigCode: [],
           qualitySolutionTeamCode: [],
-          dataCenterCode : [],
+          dataCenterCode: [],
+          geoCode: []
         },
         isLoad: {
-          popCtprvnCode: true,
-          popSigCode: true,
           qualitySolutionTeamCode: true,
-          dataCenterCode : true,
+          dataCenterCode: true,
+          geoCode: true
         },
 
         popHostNameExists: null,
@@ -199,105 +172,125 @@
 
     computed: {
       popCtprvnCode: {
-        get () {
+        get() {
           return this.code.popCtprvnCode.find(obj => obj.addressCode === this.items.popCtprvnCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.popCtprvnCode = newValue !== null ? newValue.addressCode : null;
         }
       },
       popSigCode: {
-        get () {
+        get() {
           return this.code.popSigCode.find(obj => obj.addressCode === this.items.popSigCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
         }
       },
       qualitySolutionTeamCode: {
-        get () {
+        get() {
           return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.qualitySolutionTeamCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
       dataCenterCode: {
-        get () {
+        get() {
           return this.code.dataCenterCode.find(obj => obj.code === this.items.dataCenterCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.dataCenterCode = newValue !== null ? newValue.code : null;
         }
       },
+      geoCode: {
+        get() {
+          return this.code.geoCode.find(obj => obj.code === this.items.geoCode) || null;
+        },
+        set(newValue) {
+          this.items.geoCode = newValue !== null
+            ? newValue.code : null;
+        }
+      },
+
+      isReInputed() {
+        return this.popHostNameExists === 'success' ? true : false
+      },
+
       // validation
-      valid (){
+      valid() {
         return {
           popHostName: (this.popHostNameExists === null && this.items.popHostName.length === 0) ?
             this.popHostNameExists :
             (this.items.popHostName.length > 0 &&
-            /^[A-Za-z0-9]*$/.test(this.items.popHostName) &&
-            this.popHostNameExists === 'success'),
+              /^[A-Za-z0-9]*$/.test(this.items.popHostName) &&
+              this.popHostNameExists === 'success'),
           referrer: !(!this.items.referrerYn && !this.items.highReferrerYn),
-          popCtprvnCode: this.items.popCtprvnCode !== null,
-          popSigCode: this.items.popSigCode !== null,
           qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null,
-          dataCenterCode: this.items.dataCenterCode !== null
+          dataCenterCode: this.items.dataCenterCode !== null,
+          geoCode: this.items.geoCode !== null
         }
       },
 
       // validation feedback
-      feedback (){
+      feedback() {
         return {
           popHostName: (!(/^[A-Za-z0-9]*$/.test(this.items.popHostName)) && this.items.popHostName.length > 0) ?
             '영문, 숫자만 입력하십시오.'
             : (this.popHostNameExists === null && this.items.popHostName.length > 0) ?
-            '중복확인은 필수입니다.'
-            : (this.popHostNameExists === 'not') ?
-            '입력된 항목이 없습니다.'
-            : (this.popHostNameExists === 'fail') ?
-            '이미 등록된 Host Name이 있습니다.'
-            : this.items.popHostName.length === 0 ?
-            this.$valid.msg.require : '',
-          domain: this.items.popDomainName === null ?
-            'Domain name 생성이 필요합니다.' : ''
+              '중복확인은 필수입니다.'
+              : (this.popHostNameExists === 'not') ?
+                '입력된 항목이 없습니다.'
+                : (this.popHostNameExists === 'fail') ?
+                  '이미 등록된 Host Name이 있습니다.'
+                  : this.items.popHostName.length === 0 ?
+                    this.$valid.msg.require : ''
         }
       }
     },
 
-    created (){
-      // 주소 Code
-      this.fetchAddress();
+    created() {
+
       // 품질솔루션팀 Code
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'QUALITY_TEAM' }
-        })
+        q: {groupCode: 'QUALITY_TEAM'}
+      })
         .then((res) => {
           this.isLoad.qualitySolutionTeamCode = false;
           this.code.qualitySolutionTeamCode = res.data.items;
         });
       // dataCenter Code
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'DATACENTER' }
-        })
+        q: {groupCode: 'DATACENTER'}
+      })
         .then((res) => {
           this.isLoad.dataCenterCode = false;
           this.code.dataCenterCode = res.data.items;
         });
+      // region Code
+      this.$https.get('/system/commonCode', {
+        q: {groupCode: 'GEO'}
+      })
+        .then((res) => {
+          this.isLoad.geoCode = false;
+          this.code.geoCode = res.data.items;
+        });
     },
 
     methods: {
-      onSubmit (){
+      onSubmit() {
+        console.log('Class: methods, Function: onSubmit, Line 356 (): '
+        , );
         // History
         this.items.modifyHistReason = '등록';
         const validate = (this.$valid.all(this.items) && this.popHostNameExists === 'success');
         this.inValidForm = !validate;
 
         // POST
-        if (validate){
+        if (validate) {
           this.$https.post('/pops', this.items)
             .then((res) => {
-              this.$router.push({ name: 'Pop 상세', params: { id: res.data.items }})
+              this.$router.push({name: 'Pop 상세', params: {id: res.data.items}})
             })
             .catch((error) => {
               console.log(error);
@@ -305,44 +298,19 @@
         }
       },
 
-      fetchNameExists (){
-        if (!this.items.popHostName){
+      fetchNameExists() {
+        if (!this.items.popHostName) {
           this.popHostNameExists = 'not';
           return;
         }
         this.$https.get('/pops/hostName/exists', {
-            hostName: this.items.popHostName
-          })
+          hostName: this.items.popHostName
+        })
           .then((res) => {
             this.popHostNameExists = res.data.result === 'Success' ? 'success' : 'fail';
           });
       },
 
-      fetchDomain (){
-        this.$https.get('/pops/domain')
-          .then((res) => {
-            this.items.popDomainName = res.data.items.domain;
-          });
-      },
-
-      fetchAddress (param =''){
-        this.$https.get('/pops/address', {
-          firstDepth: param
-        })
-          .then((res) => {
-            if (param === ''){
-              this.isLoad.popCtprvnCode = false;
-              this.code.popCtprvnCode = res.data.items;
-            } else {
-              this.isLoad.popSigCode = false;
-              this.code.popSigCode = res.data.items;
-            }
-          });
-      },
-
-      onFirstAddress (obj){
-        this.fetchAddress(obj.addressCode)
-      }
     }
   }
 </script>

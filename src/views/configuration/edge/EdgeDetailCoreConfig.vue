@@ -14,14 +14,14 @@
     </div>
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
-        <!-- Disk size -->
+        <!-- Disk size
         <b-form-fieldset
           label="Disk size"
           :horizontal="true">
           <span class="form-text-alone">{{ items.diskSize }}</span> GB
         </b-form-fieldset>
-
-        <!-- List -->
+        -->
+        <!-- List
         <b-form-fieldset
           label="&nbsp;"
           :horizontal="true">
@@ -81,6 +81,88 @@
             </template>
           </b-table>
         </b-form-fieldset>
+        -->
+
+        <!-- Edge 구분 :: Edit -->
+        <b-form-fieldset
+          v-if="isEdit"
+          :invalid-feedback="$valid.msg.select"
+          :horizontal="true">
+          <template slot="label">
+            Edge 구분<i class="require">*</i>
+          </template>
+
+          <multiselect
+            v-model="edgeTypeCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.edgeTypeCode"
+            :loading="isLoad.edgeTypeCode"
+            :class="{'invalid': !valid.edgeTypeCode }"
+            track-by="code"
+            label="codeName"
+            class="inline"
+            style="width:156px"
+            placeholder="선택"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <!-- Edge 구분 :: View -->
+        <b-form-fieldset
+          label="Edge 구분"
+          :horizontal="true"
+          v-else>
+          <b-form-input
+            :value="items.edgeTypeCodeName"
+            type="text"
+            plaintext
+          ></b-form-input>
+        </b-form-fieldset>
+
+        <!-- Json File Upload :: Edit -->
+        <b-form-fieldset
+          v-if="isEdit"
+          label="Config 파일"
+          :horizontal="true">
+          <input type="file" v-on:change="fileOnChange"/>
+        </b-form-fieldset>
+
+        <!-- Json :: Edit -->
+        <b-form-fieldset
+          v-if="isEdit&&!isFirstEdit"
+          :invalid-feedback="$valid.msg.require"
+          label="Config JSON"
+          :horizontal="true">
+          <template slot="label">
+            Config JSON<i class="require">*</i>
+          </template>
+          <b-table
+            class="sub"
+            show-empty
+            :items="configJson.headers">
+            <template slot="new" slot-scope="row">
+              <pre class="code left text-left" style="height:380px" id="newJson">{{ items.originalConfigTextAlignmentView }}</pre>
+            </template>
+            <template slot="old" slot-scope="row">
+              <pre class="code right text-left" style="height:380px" id="oldJson">{{ items.originalConfigTextAlignmentView }}</pre>
+            </template>
+          </b-table>
+        </b-form-fieldset>
+
+        <!-- Json :: First Edit -->
+        <b-form-fieldset
+          v-if="isEdit&&isFirstEdit"
+          :invalid-feedback="$valid.msg.require"
+          label="Config JSON"
+          :horizontal="true">
+          <template slot="label">
+            Config JSON<i class="require">*</i>
+          </template>
+          <pre class="code left text-left form-control"
+          style="height:380px !important; max-width:100% !important"
+          id="newJson"
+          :class="{'is-invalid': !valid.originalConfigText }"></pre>
+        </b-form-fieldset>
 
         <!-- 적용여부 -->
         <b-form-fieldset
@@ -94,12 +176,12 @@
           </span>
         </b-form-fieldset>
 
-        <!-- JSON -->
+        <!-- Json :: View -->
         <b-form-fieldset
           v-if="!isEdit"
-          label="JSON"
+          label="Config JSON"
           :horizontal="true">
-          <pre class="code" style="height:150px">{{ items.edgeCoreConfigRequestData }}</pre>
+          <pre class="code" style="height:330px">{{ items.originalConfigTextAlignmentView }}</pre>
         </b-form-fieldset>
 
         <!-- 변경이력 -->
@@ -174,6 +256,7 @@
 
         <!-- 배포상태 -->
         <b-form-fieldset
+          v-if="items.processId"
           label="배포상태"
           :horizontal="true">
           <input
@@ -184,6 +267,18 @@
             :value="items.processStateCodeName"
           >
           <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
+        </b-form-fieldset>
+        <b-form-fieldset
+          v-if="!items.processId&&!isHistory"
+          label="배포상태"
+          :horizontal="true">
+          <input
+            type="text"
+            readonly="readonly"
+            class="form-control-plaintext"
+            style="width:50px"
+            value="대기"
+          >
         </b-form-fieldset>
       </b-form>
     </b-collapse>
@@ -241,8 +336,9 @@
 <script>
   import ContentHeader from '@/components/ContentHeader'
   import cSwitch from '@/components/Switch'
+  import jdc from '../../../jsonDifferentCompare'
   export default {
-    name: 'edge',
+    name: 'edgeCoreConfigDetail',
     props: ['id'],
     components: {
       ContentHeader,
@@ -254,15 +350,21 @@
         name: 'Edge 상세',
         hostName: '',
         ip: '',
+        newJsonObject: '',
+        oldJsonObject: '',
+        configJson: {
+          headers: [{
+              new: null,
+              old: null
+          }]
+        },
         originItems: {},
         items: {
-          edgeCoreConfigId: 1,
-          edgeId: 5,
-          edgeCoreConfigRequestData: "",
-          coreConfigCompList: [{
-            diskMountSize: 0
-          }],
-          diskSize: 1000,
+          edgeCoreConfigId: 0,
+          edgeId: 0,
+          edgeTypeCode: null,
+          originalConfigText: null,
+          originalConfigTextAlignmentView: null,
           edgeCoreConfigApplyYn: false,
           modifyHistReason : "",
           processStateCodeName: null,
@@ -270,8 +372,7 @@
           processId: null
         },
         code: {
-          popId: [],
-          serviceTypeCode: []
+          edgeTypeCode: []
         },
         history: {
           fields: {
@@ -288,27 +389,46 @@
           }
         },
         isLoad: {
-          popId: true,
-          serviceTypeCode: true
+          edgeTypeCode: true
         },
         isEdit: false,
+        isFirstEdit: false,
         isCreate: false,
         isModalHistory: false,
+        isOriginalConfigTextValidateFlag: false,
+        isHistory: false,
 
         inValidForm: false
       }
     },
 
     computed: {
+      /*
       total (){
         return this.items.coreConfigCompList
             .map(({diskMountSize}) => parseInt(diskMountSize))
             .reduce((p, n) => p + n)
       },
+      */
+      edgeTypeCode: {
+        get () {
+          return this.code.edgeTypeCode.find(obj => obj.code === this.items.edgeTypeCode) || null;
+        },
+        set (newValue) {
+          this.items.edgeTypeCode = newValue !== null ? newValue.code : null;
+        }
+      },
       isProcessComplete (){
         return this.items.processId === null || (this.items.processStateCode !== null &&
         this.items.processStateCode !== '' &&
         this.items.processStateCode === 'PROCESS_STATE_02')
+      },
+      // validate
+      valid (){
+        return {
+          edgeTypeCode: this.items.edgeTypeCode !== null,
+          originalConfigText: this.items.originalConfigText !== null || !this.isOriginalConfigTextValidateFlag
+        }
       }
     },
 
@@ -319,6 +439,7 @@
 
       if (historyId){
         document.querySelector('body.app').classList.add('history-mode')
+        this.isHistory = true
       }
 
       // Default Data
@@ -335,22 +456,84 @@
           if (res.data.items === null){
             this.isCreate = true;
             this.isEdit = true;
+            this.isFirstEdit = true
           }else{
-            const json = JSON.parse(res.data.items.edgeCoreConfigRequestData);
+            const originalJson = JSON.parse(res.data.items.originalConfigText);
             this.items = {
               ...this.items,
               ...res.data.items,
-              edgeCoreConfigRequestData: JSON.stringify(json, null, 4)
+              originalConfigText: JSON.stringify(originalJson),
+              originalConfigTextAlignmentView: JSON.stringify(originalJson, null, 4)
             };
+            this.oldJsonObject = originalJson
             this.originItems = JSON.parse(JSON.stringify(this.items));
           }
         })
         .catch(error => {
           console.log(error);
         });
+
+      // Edge Type List
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'EDGE_TYPE' }
+        })
+        .then((res) => {
+          this.isLoad.edgeTypeCode = false;
+          this.code.edgeTypeCode = res.data.items;
+        });
     },
 
     methods: {
+      fileOnChange: function(fileOnChangeEvent) {
+        var reader = new FileReader()
+        var onloadFunction = function(readerOnLoadEvent) {
+          var loadJsonObject = this.isJson(readerOnLoadEvent.target.result)
+          if (loadJsonObject) {
+            this.newJsonObject = loadJsonObject
+            this.items.originalConfigText = JSON.stringify(loadJsonObject)
+            this.jsonDifferentCompare()
+          } else {
+            alert('NOT JSON')
+          }
+        }
+        reader.onload = onloadFunction.bind(this)
+        reader.readAsText(fileOnChangeEvent.target.files[0])
+      },
+      isJson: function(fileContent) {
+        try {
+  		    var jsonObject = JSON.parse(fileContent)
+  	      if (jsonObject && typeof jsonObject === 'object') {
+  		      return jsonObject
+          }
+        } catch (e) {}
+  	    return false
+      },
+      jsonDifferentCompare: function() {
+        jdc.jdd.diffs = []
+        var newConfig = jdc.createConfig()
+        jdc.formatAndDecorate(newConfig, this.newJsonObject)
+        document.getElementById('newJson').textContent = newConfig.out
+        if (this.isEdit&&!this.isFirstEdit) {
+          var oldConfig = jdc.createConfig()
+          jdc.formatAndDecorate(oldConfig, this.oldJsonObject)
+          document.getElementById('oldJson').textContent = oldConfig.out
+          jdc.formatPRETags()
+          newConfig.currentPath = []
+          oldConfig.currentPath = []
+          jdc.diffVal(this.newJsonObject, newConfig, this.oldJsonObject, oldConfig)
+          jdc.processDiffs()
+          if (jdc.jdd.diffs.length > 0) {
+              jdc.highlightDiff(0)
+              jdc.currentDiff = 0
+          }
+          var differentNodeList = document.querySelectorAll('span.diff')
+          Array.prototype.forEach.call(differentNodeList, differentNode => {
+            differentNode.style.background = 'red'
+            differentNode.style.color = 'white'
+          })
+        }
+      },
+
       onEdit (){
         this.isEdit = true;
       },
@@ -361,13 +544,15 @@
       },
 
       onSubmit (){
+        /*
         const coreConfigCompList = this.items.coreConfigCompList.map(({ diskMountPath, diskMountSize }) => ({
           diskMountPath,
           diskMountSize
         }));
-        const { modifyHistReason } = this.items;
+        */
+        const { edgeTypeCode, modifyHistReason, originalConfigText } = this.items;
 
-        const submitItems = { coreConfigCompList, modifyHistReason };
+        const submitItems = { edgeTypeCode, modifyHistReason, originalConfigText };
         const validate = this.$valid.all(submitItems);
         const submitAction = (this.isCreate) ?
           () => this.$https.post(`/edges/${this.id}/cores`, submitItems) :
@@ -384,10 +569,17 @@
             .catch((error) => {
               console.log(error);
             });
+        } else {
+          if (this.items.originalConfigText === null) {
+            this.isOriginalConfigTextValidateFlag = true
+          }
         }
       },
 
       onDeploy (){
+        // TODO: 배포 추후 작업
+        alert('배포 미개발')
+        /*
         this.$https.post(`/edges/${this.id}/cores/apply`)
           .then((res) => {
             this.$router.go(this.$router.currentRoute);
@@ -395,8 +587,9 @@
           .catch((error) => {
             console.log(error);
           });
+        */
       },
-
+      /*
       onAddRow (){
         this.items.coreConfigCompList.push({
           edgeCoreConfigCompSeq: this.items.coreConfigCompList.length,
@@ -412,14 +605,14 @@
       setDefault (item, key) {
         item[key] = item[key] !== '' ? parseInt(item[key]) : 0;
       },
-
+      */
       getHistoryLink (rowId){
         return `#/configuration/edges/edge/${this.id}/core?histories=${rowId}`
       },
 
       showHistory () {
         this.isModalHistory = !this.isModalHistory;
-        this.$https.get(`/edges/${this.id}/histories`)
+        this.$https.get(`/edges/${this.id}/cores/histories`)
           .then((res) => {
             this.history.items = res.data.items;
           });

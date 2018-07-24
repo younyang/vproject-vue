@@ -16,8 +16,9 @@
         <!-- PoP Id -->
         <b-form-fieldset
           v-if="!isEdit"
-          label="PoP ID"
+          label="ID"
           :horizontal="true">
+
           <b-form-input
             :value="id"
             type="text"
@@ -27,8 +28,11 @@
 
         <!-- PoP Name -->
         <b-form-fieldset
-          label="PoP Name"
           :horizontal="true">
+          <template slot="label">
+            PoP Name
+            <!--<i v-if="isEdit" class="require">*</i>-->
+          </template>
           <b-form-input
             :value="items.popName"
             type="text"
@@ -36,25 +40,34 @@
           ></b-form-input>
         </b-form-fieldset>
 
-        <!-- Host Name -->
-        <b-form-fieldset
-          label="Host Name(Prefix)"
-          :horizontal="true">
-          <b-form-input
-            :value="items.popHostName"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
+        <div class="form-row">
+          <!-- Host Name -->
+          <b-form-fieldset
+            :horizontal="true">
+            <template slot="label">
+              Host Name(Prefix)
+            </template>
+            <b-form-input
+              :value="items.popHostName"
+              type="text"
+              plaintext
+            ></b-form-input>
+          </b-form-fieldset>
 
-        <!-- Domain -->
-        <b-form-fieldset
-          label="Domain"
-          :horizontal="true">
-          <small class="form-text-alone">
-            http(s)://<strong class="text-primary">{{ items.popDomainName }}</strong>.[country].[service type].[service name].vessels.com
-          </small>
-        </b-form-fieldset>
+          <!-- region code -->
+          <b-form-fieldset
+            :invalid-feedback="$valid.msg.select"
+            :horizontal="true">
+            <template slot="label">
+              지역
+            </template>
+            <b-form-input
+              :value="items.geoCodeName"
+              type="text"
+              plaintext
+            ></b-form-input>
+          </b-form-fieldset>
+        </div>
 
         <!-- Data Center -->
         <b-form-fieldset
@@ -77,58 +90,6 @@
           <b-form-input
             v-else
             :value="items.dataCenterCodeName"
-            type="text"
-            plaintext
-          ></b-form-input>
-        </b-form-fieldset>
-
-        <!-- 주소 :: Edit -->
-        <b-form-fieldset
-          v-if="isEdit"
-          :invalid-feedback="$valid.msg.select"
-          :horizontal="true">
-          <template slot="label">
-            주소<i class="require">*</i>
-          </template>
-
-          <multiselect
-            v-model="popCtprvnCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popCtprvnCode"
-            :loading="isLoad.popCtprvnCode"
-            :class="{'invalid': !valid.popCtprvnCode }"
-            @select="onFirstAddress"
-            track-by="addressCode"
-            label="addressCodeName"
-            class="inline"
-            style="width:156px"
-            placeholder="선택"
-          ></multiselect>
-
-          <multiselect
-            v-if="popCtprvnCode"
-            v-model="popSigCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.popSigCode"
-            :loading="isLoad.popSigCode"
-            :class="{'invalid': !valid.popSigCode }"
-            track-by="addressCode"
-            label="addressCodeName"
-            placeholder="선택"
-            class="inline"
-            style="width: 160px"
-          ></multiselect>
-        </b-form-fieldset>
-
-        <!-- 주소 :: View -->
-        <b-form-fieldset
-          label="주소"
-          :horizontal="true"
-          v-else>
-          <b-form-input
-            :value="items.popAddress"
             type="text"
             plaintext
           ></b-form-input>
@@ -159,16 +120,75 @@
           ></b-form-input>
         </b-form-fieldset>
 
-        <!-- Service Name -->
+        <!-- Service List -->
         <b-form-fieldset
-          v-if="!isEdit"
           label="Service"
           :horizontal="true">
-          <div class="badge-list">
-            <span class="badge sm" v-for="item in serviceNames">
-              {{ item }}
-            </span>
-          </div>
+          <b-table
+            hover
+            show-empty
+            :items="serviceList.items"
+            :fields="serviceList.fields"
+            :current-page="serviceList.pageInfo.page"
+            :per-page="serviceList.pageInfo.size"
+            thead-class="hidden_header"
+          >
+            <template slot="distributeBtn" slot-scope="row" style="width :350px">
+              <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
+            </template>
+
+
+          </b-table>
+
+        </b-form-fieldset>
+
+        <!-- Eag Setting List -->
+        <b-form-fieldset
+          label="Eag 설정"
+          :horizontal="true">
+          <b-table
+            hover
+            show-empty
+            :items="eagSettingList.items"
+            :fields="eagSettingList.fields"
+            :current-page="eagSettingList.pageInfo.page"
+            :per-page="eagSettingList.pageInfo.size"
+          >
+
+            <template slot="HEAD_serviceName" slot-scope="data">
+              <em v-if="!isEdit">{{data.label}}</em>
+            </template>
+
+            <template slot="HEAD_serviceTypeName" slot-scope="data">
+              <em v-if="!isEdit">{{data.label}}</em>
+            </template>
+
+            <template slot="copyRankMin" slot-scope="data">
+              <em v-if="!isEdit">{{data.item.copyRankMin}}</em>
+              <b-form-input v-else type="text" class="keyword" v-model="data.item.copyRankMin"
+                            placeholder="Enter Search text"></b-form-input>
+            </template>
+
+            <template slot="copyRankMax" slot-scope="data">
+              <em v-if="!isEdit">{{data.item.copyRankMax}}</em>
+              <b-form-input v-else type="text" class="keyword" v-model="data.item.copyRankMax"
+                            placeholder="Enter Search text"></b-form-input>
+            </template>
+
+            <template slot="remainRankMin" slot-scope="data">
+              <em v-if="!isEdit">{{data.item.remainRankMin}}</em>
+              <b-form-input v-else type="text" class="keyword" v-model="data.item.remainRankMin"
+                            placeholder="Enter Search text"></b-form-input>
+            </template>
+
+            <template slot="hashValue" slot-scope="data">
+              <em v-if="!isEdit">{{data.item.hashValue}}</em>
+              <b-form-input v-else type="text" class="keyword" v-model="data.item.hashValue"
+                            placeholder="Enter Search text"></b-form-input>
+            </template>
+
+          </b-table>
+
         </b-form-fieldset>
 
         <!-- Bandwidth -->
@@ -176,19 +196,20 @@
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            Bandwidth(bps)<i v-if="isEdit" class="require">*</i>
+            Bandwidth<i v-if="isEdit" class="require">*</i>
           </template>
           <cleave
             v-if="isEdit"
-            :value.sync="items.bandwidth"
+            v-model="items.bandwidth"
             style="width: 156px;"
-            class="form-control"
+            class="form-control inline"
             :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
             required
           ></cleave>
+          {{ (isEdit) ?` Gbps` : ''}}
           <b-form-input
-            v-else
-            :value="items.bandwidth"
+            v-if="!isEdit"
+            :value="items.bandwidth + ' Gbps'"
             type="text"
             plaintext
           ></b-form-input>
@@ -284,20 +305,6 @@
             ></b-form-input>
           </b-form-fieldset>
         </div>
-
-        <!-- 배포상태 -->
-        <b-form-fieldset
-          label="배포상태"
-          :horizontal="true">
-          <input
-            type="text"
-            readonly="readonly"
-            class="form-control-plaintext"
-            style="width:50px"
-            :value="items.processStateCodeName"
-          >
-          <a :href="`#/workflow/service/${ items.processId }`" class="btn btn-in-table" target="_blank">{{ items.processId }}</a>
-        </b-form-fieldset>
       </b-form>
     </b-collapse>
 
@@ -309,8 +316,8 @@
 
     <div class="page-btn" v-else>
       <span v-if="isProcessComplete">
-        <b-button type="button" variant="outline-secondary" class="float-left" @click="onDelete">삭제</b-button>
-        <b-button type="button" variant="outline-secondary" @click="onDeploy">배포</b-button>
+        <b-button type="button" variant="outline-secondary" class="float-left"
+                  @click="onDelete">삭제</b-button>
         <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
         <b-button type="button" variant="outline-secondary" :to="{ name: 'Pop 관리' }">목록</b-button>
         <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
@@ -332,6 +339,9 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
+          <template slot="modifyHistReason" slot-scope="row">
+            {{(row.value) ? row.value : "-"}}
+          </template>
           <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
@@ -350,22 +360,27 @@
       </div>
     </b-modal>
 
-    <!-- Message Alert Modal -->
+    <!-- 일반 경고 메시지 Modal -->
     <b-modal title="Message" size="sm" v-model="modal.open" :class="`modal-${modal.type}`">
       <div class="d-block text-center">
         <p>{{ modal.msg }}</p>
       </div>
       <div slot="modal-footer" class="mx-auto">
         <b-button type="button" variant="primary" @click="modal.action">확인</b-button>
-        <b-button type="button" variant="outline-secondary" @click="modal.open = false">취소</b-button>
+        <b-button v-if="!modal.hideCancelBtn" type="button" variant="outline-secondary"
+                  @click="modal.open = false">취소
+        </b-button>
       </div>
     </b-modal>
   </div>
+
+
 </template>
 
 <script>
   import ContentHeader from '@/components/ContentHeader'
   import cSwitch from '@/components/Switch'
+
   export default {
     name: 'pops',
     props: ['id', 'histories'],
@@ -374,17 +389,13 @@
       cSwitch
     },
 
-    data (){
+    data() {
       return {
         name: 'Pop 상세',
         originItems: {},
         items: {
           popName: '',
           popHostName: '',
-          popDomainName: null,
-          popCtprvnCode: null,
-          popSigCode: null,
-          popAddress: '',
           qualitySolutionTeamCode: null,
           qualitySolutionTeamCodeName: '',
           dataCenterCode: null,
@@ -396,18 +407,53 @@
           edgeList: [],
           processStateCodeName: null,
           processStateCode: null,
-          processId: null
+          processId: null,
+          geoCode: [],
+          geoCodeName: null
         },
         code: {
-          popCtprvnCode: [],
-          popSigCode: [],
           qualitySolutionTeamCode: [],
-          dataCenterCode: []
+          dataCenterCode: [],
+          geoCode: []
+        },
+        serviceList: {
+          items: [],
+          fields: {
+            serviceName: {label: '이름', variant: 'info'},
+            serviceTypeName: {label: '타입', variant: 'info'},
+            domainPurpose: {label: '목적', variant: 'info'},
+            domainName: {label: '도메인이름', 'class': 'text-left'},
+            protocolCnt: {label: '프로토콜', 'class': 'text-left'},
+            distributeBtn: {label: '배포',}
+          },
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
+        },
+
+        eagSettingList: {
+          items: [],
+          fields: {
+            serviceName: {label: '서비스명', variant: 'info', thClass: "table-hidden"},
+            serviceTypeName: {label: '서비스타입', variant: 'info', thClass: "table-hidden"},
+            copyRankMin: {label: 'copyRankMin'},
+            copyRankMax: {label: 'copyRankMax'},
+            remainRankMin: {label: 'remainRankMin'},
+            hashValue: {label: 'hashValue'}
+          },
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
         },
         history: {
           fields: {
             createId: {label: '등록/수정자', 'class': 'text-left'},
             histBeginDateTime: {label: '등록/수정일시'},
+            // histTypeName: {label: '구분'},
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
@@ -418,11 +464,26 @@
             totalCount: 1
           }
         },
+        edgeList: {
+          items: [],
+          fields: {
+            serviceName: {label: '서비스명', variant: 'info', thClass: "table-hidden"},
+            serviceTypeName: {label: '서비스타입', variant: 'info', thClass: "table-hidden"},
+            copyRankMin: {label: 'copyRankMin'},
+            copyRankMax: {label: 'copyRankMax'},
+            remainRankMin: {label: 'remainRankMin'},
+            hashValue: {label: 'hashValue'}
+          },
+          pageInfo: {
+            page: 1,
+            size: 10,
+            totalCount: 1
+          }
+        },
         isLoad: {
-          popCtprvnCode: true,
-          popSigCode: true,
           qualitySolutionTeamCode: true,
-          dataCenterCode: true
+          dataCenterCode: true,
+          geoCode: true
         },
         isEdit: false,
         isModalHistory: false,
@@ -431,7 +492,9 @@
           open: false,
           type: 'done',
           msg: '',
-          action (){}
+          action() {
+          },
+          hideCancelBtn: false
         },
 
         inValidForm: false
@@ -439,74 +502,62 @@
     },
 
     computed: {
-      popCtprvnCode: {
-        get () {
-          return this.code.popCtprvnCode.find(obj => obj.addressCode === this.items.popCtprvnCode) || null;
-        },
-        set (newValue) {
-          this.items.popCtprvnCode = newValue !== null ? newValue.addressCode : null;
-        }
-      },
-      popSigCode: {
-        get () {
-          return this.code.popSigCode.find(obj => obj.addressCode === this.items.popSigCode) || null;
-        },
-        set (newValue) {
-          this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
-        }
-      },
       qualitySolutionTeamCode: {
-        get () {
+        get() {
           return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.items.qualitySolutionTeamCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
       dataCenterCode: {
-        get () {
+        get() {
           return this.code.dataCenterCode.find(obj => obj.code === this.items.dataCenterCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.items.dataCenterCode = newValue !== null ? newValue.code : null;
         }
       },
-      serviceNames (){
+      geoCode: {
+        get() {
+          return this.code.geoCode.find(obj => obj.code === this.items.geoCode) || null;
+        },
+        set(newValue) {
+          this.items.geoCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      serviceNames() {
         return this.items.serviceNames !== null ? this.items.serviceNames.split(',') : []
       },
-      isProcessComplete (){
+      isProcessComplete() {
         return (this.items.processStateCode == null || (
-                this.items.processStateCode !== '' &&
-                this.items.processStateCode === 'PROCESS_STATE_02'))
+          this.items.processStateCode !== '' &&
+          this.items.processStateCode === 'PROCESS_STATE_02'))
       },
 
       // validation
-      valid (){
+      valid() {
         return {
-          popCtprvnCode: this.items.popCtprvnCode !== null,
-          popSigCode: this.items.popSigCode !== null,
           qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null,
-          dataCenterCode: this.items.dataCenterCode !== null
+          // dataCenterCode: this.items.dataCenterCode !== null,
+          geoCode: this.items.geoCode !== null
         }
       }
     },
 
-    created (){
+    created() {
       // History
       const historyId = this.$route.query.histories;
       const detailUrl = historyId !== undefined ? `/pops/${this.id}/histories/${historyId}` : `/pops/${this.id}`;
 
-      if (historyId){
+      if (historyId) {
         document.querySelector('body.app').classList.add('history-mode')
       }
 
-      // 주소 Code
-      this.fetchAddress();
-
       // 품질솔루션팀 Code
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'QUALITY_TEAM' }
-        })
+        q: {groupCode: 'QUALITY_TEAM'}
+      })
         .then((res) => {
           this.isLoad.qualitySolutionTeamCode = false;
           this.code.qualitySolutionTeamCode = res.data.items;
@@ -514,45 +565,65 @@
 
       // Data Center Code
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'DATACENTER' }
-        })
+        q: {groupCode: 'DATACENTER'}
+      })
         .then((res) => {
           this.isLoad.dataCenterCode = false;
           this.code.dataCenterCode = res.data.items;
         });
 
-      // Detail Data
+      // 세부 자료
       this.$https.get(detailUrl)
         .then((res) => {
           this.items = res.data.items;
-          this.originItems = JSON.parse(JSON.stringify(this.items));
 
-          if (this.items.popCtprvnCode !== ''){
-            this.fetchAddress(this.items.popCtprvnCode);
-          }
+          this.serviceList.items = res.items.serviceList
+          this.eagSettingList.items = res.items.eagSettingList
+
+          this.originItems = JSON.parse(JSON.stringify(this.items));
         });
+
+      // region Code
+      this.$https.get('/system/commonCode', {
+        q: {groupCode: 'GEO'}
+      }).then((res) => {
+
+        this.isLoad.geoCode = false;
+        this.code.geoCode = res.data.items;
+      });
 
     },
 
+
     methods: {
-      onEdit (){
+      onEdit() {
         this.isEdit = true;
+        const geoName = this.items.geoCodeName
+        this.items.geoCode = this.code.geoCode.filter(obj => obj.codeName === geoName)[0].code
+        delete this.serviceList.fields.distributeBtn
       },
 
-      onView (){
+      onView() {
         this.isEdit = false;
         this.items = JSON.parse(JSON.stringify(this.originItems));
+        this.serviceList.fields.distributeBtn = {label: '배포'}
       },
 
-      onSubmit (){
+      onSubmit() {
 
-        const { popCtprvnCode, popSigCode, qualitySolutionTeamCode, dataCenterCode, modifyHistReason } = this.items;
-        const submitItems = { popCtprvnCode, popSigCode, qualitySolutionTeamCode, dataCenterCode, modifyHistReason };
+        // const {qualitySolutionTeamCode, dataCenterCode, modifyHistReason} = this.items;
+        const {qualitySolutionTeamCode, dataCenterCode, modifyHistReason} = this.items;
+        // const  = this.edge.items.map(r => [r.copyRankMin,r.copyRankMax, r.remainRankMin, r.hashValue] )
+        const submitItems = {
+          qualitySolutionTeamCode,
+          dataCenterCode,
+          modifyHistReason
+        };
         const validate = this.$valid.all(submitItems);
         this.inValidForm = !validate;
 
-        if (validate){
-          this.$https.put(`/pops/${this.id}`, this.items)
+        if (validate) {
+          this.$https.put(`/pops/${this.id}`, this.items, this.edgeList.items)
             .then((res) => {
               this.$router.go(this.$router.currentRoute);
             })
@@ -562,17 +633,30 @@
         }
       },
 
-      onDeploy (){
-        this.$https.put(`/pops/${this.id}/serviceProcess`)
-          .then((res) => {
-            this.$router.go(this.$router.currentRoute);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      onDeploy() {
+        const stateCode = this.items.processStateCodeName
+        stateCode && stateCode === '완료'
+          ? this.$https.put(`/pops/${this.id}/serviceProcess`)
+            .then((res) => {
+              this.$router.go(this.$router.currentRoute);
+            })
+            .catch((error) => {
+              console.log(error);
+            })
+          : this.modal = {
+            open: true,
+            type: 'error',
+            msg: `이전 배포가 완료되지 않아 \n` +
+            '수정이 불가능합니다..\n',
+            hideCancelBtn: true,
+            action: () => {
+              this.modal.open = false
+              this.modal.hideCancelBtn = false
+            }
+          };
       },
 
-      onDelete (){
+      onDelete() {
         this.modal = {
           open: true,
           type: 'error',
@@ -581,40 +665,21 @@
         };
       },
 
-      onDeleteData (){
+      onDeleteData() {
         this.$https.delete(`/pops/${this.id}`)
           .then((res) => {
-            this.$router.push({ name: 'Pop 관리' });
+            this.$router.push({name: 'Pop 관리'});
           })
           .catch((error) => {
             console.log(error);
           });
       },
 
-      onFirstAddress (obj){
-        this.fetchAddress(obj.addressCode)
-      },
-
-      fetchAddress (param =''){
-        this.$https.get('/pops/address', {
-          firstDepth: param
-        })
-          .then((res) => {
-            if (param === ''){
-              this.isLoad.popCtprvnCode = false;
-              this.code.popCtprvnCode = res.data.items;
-            } else {
-              this.isLoad.popSigCode = false;
-              this.code.popSigCode = res.data.items;
-            }
-          });
-      },
-
-      getHistoryLink (rowId){
+      getHistoryLink(rowId) {
         return `#/configuration/pop/${this.id}?histories=${rowId}`
       },
 
-      showHistory () {
+      showHistory() {
         this.isModalHistory = !this.isModalHistory;
         this.$https.get(`/pops/${this.id}/histories`)
           .then((res) => {

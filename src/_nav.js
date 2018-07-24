@@ -45,6 +45,10 @@ export default {
               name: 'Cache Deletions',
               url: '/configuration/edges/cacheDeletions'
             }*/
+            ,{
+              name: 'Diff Test',
+              url: '/configuration/edges/diff'
+            }
           ]
         },
         {

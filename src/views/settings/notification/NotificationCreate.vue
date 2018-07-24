@@ -9,11 +9,12 @@
 
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
+
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            국사<i class="require" v-if="isEdit">*</i>
+            국사<i class="require">*</i>
           </template>
           <multiselect
             v-model="popId"
@@ -23,23 +24,16 @@
             :loading="isLoad.popId"
             label="popName"
             track-by="popId"
-            v-if="isEdit"
           ></multiselect>
-          <span v-else>
-            {{items.popName}}
-          </span>
         </b-form-fieldset>
+
         <!-- ServerType -->
         <b-form-fieldset
           :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            ServerType<i class="require" v-if="isEdit">*</i>
+            ServerType<i class="require">*</i>
           </template>
-          <span
-          v-if="!isEdit">
-            {{items.serverType}}
-          </span>
           <multiselect
             v-model="componentTypeCode"
             :showLabels="false"
@@ -48,30 +42,15 @@
             :loading="isLoad.componentTypeCode"
             label="codeName"
             track-by="code"
-            v-else
           ></multiselect>
-        </b-form-fieldset>
-
-        <!-- 수신그룹 -->
-        <b-form-fieldset
-          :horizontal="true" v-if="!isEdit">
-          <template slot="label">
-            수신그룹
-          </template>
-          <div class="badge-list" >
-            <span class="badge sm" v-for="item in items.groupNames">
-              {{ item }}
-            </span>
-          </div>
         </b-form-fieldset>
         <!-- 수신그룹 -->
         <b-form-fieldset
         description = "[!] Shift 버튼을 누른 상태에서 선택하면 여러 항목을 동시에 선택할 수 있습니다."
-          :horizontal="true" v-else>
+          :horizontal="true">
           <template slot="label">
             수신그룹<i class="require">*</i>
           </template>
-          <div v-if="isEdit">
             <button title="select전체선택" @click="selectAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택">전체선택</button>
             <b-form-select
              style="width: 150px; height: 80px;"
@@ -92,19 +71,14 @@
               :options="items.possibleGroupListEdit"
             ></b-form-select>
             <button title="possible전체선택" @click="possibleAllGroup" class="btn btn-outline-secondary" data-original-title="전체선택">전체선택</button>
-          </div>
         </b-form-fieldset>
 
         <!--알림방법 -->
         <b-form-fieldset
-          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            알림 방법<i class="require" v-if="isEdit">*</i>
+            알림 방법<i class="require">*</i>
           </template>
-          <span v-if="!isEdit">
-            {{ items.alarmTypeName }}
-          </span>
           <multiselect
             v-model="alarmTypeCode"
             :showLabels="false"
@@ -113,31 +87,22 @@
             :loading="isLoad.alarmTypeCode"
             label="codeName"
             track-by="code"
-            v-else
           ></multiselect>
         </b-form-fieldset>
 
         <!-- 상태 -->
         <b-form-fieldset
-          :invalid-feedback="$valid.msg.require"
           :horizontal="true">
           <template slot="label">
-            상태<i class="require" v-if="isEdit">*</i>
+            상태<i class="require">*</i>
           </template>
           <c-switch
-            v-if="isEdit"
             type="text"
             class="v-switch"
             on="사용"
             off="미사용"
             v-model="items.alarmPolicyUseYn"
           ></c-switch>
-          <span
-            v-else
-            class="badge"
-            :class="{'primary' : items.alarmPolicyUseYn }">
-            {{ items.alarmPolicyUseYn ? '사용' : '미사용' }}
-          </span>
         </b-form-fieldset>
       </b-form>
     </b-collapse>
@@ -157,115 +122,62 @@
             :items="items.alarmPolicyCompList"
             :fields="fields"
           >
-            <!-- 항목 -->
-            <template slot="policyTypeName" slot-scope="row">
-              <b-form-checkbox
-                v-if="isEdit"
-                v-model="row.item.alarmPolicyCompUseYn"
-                @change="onChecked(row.item)"
-              ></b-form-checkbox>
-              <span v-if="row.item.alarmPolicyCompUseYn&&!isEdit"> &nbsp;*&nbsp;</span>
-              <span v-else >&nbsp;&nbsp;&nbsp;</span>
-              {{row.item.policyTypeName}}
-            </template>
-            <!-- 임계치 -->
-            <template slot="policyWarningThreshold" slot-scope="row">
-              <span v-if="isEdit">
-                <b-form-input
-                  v-model="row.item.policyWarningThreshold"
-                  type="number"
-                  style="width: 80px;"
-                  :disabled="!row.item.alarmPolicyCompUseYn"
-                  required
-                ></b-form-input>이상
-              </span>
-              <span v-else>{{ row.item.policyWarningThreshold }} 이상</span>
-            </template>
-            <!-- 지속시간 -->
-            <template slot="policyWarningDurationTime" slot-scope="row">
-              <span v-if="isEdit">
-                <b-form-input
-                  v-model="row.item.policyWarningDurationTime"
-                  type="number"
-                  style="width: 80px;"
-                  :disabled="!row.item.alarmPolicyCompUseYn"
-                  required
-                ></b-form-input>{{row.item.policyWarningDurationTimeUnitName}}
-              </span>
-              <span v-else>{{ row.item.policyWarningDurationTime }} {{ row.item.policyWarningDurationTimeUnitName }}</span>
-            </template>
+          <!-- 항목 -->
+          <template slot="policyTypeName" slot-scope="row">
+            <b-form-checkbox
+              v-model="row.item.alarmPolicyCompUseYn"
+              @change="onChecked(row.item)"
+            ></b-form-checkbox>&nbsp;&nbsp;&nbsp;
+            {{row.item.policyTypeName}}
+          </template>
+          <!-- 임계치 -->
+          <template slot="policyWarningThreshold" slot-scope="row">
+              <b-form-input
+                v-model="row.item.policyWarningThreshold"
+                type="number"
+                style="width: 80px;"
+                :disabled="!row.item.alarmPolicyCompUseYn"
+                required
+              ></b-form-input>이상
+          </template>
+          <!-- 지속시간 -->
+          <template slot="policyWarningDurationTime" slot-scope="row">
+              <b-form-input
+                v-model="row.item.policyWarningDurationTime"
+                type="number"
+                style="width: 80px;"
+                :disabled="!row.item.alarmPolicyCompUseYn"
+                required
+              ></b-form-input>{{row.item.policyWarningDurationTimeUnitName}}
+          </template>
 
-            <template slot="policyCriticalThreshold" slot-scope="row">
-              <span v-if="isEdit">
-                <b-form-input
-                  v-model="row.item.policyCriticalThreshold"
-                  type="number"
-                  style="width: 80px;"
-                  :disabled="!row.item.alarmPolicyCompUseYn"
-                  required
-                ></b-form-input>이상
-              </span>
-              <span v-else>{{ row.item.policyCriticalThreshold }} 이상</span>
-            </template>
-            <!-- 지속시간 -->
-            <template slot="policyCriticalDurationTime" slot-scope="row">
-              <span v-if="isEdit">
-                <b-form-input
-                  v-model="row.item.policyCriticalDurationTime"
-                  type="number"
-                  style="width: 80px;"
-                  :disabled="!row.item.alarmPolicyCompUseYn"
-                  required
-                ></b-form-input>{{row.item.policyCriticalDurationTimeUnitName}}
-              </span>
-              <span v-else>{{ row.item.policyCriticalDurationTime }} {{ row.item.policyCriticalDurationTimeUnitName }}</span>
-            </template>
-          </b-table>
-        </section>
-      </b-form>
-    </b-collapse>
+          <template slot="policyCriticalThreshold" slot-scope="row">
+              <b-form-input
+                v-model="row.item.policyCriticalThreshold"
+                type="number"
+                style="width: 80px;"
+                :disabled="!row.item.alarmPolicyCompUseYn"
+                required
+              ></b-form-input>이상
+          </template>
+          <!-- 지속시간 -->
+          <template slot="policyCriticalDurationTime" slot-scope="row">
+              <b-form-input
+                v-model="row.item.policyCriticalDurationTime"
+                type="number"
+                style="width: 80px;"
+                :disabled="!row.item.alarmPolicyCompUseYn"
+                required
+              ></b-form-input>{{row.item.policyCriticalDurationTimeUnitName}}
+          </template>
+        </b-table>
+      </section>
+    </b-form>
+  </b-collapse>
 
-    <!-- 처리이력 -->
-    <div class="collapse-title" v-if="!isEdit">
-      <b-button class="btn-collapse" v-b-toggle.formHistory>
-        <i class="fa"></i>
-        처리이력
-      </b-button>
-    </div>
-    <b-collapse id="formHistory" visible v-if="!isEdit">
-      <b-form class="formView">
-        <div class="form-row">
-          <!-- 수정일 -->
-          <b-form-fieldset
-            label="수정일시"
-            :horizontal="true">
-            <b-form-input
-              :value="items.modifyDatetime"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-          <!-- 수정자 -->
-          <b-form-fieldset
-            label="수정자"
-            :horizontal="true">
-            <b-form-input
-              :value="items.modifyId"
-              plaintext
-              type="text"
-            ></b-form-input>
-          </b-form-fieldset>
-        </div>
-      </b-form>
-    </b-collapse>
-
-    <div class="page-btn" v-if="isEdit">
-      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+    <div class="page-btn">
+      <b-button type="button" variant="outline-secondary" :to="{ name: 'Notification 관리' }">취소</b-button>
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
-    </div>
-    <div class="page-btn" v-else>
-      <b-button type="button" variant="outline-secondary" :to="{ name: 'Notification 관리' }">목록</b-button>
-      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
   </div>
 </template>
@@ -275,7 +187,6 @@
   import cSwitch from '@/components/Switch'
   export default {
     name: 'service',
-    props: ['id'],
     components: {
       ContentHeader,
       cSwitch
@@ -283,8 +194,6 @@
 
     data (){
       return {
-        name: 'Application 상세',
-        originItems: {},
         fields: {
           policyTypeCode: {label: '구분'},
           policyTypeName: {label: '항목','class': 'text-left'},
@@ -298,9 +207,8 @@
           serviceType : null,
           componentTypeCode : null,
           groupNames : null,
-          alarmTypeName : null,
           alarmTypeCode : null,
-          alarmPolicyUseYn : null,
+          alarmPolicyUseYn : true,
           modifyDatetime : null,
           modifyId : null,
           alarmPolicyCompList : [],
@@ -313,6 +221,7 @@
           possibleGroupList : [],
           selectGroupListEdit : [],
           possibleGroupListEdit : [],
+          alarmTypeCode : [],
           popId : null
         },
         code: {
@@ -327,16 +236,6 @@
           groupId : true,
           alarmTypeCode : true,
           popId : true
-        },
-
-        isEdit: false,
-        isModalHistory: false,
-
-        modal: {
-          open: false,
-          type: 'done',
-          msg: '',
-          action (){}
         },
 
         inValidForm: false
@@ -367,17 +266,17 @@
         set (newValue) {
           this.items.popId = newValue !== null ? newValue.popId : null;
         }
-      },
+      }
     },
 
 
     created (){
-      const detailUrl = `/monitoring/policies/${this.id}`;
       const checkList = [];
       // Detail Data
-      this.$https.get(detailUrl)
+      this.$https.get('/monitoring/policies/check')
         .then((res) => {
-          res.data.items.alarmPolicyCompList.forEach(obj => {
+          this.items.alarmPolicyCompList = res.data.items;
+          res.data.items.forEach(obj => {
             if(obj.alarmPolicyId){
               obj.alarmPolicyCompUseYn = true;
               checkList.push(obj);
@@ -390,8 +289,6 @@
             ...this.items
             , ...res.data.items
           };
-          this.items.groupNames = this.items.groupNames.split(',');
-          this.originItems = JSON.parse(JSON.stringify(this.items));
         });
       // ComponentTypeCode List
       this.$https.get('/system/commonCode', {
@@ -413,7 +310,12 @@
       this.$https.get('/setting/operators/groups')
         .then((res) => {
           this.isLoad.groupId = false;
-          this.code.groupId = res.data.items;
+          res.data.items.forEach( obj => {
+            this.items.possibleGroupListEdit.push({
+              text : obj.groupName,
+              value : obj.groupId
+            })
+          });
         });
         // Pop 목록
       this.$https.get('/pops')
@@ -428,28 +330,18 @@
     },
 
     methods: {
-      fetchDetail (res){
-      },
-
-      onEdit (){
-        this.isEdit = true;
-      },
-
-      onView (){
-        this.isEdit = false;
-        this.items = JSON.parse(JSON.stringify(this.originItems));
-      },
 
       onSubmit (){
         this.items.groupIds = this.items.selectGroupList;
-        const submitItems = {
-          ...this.items,
-        }
         if(this.items.groupIds.length !== 0){
-          this.$https.put(`/monitoring/policies/${this.id}`,this.items).then(() => {
-            this.$router.go(this.$router.currentRoute);
-          }).catch((error) => {
-          })
+          this.$https.post('/monitoring/policies', this.items)
+            .then((res) => {
+              this.$router.push({ name: 'Notification 관리'})
+            })
+            .catch((error) => {
+              console.log(error);
+              alert(error.response.data.error.message);
+            });
         }else{
           alert("수신 그룹을 추가하세요.");
         }

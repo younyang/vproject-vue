@@ -55,74 +55,109 @@
         </template>
 
         <multiselect
-          v-model="serviceTypeCode"
-          class="multiple"
-          :class="{'invalid': !valid.serviceTypeCode }"
-          track-by="code"
-          label="codeName"
-          :multiple="true"
+          v-model="serviceTypeId"
           :showLabels="false"
-          :options="code.serviceTypeCode"
-          :loading="isLoad.serviceTypeCode"
-          @select="onSelectType"
-          @remove="onRemoveType"
+          :searchable="false"
+          :options="code.serviceTypeId"
+          :loading="isLoad.serviceTypeId"
+          label="serviceTypeName"
+          track-by="serviceTypeId"
           placeholder="Select service type"
         ></multiselect>
       </b-form-fieldset>
 
-      <!-- Domain -->
+      <!-- Domain-->
       <b-form-fieldset
         label="Domain"
         :horizontal="true">
-        <small class="form-text-alone text-muted" v-if="!items.serviceDomainList.length">※ Service Name, Service Type 선택 시, 자동 생성</small>
+        <template slot="label">
+          Domain<i class="require">*</i>
+        </template>
+        <b-form-input
+          v-model="items.serviceDomainName"
+          type="text"
+          :formatter="lowerFomatter"
+          required
+        ></b-form-input>
+      </b-form-fieldset>
 
-        <!-- domain list -->
+      <!-- 서비스 유형 -->
+      <b-form-fieldset
+        label="서비스 유형<i class='require'>*</i>"
+        :horizontal="true">
+
         <b-table
-          v-if="items.serviceDomainList.length"
           class="sub"
           show-empty
           :items="items.serviceDomainList"
           :fields="{
-            serviceTypeCode: {label: '&nbsp;', 'class': 'index'},
-            domainProtocolCode: {label: 'Domain<i class=\'require\'>*</i>', 'class': 'text-left'},
-            domainHashingTypeCode: {label: 'Hasing type<i class=\'require\'>*</i>', 'class': 'w-25'}
+            domainPurposeCode: {label: '', 'class': 'text-left'},
+            sslYn: {label: '*Domain', 'class': 'text-left'},
+            domainPortNumber: {label: 'domainPortNumber', 'class': 'text-left'},
+            hashingType: {label: 'hashingType', 'class': 'text-left'},
+            action: {label: ''}
           }"
         >
-          <template slot="serviceTypeCode" slot-scope="row">
-            {{ row.value.codeName }}
-          </template>
-
-          <template slot="domainProtocolCode" slot-scope="row">
+          <!--1 td-->
+          <template slot="domainPurposeCode" slot-scope="row">
             <multiselect
+              v-model="row.item.domainPurposeCode"
               label="codeName"
-              v-model="row.item.domainProtocolCode"
-              class="protocol noEmpty"
-              :allowEmpty="false"
-              :showLabels="false"
-              :searchable="false"
-              :options="code.domainProtocolCode"
-              :loading="isLoad.domainProtocolCode"
-              placeholder="://"
-            ></multiselect>
-            <span class="font-text-alone">
-              <strong class="text-primary">{{ row.item.serviceTypeCode.codeName | lowercase }}.{{ items.serviceName }}</strong>.ecdn.com
-            </span>
-          </template>
-
-          <template slot="domainHashingTypeCode" slot-scope="row">
-            <multiselect
-              label="codeName"
-              v-model="row.item.domainHashingTypeCode"
               class="noEmpty"
               :allowEmpty="false"
               :showLabels="false"
               :searchable="false"
-              :options="code.domainHashingTypeCode"
-              :loading="isLoad.domainHashingTypeCode"
+              :options="code.domainPurposeCode"
+              :loading="isLoad.domainPurposeCode"
             ></multiselect>
+          </template>
+
+          <!--2 td-->
+          <template slot="sslYn" slot-scope="row">
+            <c-switch
+              type="text"
+              class="v-switch"
+              on="https://"
+              off="http://"
+              v-model="row.item.sslYn"
+            ></c-switch>
+            [uuid].{{items.serviceDomainName}}
+          </template>
+
+          <!--3 td-->
+          <template slot="domainPortNumber" slot-scope="row">
+            <b-form-input
+              v-model="row.item.domainPortNumber"
+              type="text"
+              required
+            ></b-form-input>
+            <div class="invalid-tooltip">{{ $valid.msg.require }}</div>
+          </template>
+
+          <!--4 td-->
+          <template slot="hashingType" slot-scope="row">
+            <multiselect
+              v-model="row.item.hashingType"
+              label="codeName"
+              class="noEmpty"
+              :allowEmpty="false"
+              :showLabels="false"
+              :searchable="false"
+              :options="code.hashingType"
+              :loading="isLoad.hashingType"
+            ></multiselect>
+          </template>
+
+          <template slot="action" slot-scope="row">
+            <span class="ico">
+              <button type="button" v-if="row.index === 0" @click="onAddRow('serviceDomainList')"><i class="fa fa-plus-circle"></i></button>
+              <button type="button" v-if="row.index > 0" @click="onDelRow('serviceDomainList', row.index)"><i class="fa fa-times-circle"></i></button>
+            </span>
           </template>
         </b-table>
       </b-form-fieldset>
+
+
 
       <!-- CNAME -->
       <b-form-fieldset
@@ -243,8 +278,14 @@
         items: {
           companyCode: null,
           serviceName: '',
-          serviceTypeCode: [],
-          serviceDomainList: [],
+          serviceTypeId: null,
+          serviceDomainName: '',
+          serviceDomainList: [{
+            domainPurposeCode: null,
+            sslYn: true,
+            domainPortNumber: "",
+            hashingType: null,
+          }],
           cnameUseYn: true,
           cnameDomainName: "",
           sslCertUseYn: true,
@@ -255,16 +296,21 @@
         },
         code: {
           companyCode: [],
-          serviceTypeCode: [],
+          serviceTypeId: null,
           serviceTypeCodeAll: [],
           domainProtocolCode: [],
-          domainHashingTypeCode: []
+          serviceDomainList: [{
+            domainPurposeCode: null,
+            sslYn: true,
+            domainPortNumber: "",
+            hashingType: null,
+          }]
         },
         isLoad: {
           companyCode: true,
-          serviceTypeCode: true,
+          serviceTypeId: false,
           domainProtocolCode: true,
-          domainHashingTypeCode: true
+          serviceDomainList: true
         },
 
         serviceNameExists: null,
@@ -281,16 +327,13 @@
           this.items.companyCode = newValue !== null ? newValue.code : '';
         }
       },
-      serviceTypeCode: {
+
+      serviceTypeId: {
         get () {
-          return this.items.serviceTypeCode.length > 0
-            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.code === val))
-            : [];
+          return this.code.serviceTypeId.find(obj => obj.serviceTypeId === this.items.serviceTypeId) || null;
         },
         set (newValue) {
-          this.items.serviceTypeCode = newValue.length > 0
-            ? newValue.map(obj => obj.code)
-            : [];
+          this.items.serviceTypeId = newValue !== null ? newValue.serviceTypeId : null;
         }
       },
 
@@ -304,8 +347,7 @@
             this.serviceNameExists === 'success'),
           companyCode: this.items.companyCode === null ?
             this.items.companyCode :
-            this.items.companyCode.length > 0,
-          serviceTypeCode: this.items.serviceTypeCode.length
+            this.items.companyCode.length > 0
         }
       },
 
@@ -336,13 +378,10 @@
           this.code.companyCode = res.data.items;
       });
       // Service Type Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'SERVICE_TYPE' }
-        })
+      this.$https.get('/serviceTypeFilterList', {})
         .then((res) => {
-          this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCodeAll = res.data.items;
-          this.code.serviceTypeCode = res.data.items;
+          this.isLoad.serviceTypeId = false;
+          this.code.serviceTypeId = res.data.items;
         });
       // Domain Protocol Code
       this.$https.get('/system/commonCode', {
@@ -357,23 +396,42 @@
           q: { groupCode: 'HASHING_TYPE' }
         })
         .then((res) => {
-          this.isLoad.domainHashingTypeCode = false;
-          this.code.domainHashingTypeCode = res.data.items;
+          this.isLoad.hashingTypeCode = false;
+          this.code.hashingTypeCode = res.data.items;
         });
+      // Domain Hahing Type Code
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'DOMAIN_PUPOSE' }
+        })
+        .then((res) => {
+          this.isLoad.domainPurposeCode = false;
+          this.code.domainPurposeCode = res.data.items;
+          this.items.serviceDomainList[0].domainPurposeCode = { ...this.code.domainPurposeCode[0]};
+      });
+
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'HASHING_TYPE' }
+        })
+        .then((res) => {
+          this.isLoad.hashingType = false;
+          this.code.hashingType = res.data.items;
+          this.items.serviceDomainList[0].hashingType = { ...this.code.hashingType[0]};
+      });
     },
 
     methods: {
       onSubmit (){
         const submitItems = {
           ...this.items,
-          serviceDomainList: this.items.serviceDomainList.length ?
-            this.items.serviceDomainList.map(({ serviceTypeCode,domainProtocolCode,domainHashingTypeCode }) => {
-              return {
-                serviceTypeCode: serviceTypeCode.code,
-                domainProtocolCode: domainProtocolCode.code,
-                domainHashingTypeCode: domainHashingTypeCode.code
-              }
-            }) : []
+           serviceDomainList: this.items.serviceDomainList.length ?
+             this.items.serviceDomainList.map(({ domainPurposeCode,sslYn,domainPortNumber,hashingType }) => {
+               return {
+                 domainPurposeCode: domainPurposeCode.code,
+                 sslYn: sslYn,
+                 domainPortNumber: domainPortNumber,
+                 hashingType: hashingType.code
+               }
+             }) : []
         };
         // History
         this.items.modifyHistReason = '등록';
@@ -421,38 +479,37 @@
           validateItems = {...validateItems, sslCert, sslCertKey, sslCertExpireDate };
         }
 
-        const validate = (this.$valid.all(validateItems) && this.serviceNameExists === 'success' &&
-                            this.items.serviceTypeCode.length > 0);
+        const validate = (this.$valid.all(validateItems) && this.serviceNameExists === 'success');
 
         this.inValidForm = !validate;
         return validate;
       },
 
-      onSelectType (item){
-        const domain = this.getServiceDomain(item);
-        const isContain = this.items.serviceDomainList.length ?
-          this.items.serviceDomainList.find(({ serviceTypeCode }) => serviceTypeCode.code === domain.code)
-          : false;
-        if (!isContain){
-          this.items.serviceDomainList.push({
-            serviceTypeCode: domain,
-            domainProtocolCode: this.code.domainProtocolCode[0],
-            domainHashingTypeCode: this.code.domainHashingTypeCode[0]
-          });
-        }
-      },
+      // onSelectType (item){
+      //   const domain = this.getServiceDomain(item);
+      //   const isContain = this.items.serviceDomainList.length ?
+      //     this.items.serviceDomainList.find(({ serviceTypeCode }) => serviceTypeCode.code === domain.code)
+      //     : false;
+      //   if (!isContain){
+      //     this.items.serviceDomainList.push({
+      //       serviceTypeCode: domain,
+      //       domainProtocolCode: this.code.domainProtocolCode[0],
+      //       domainHashingTypeCode: this.code.domainHashingTypeCode[0]
+      //     });
+      //   }
+      // },
 
       onRemoveType (item){
         const domain = this.getServiceDomain(item);
-        const isContain = this.items.serviceTypeCode.filter(val => {
-          return domain.code === val.slice(0, val.length - 2);
-        }).length > 0;
+        // const isContain = this.items.serviceTypeCode.filter(val => {
+        //   return domain.code === val.slice(0, val.length - 2);
+        // }).length > 0;
 
-        if (!isContain){
-          this.items.serviceDomainList = this.items.serviceDomainList.filter(({serviceTypeCode}) => {
-            return serviceTypeCode.code !== domain.code
-          });
-        }
+        // if (!isContain){
+        //   this.items.serviceDomainList = this.items.serviceDomainList.filter(({serviceTypeCode}) => {
+        //     return serviceTypeCode.code !== domain.code
+        //   });
+        // }
       },
 
       lowerFomatter (value) {
@@ -462,7 +519,19 @@
       getServiceDomain (item){
         const codeSplit = item.code.split('_')[2];
         return this.code.serviceTypeCodeAll.find(({ code }) => item.code.slice(0, item.code.length) === code);
-      }
+      },
+      onAddRow (item, data = {}){
+         this.items[item].push(Object.assign({}, {
+           domainPurposeCode: this.code.domainPurposeCode[0],
+           sslYn: true,
+           domainPortNumber: '',
+           hashingType: this.code.hashingType[0]
+         }, data));
+      },
+
+      onDelRow (item, index){
+        this.items[item].splice(index, 1);
+      },
     }
   }
 </script>

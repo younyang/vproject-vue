@@ -15,113 +15,134 @@
     <b-collapse id="formDefault" visible>
       <b-form class="formView" :validated="inValidForm" novalidate>
 
-        <div class="repeats" v-for="(origin, index) in items.originList" :key="origin.serviceTypeCode">
-          <h3 class="content-title"><i class="fa fa-circle"></i> {{ origin.serviceTypeName }}</h3>
-          <!-- Origin 사용설정 -->
+        <b-form-fieldset
+          label="Service Type"
+          :horizontal="true">
+          <b-form-input
+            :value="items.serviceTypeName"
+            type="text"
+            plaintext
+          ></b-form-input>
+       </b-form-fieldset>
+
+        <div class="form-row">
+          <!-- NAS IP 주소 -->
           <b-form-fieldset
-            :horizontal="true">
-            <template slot="label">
-              Origin 사용 설정<i v-if="isEdit" class="require">*</i>
-            </template>
-            <b-form-radio-group
-              v-if="isEdit"
-              v-model="origin.originSectionCode"
-              :options="code.originSectionCode"
-              :name="origin.serviceTypeCode"
-              value-field="code"
-              text-field="codeName"
-            ></b-form-radio-group>
+           :invalid-feedback="$valid.msg.require"
+           :horizontal="true">
+           <template slot="label">
+             NAS IP 주소
+             <i v-if="isEdit" class="require">*</i>
+           </template>
             <b-form-input
-              v-else
-              :value="origin.originSectionCodeName"
+              v-if="!isEdit"
+              :value="items.nasServerIp"
               type="text"
               plaintext
             ></b-form-input>
-          </b-form-fieldset>
 
-          <!-- Bucket 선택 -->
-          <b-form-fieldset
-            v-if="origin.originSectionCode === 'ORIGIN_SECTION_01'"
-            :invalid-feedback="$valid.msg.select"
-            :horizontal="true">
-            <template slot="label">
-              Bucket 선택<i v-if="isEdit" class="require">*</i>
-            </template>
-            <multiselect
-              v-if="isEdit"
-              v-model="origin.originBucketId"
-              label="originBucketName"
-              class="inline"
-              style="min-width:160px"
-              :class="{'invalid': origin.originBucketId === null }"
-              :id="index"
-              :showLabels="false"
-              :searchable="false"
-              :options="code.bucket[origin.serviceTypeName]"
-              @select="onBucket"
-              placeholder="Select Bucket"
-            ></multiselect>
-
-            <span v-else class="form-text-alone">
-              {{ origin.originBucketName }}
-            </span>
-
-            <span class="form-text-alone">
-              ( {{ origin.operatorName }} /
-              {{ origin.operatorTeamName }} )
-            </span>
-          </b-form-fieldset>
-
-          <!-- Origin Domain -->
-          <b-form-fieldset
-            v-if="origin.originSectionCode === 'ORIGIN_SECTION_02'"
-            :invalid-feedback="$valid.msg.require"
-            :horizontal="true">
-            <template slot="label">
-              Origin Domain<i v-if="isEdit" class="require">*</i>
-            </template>
             <b-form-input
-              v-model="origin.originDomainName"
+              v-if="isEdit"
+              v-model="tempItems.nasServerIp"
               type="text"
-              :plaintext="!isEdit"
               required
             ></b-form-input>
-          </b-form-fieldset>
+
+         </b-form-fieldset>
+
+        <!-- 클라이언트 마운트 경로 -->
           <b-form-fieldset
-            v-if="origin.originSectionCode === 'ORIGIN_SECTION_02'"
             :invalid-feedback="$valid.msg.require"
             :horizontal="true">
             <template slot="label">
-              Port<i v-if="isEdit" class="require">*</i>
+              클라이언트마운트경로
+              <i v-if="isEdit" class="require">*</i>
             </template>
-            <cleave
+
+            <b-form-input
+              v-if="!isEdit"
+              :value="items.clientServiceNasMountPath"
+              plaintext
+              type="text"
+            ></b-form-input>
+
+            <b-form-input
               v-if="isEdit"
-              v-model="origin.originPort"
-              style="width: 120px;"
-              class="form-control"
-              :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+              v-model="tempItems.clientServiceNasMountPath"
+              type="text"
               required
-            ></cleave>
+            ></b-form-input>
 
-            <span v-else class="form-text-alone">{{ origin.originPort }}</span>
           </b-form-fieldset>
-        </div>
+       </div>
 
-        <!-- 변경이력 -->
-        <b-form-fieldset
-          v-if="isEdit"
-          label="변경이력<i class='require'>*</i>"
-          :invalid-feedback="$valid.msg.require"
-          :horizontal="true">
-          <b-form-textarea
-            v-model="items.modifyHistReason"
-            :rows="6"
-            required
-          ></b-form-textarea>
+       <div class="form-row">
+       <!-- NAS Mount Path -->
+         <b-form-fieldset
+           :invalid-feedback="$valid.msg.require"
+           :horizontal="true">
+           <template slot="label">
+             NAS Mount Path
+             <i v-if="isEdit" class="require">*</i>
+           </template>
+           <b-form-input
+             v-if="!isEdit"
+             :value="items.serviceNasMountPath"
+             type="text"
+             plaintext
+           ></b-form-input>
+
+           <b-form-input
+             v-if="isEdit"
+             v-model="tempItems.serviceNasMountPath"
+             type="text"
+             required
+           ></b-form-input>
+
         </b-form-fieldset>
+
+       <!-- NAS Mount Auth Key -->
+         <b-form-fieldset
+           :invalid-feedback="$valid.msg.require"
+           :horizontal="true">
+           <template slot="label">
+            NAS Mount Auth Key
+             <i v-if="isEdit" class="require">*</i>
+           </template>
+
+           <b-form-input
+             v-if="!isEdit"
+             :value="items.serviceNasMountAuthKey"
+             plaintext
+             type="text"
+           ></b-form-input>
+
+           <b-form-input
+             v-if="isEdit"
+             v-model="tempItems.serviceNasMountAuthKey"
+             type="text"
+             required
+           ></b-form-input>
+
+         </b-form-fieldset>
+
+      </div>
+
+      <!-- 변경이력 -->
+      <b-form-fieldset
+        v-if="isHistReasonEdit"
+        label="변경이력<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <b-form-textarea
+          v-model="tempItems.modifyHistReason"
+          :rows="6"
+          required
+        ></b-form-textarea>
+      </b-form-fieldset>
+
       </b-form>
     </b-collapse>
-
     <!-- 처리이력 -->
     <div class="collapse-title" v-if="!isEdit">
       <b-button class="btn-collapse" v-b-toggle.formHistory>
@@ -137,7 +158,7 @@
             label="등록일시"
             :horizontal="true">
             <b-form-input
-              :value="items.createDateTime"
+              :value="items.createDatetime"
               plaintext
               type="text"
             ></b-form-input>
@@ -177,7 +198,6 @@
           </b-form-fieldset>
         </div>
 
-        <!-- 배포상태 -->
         <b-form-fieldset
           v-if="items.processId !== null"
           label="배포상태"
@@ -194,22 +214,14 @@
       </b-form>
     </b-collapse>
 
-
-
     <div class="page-btn" v-if="isEdit">
-      <b-button type="button" variant="outline-secondary" @click="onView">취소</b-button>
+      <b-button type="button" variant="outline-secondary" v-if="!isCreate"  @click="onView">취소</b-button>
       <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
     </div>
     <div class="page-btn" v-else>
       <b-button type="button" variant="outline-secondary" @click="showHistory">이력관리</b-button>
-      <b-button
-        v-if="isProcessComplete"
-        type="button"
-        variant="primary"
-        @click="onEdit"
-      >수정</b-button>
+      <b-button type="button" variant="primary" @click="onEdit">수정</b-button>
     </div>
-
 
     <!-- History Modal -->
     <b-modal size="lg" title="이력관리" v-model="isModalHistory">
@@ -222,6 +234,9 @@
           :current-page="history.pageInfo.page"
           :per-page="history.pageInfo.size"
         >
+          <template slot="modifyHistReason" slot-scope="row">
+            {{(row.value) ? row.value : "-"}}
+          </template>
           <template slot="histMgmtId" slot-scope="row">
             <a :href="getHistoryLink(row.value)" target="_blank">보기</a>
           </template>
@@ -234,8 +249,7 @@
         :per-page="history.pageInfo.size"
         class="mt-2"
       ></b-pagination>
-
-      <div slot="modal-footer">
+      <div slot="modal-footer" class="mx-auto">
         <b-button type="button" variant="primary" @click="isModalHistory = false">확인</b-button>
       </div>
     </b-modal>
@@ -257,23 +271,28 @@
       return {
         name: 'Service 상세',
         originItems: {},
-        serviceName: '',
+        tempItems: {},
+        serviceName:'',
         items: {
-          originList: [],
+          serviceNasMountAuthKey: null,
+          serviceNasMountPath: null,
+          clientServiceNasMountPath: null,
+          nasServerIp: null,
+          serviceTypeId: null,
           modifyHistReason: null,
+          serviceTypeName: null,
           processStateCode: null,
           processId: null
         },
 
         code: {
-          serviceTypeList: [],
           originSectionCode: [],
           bucket: {}
         },
         history: {
           fields: {
-            createId: {label: '등록/수정자', 'class': 'text-left'},
-            histBeginDateTime: {label: '등록/수정일시'},
+            createId: {label: '등록/수정자'},
+            createDatetime: {label: '등록/수정일시'},
             modifyHistReason: {label: '변경이력', 'class': 'text-left'},
             histMgmtId: {label: '보기'}
           },
@@ -290,18 +309,19 @@
         },
         isCreate: false,
         isEdit: false,
+        isTypeNameShow:true,
         isModalHistory: false,
-
+        isHistReasonEdit: false,
         inValidForm: false
       }
     },
 
     computed: {
-      isProcessComplete (){
-        return this.items.processId === null || (this.items.processStateCode !== null &&
-        this.items.processStateCode !== '' &&
-        this.items.processStateCode === 'PROCESS_STATE_02')
-      }
+       isProcessComplete (){
+         return this.items.processId === null || (this.items.processStateCode !== null &&
+         this.items.processStateCode !== '' &&
+         this.items.processStateCode === 'PROCESS_STATE_02')
+       }
     },
 
     created (){
@@ -313,131 +333,68 @@
         document.querySelector('body.app').classList.add('history-mode')
       }
 
-      // Service Name
+      // serviceTypeName 정보를 가져온다
       this.$https.get(`/services/${this.id}`)
         .then((res) => {
-          this.serviceName = res.data.items.serviceName;
+         this.items.serviceTypeName = res.data.items.serviceTypeName;
+      });
+
+      //origin 정보를 가져온다.
+      this.$https.get(detailUrl)
+        .then((res) => {
+          if (res.data.items === null){
+            this.isCreate = true;
+            this.isEdit = true;
+            this.tempItems = this.items;
+          }else{
+            this.items = res.data.items;
+            this.originItems = JSON.parse(JSON.stringify(this.items));
+          }
         });
-
-      // fetch
-      const fetch = () => this.$https.get('/system/commonCode', { q: { groupCode: 'ORIGIN_SECTION' } });
-
-      // fetch Origin Service Type
-      const fetchCodeSection = (res) => {
-        this.isLoad.originSectionCode = false;
-        this.code.originSectionCode = res.data.items;
-        //return this.$https.get(`${detailUrl}/types`);
-        return this.$https.get(`/services/${this.id}/origins/types`);
-      };
-
-      const fetchServiceType = (res) => {
-        this.code.serviceTypeList = res.data.items;
-        return this.$https.get(detailUrl);
-      };
-
-      fetch()
-        .then(fetchCodeSection)
-        .then(fetchServiceType)
-        .then(this.fetchDetail);
     },
 
     methods: {
-      fetchDetail (res){
-        if (res.data.items === null){
-          this.isCreate = true;
-          this.isEdit = true;
-        }else{
-          this.originList = res.data.items.originList;
-          this.items = { ...res.data.items, originList: []};
-        }
-
-        this.code.serviceTypeList.forEach(this.fetchBucketList);
-      },
-
-      fetchBucketList (obj){
-        const { serviceTypeCode, serviceTypeName } = obj;
-        const bucketList = () => this.$https.get('/services/origins/buckets', { serviceType: serviceTypeCode });
-        bucketList().then((res) => {
-          this.code.bucket[serviceTypeName] = res.data.items;
-          this.setOriginList(serviceTypeCode, serviceTypeName);
-        });
-      },
-
-      setOriginList (serviceTypeCode, serviceTypeName){
-        const originItems = this.isCreate ? {
-          serviceTypeCode,
-          serviceTypeName,
-          originSectionCode: 'ORIGIN_SECTION_01',
-          originSectionCodeName: '',
-          originBucketId: null,
-          originBucketName: '',
-          operatorName: '',
-          operatorTeamName: '',
-          originDomainName: null,
-          originPort: null
-        } : this.originList.find(obj => obj.serviceTypeCode === serviceTypeCode);
-
-        const buckets = this.code.bucket[serviceTypeName];
-        const originSectionCode = this.code.originSectionCode.find(({code}) => {
-          return code === originItems.originSectionCode
-        });
-        const originSectionCodeName = originSectionCode ? originSectionCode.codeName : '';
-        const originBucketId = originItems.originBucketId
-            ? buckets.find(({originBucketId}) => {
-                return originBucketId === originItems.originBucketId
-              })
-            : null;
-
-        this.items.originList.push({
-          ...originItems,
-          originSectionCodeName,
-          originBucketId
-        });
-      },
 
       onEdit (){
         this.isEdit = true;
+        this.isHistReasonEdit = true;
+        this.tempItems = JSON.parse(JSON.stringify(this.originItems));
       },
 
       onView (){
         this.isEdit = false;
-        this.items = JSON.parse(JSON.stringify(this.originItems))
+        this.isHistReasonEdit = false;
+        this.tempItems = {};
+        this.items = JSON.parse(JSON.stringify(this.originItems));
+      },
+
+      validate (submitItems){
+        const {
+           serviceNasMountAuthKey,
+           serviceNasMountPath,
+           clientServiceNasMountPath,
+           nasServerIp,
+           modifyHistReason,
+       } = submitItems;
+
+        let validateItems = {serviceNasMountAuthKey,serviceNasMountPath,clientServiceNasMountPath,nasServerIp};
+        if(this.isCreate === false){
+            validateItems = {...validateItems, modifyHistReason };
+        }
+        const validate = this.$valid.all(validateItems);
+        this.inValidForm = !validate;
+        return validate;
       },
 
       onSubmit (){
-        const submitItems = this.items.originList.map(obj => {
-          const {
-            serviceTypeCode,
-            originSectionCode,
-            originBucketId,
-            originDomainName,
-            originPort
-          } = obj;
-
-          const defaultItems = {
-            serviceTypeCode,
-            originSectionCode,
-            modifyHistReason: this.items.modifyHistReason
-          };
-
-          return (originSectionCode === 'ORIGIN_SECTION_01') ? {
-            ...defaultItems,
-            originBucketId: originBucketId ? originBucketId.originBucketId : null
-          } : {
-            ...defaultItems,
-            originDomainName,
-            originPort
-          }
-        });
-
-        const validate = this.$valid.all(submitItems);
+        const submitItems = {
+          ...this.tempItems
+        };
         const submitAction = (this.isCreate) ?
           () => this.$https.post(`/services/${this.id}/origins`, submitItems) :
-          () => this.$https.put(`/services/${this.id}/origins`, submitItems);
+          () => this.$https.put(`/services/${this.id}/origins/${submitItems.serviceTypeId}`, submitItems);
 
-        this.inValidForm = !validate;
-
-        if (validate){
+        if (this.validate(submitItems)) {
           submitAction()
             .then(() => {
               this.$router.go(this.$router.currentRoute);
@@ -446,11 +403,6 @@
               console.log(error);
             });
         }
-      },
-
-      onBucket ({ operatorName, operatorTeamName }, index){
-        this.items.originList[index].operatorName = operatorName;
-        this.items.originList[index].operatorTeamName = operatorTeamName;
       },
 
       getHistoryLink (rowId){

@@ -3,32 +3,32 @@
     <b-form class="searchBox" @reset="onReset">
       <div class="form-row">
         <b-form-fieldset
-          label="알림 구분1"
+          label="검색어"
           class="inline"
           :horizontal="true">
           <multiselect
-            v-model="componentTypeCode"
+            v-model="searchType"
             label="codeName"
+            class="noEmpty"
+            :allowEmpty="false"
             :showLabels="false"
             :searchable="false"
-            :loading="isLoad.componentTypeCode"
-            :options="code.componentTypeCode"
-            track-by="code"
-            placeholder="전체"
+            :options="code.searchType"
           ></multiselect>
+          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="알림 방법"
+          label="Display"
           class="label-lg"
           :horizontal="true">
           <multiselect
-            v-model="alarmTypeCode"
-            label="codeName"
+            v-model="displayCode"
             :showLabels="false"
             :searchable="false"
-            :options="code.alarmTypeCode"
-            :loading="isLoad.alarmTypeCode"
+            :options="code.displayCode"
+            :loading="isLoad.displayCode"
+            label="codeName"
             track-by="code"
             placeholder="전체"
           ></multiselect>
@@ -37,16 +37,16 @@
 
       <div class="form-row">
         <b-form-fieldset
-          label="수신 그룹"
+          label="Target"
           :horizontal="true">
           <multiselect
-            v-model="groupId"
+            v-model="targetCode"
             :showLabels="false"
             :searchable="false"
-            :options="code.groupId"
-            :loading="isLoad.groupId"
-            label="groupName"
-            track-by="groupId"
+            :options="code.targetCode"
+            :loading="isLoad.targetCode"
+            label="codeName"
+            track-by="code"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -56,7 +56,7 @@
           class="label-lg"
           :horizontal="true">
           <multiselect
-            v-model="searchItem.alarmPolicyUseYn"
+            v-model="searchItem.widgetUseYn"
             :showLabels="false"
             :searchable="false"
             :options="['사용', '미사용']"
@@ -100,6 +100,9 @@
       <b-button type="button" variant="primary" @click="excelDownload">
         엑셀 다운로드
       </b-button>
+      <b-button type="button" variant="primary" :to="{ name: 'Widget 등록' }">
+        등록
+      </b-button>
     </section>
 
     <section class="board">
@@ -110,11 +113,17 @@
         :fields="fields"
         @row-clicked="details"
       >
-        <template slot="groupNames" slot-scope="row">
+        <template slot="widgetDisplayNames" slot-scope="row">
           <span class="badge" v-for="val in row.value">
             {{ val }}
           </span>
         </template>
+        <template slot="widgetTargetNames" slot-scope="row">
+          <span class="badge" v-for="val in row.value">
+            {{ val }}
+          </span>
+        </template>
+        <template slot="widgetUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
       </b-table>
     </section>
 
@@ -154,12 +163,14 @@
     data (){
       return {
         fields: {
-          serverType: {label: 'ServerType', 'class': 'text-left'},
-          alarmPolicyCompCount: {label: '알림 설정', 'class': 'text-left'},
-          groupNames: {label: '수신 그룹', 'class': 'text-left'},
-          alarmTypeName: {label: '알림 방법', 'class': 'text-left'},
-          modifyDatetime:{label: '수정일', 'class': 'text-left'},
-          alarmPolicyUseYnName: {label: '사용여부', 'class': 'text-left'},
+          widgetId: {label: 'ID'},
+          widgetName: {label: 'Widget Name', 'class': 'text-left'},
+          widgetSourceName: {label: 'Data Source', 'class': 'text-left'},
+          widgetDisplayNames: {label: 'Display', 'class': 'text-left'},
+          widgetTargetNames:{label: 'Target', 'class': 'text-left'},
+          createDateTime: {label: '등록일'},
+          modifyDateTime: {label: '수정일'},
+          widgetUseYn: {label: '사용여부'}
         },
         items: [],
         pageInfo: {
@@ -173,19 +184,25 @@
         queryParams: {},
 
         searchItem: {
-          componentTypeCode: null,
-          alarmPolicyUseYn: null,
-          alarmTypeCode: null,
-          groupId: null,
+          searchType: 'widgetName',
+          searchKeyword: null,
+          displayCode: null,
+          targetCode: null,
+          widgetUseYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
           searchDateTo: null
         },
         code: {
-          componentTypeCode: [],
-          alarmTypeCode: [{
-                code: 'ALARM_TYPE_CODE_01',
-            codeName: 'Email'
+          searchType: [{
+                code: 'widgetName',
+            codeName: 'Widget Name'
+          },{
+                code: 'widgetSourceName',
+            codeName: 'Data Source'
+          },{
+                code: 'widgetId',
+            codeName: 'ID'
           }],
           searchDateType: [{
             code: 'createDate',
@@ -194,23 +211,39 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          groupId:[],
+          displayCode: [],
+          targetCode:[]
         },
         isLoad: {
-          componentTypeCode:false,
-          alarmTypeCode: false,
-          groupId: false,
+          displayCode: false,
+          targetCode: false
         }
       }
     },
 
     computed: {
-      groupId: {
+      searchType: {
         get () {
-          return this.code.groupId.find(obj => obj.code === this.searchItem.groupId) || null;
+          return this.code.searchType.find(obj => obj.code === this.searchItem.searchType) || null;
         },
         set (newValue) {
-          this.searchItem.groupId = newValue !== null ? newValue.groupId : null;
+          this.searchItem.searchType = newValue !== null ? newValue.code : null;
+        }
+      },
+      displayCode: {
+        get () {
+          return this.code.displayCode.find(obj => obj.code === this.searchItem.displayCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.displayCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      targetCode: {
+        get () {
+          return this.code.targetCode.find(obj => obj.code === this.searchItem.targetCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.targetCode = newValue !== null ? newValue.code : null;
         }
       },
       searchDateType: {
@@ -220,47 +253,33 @@
         set (newValue) {
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
-      },
-      componentTypeCode: {
-        get () {
-          return this.code.componentTypeCode.find(obj => obj.code === this.searchItem.componentTypeCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.componentTypeCode = newValue !== null ? newValue.code : null;
-        }
-      },
-      alarmTypeCode: {
-        get () {
-          return this.code.alarmTypeCode.find(obj => obj.code === this.searchItem.alarmTypeCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.alarmTypeCode = newValue !== null ? newValue.code : null;
-        }
       }
     },
 
     created (){
       this.fetchList();
-      this.$https.get('/setting/operators/groups')
-        .then((res) => {
-          this.isLoad.groupId = false;
-          this.code.groupId = res.data.items;
-        });
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'WIDGET_DISPLAY' }
+      })
+      .then((res) => {
+        this.isLoad.displayCode = false;
+        this.code.displayCode = res.data.items;
+      });
 
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'COMPONENT_TYPE' }
-        })
-        .then((res) => {
-          this.isLoad.componentTypeCode = false;
-          this.code.componentTypeCode = res.data.items;
-        });
+        q: { groupCode: 'WIDGET_TARGET' }
+      })
+      .then((res) => {
+        this.isLoad.targetCode = false;
+        this.code.targetCode = res.data.items;
+      });
     },
 
     methods: {
       details (item) {
         this.$router.push({
-          name: 'Notification 상세',
-          params: { id: item.alarmPolicyId }
+          name: 'Widget 상세',
+          params: { id: item.widgetId }
         })
       },
 
@@ -271,11 +290,21 @@
           q: this.queryParams
         };
 
-        this.$https.get('/monitoring/policies', {...defaultParams, ...params})
+        this.$https.get('/setting/widget', {...defaultParams, ...params})
           .then((res) => {
-            // Setting API Service Name
             this.items = res.data.items.map(obj => {
-              obj.groupNames = (obj.groupNames) ? obj.groupNames.split(',') : [];
+              const widgetDisplayNames = [];
+              const widgetTargetNames = [];
+              obj.widgetDisplayList.forEach( obj => {
+                widgetDisplayNames.push(obj.widgetDisplayName)
+              })
+              obj.widgetDisplayNames = widgetDisplayNames;
+
+              obj.widgetTargetList.forEach( obj => {
+                widgetTargetNames.push(obj.widgetTargetName)
+              })
+              obj.widgetTargetNames = widgetTargetNames;
+              
               return obj
             });
             this.pageInfo = res.data.pageInfo;
@@ -301,7 +330,7 @@
         // UseYn data convert
         Object.keys(this.searchItem).forEach(key => {
           if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
-            this.queryParams[key] = (key === 'alarmPolicyUseYn' )
+            this.queryParams[key] = (key === 'widgetUseYn' )
               ? (this.searchItem[key] === '사용')
               : this.searchItem[key];
           }
@@ -312,7 +341,13 @@
 
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
-          this.searchItem[key] = null;
+          if (key === 'searchType'){
+            this.searchItem[key] = 'widgetName';
+          } else if (key === 'searchDateType') {
+            this.searchItem[key] = 'createDate';
+          } else {
+            this.searchItem[key] = null;
+          }
         });
         this.queryParams = {};
         this.fetchList();
@@ -329,7 +364,7 @@
       excelDownload(){
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
-        return window.location.href = '/api/setting/management/operators/excel/download?q=' + q;
+        return window.location.href = '/api/setting/widget/excel/download?q=' + q;
       },
     }
   }

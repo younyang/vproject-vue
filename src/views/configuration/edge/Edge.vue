@@ -18,7 +18,7 @@
         </b-form-fieldset>
 
         <b-form-fieldset
-          label="Service Type"
+          label="ServiceType-Protocol"
           class="label-lg"
           :horizontal="true">
           <multiselect
@@ -27,8 +27,8 @@
             :searchable="false"
             :options="code.serviceTypeCode"
             :loading="isLoad.serviceTypeCode"
-            label="codeName"
-            track-by="code"
+            label="serviceTypeName"
+            track-by="serviceTypeAndProtocolCode"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -76,11 +76,11 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
-
-
+      </div>
+      -->
+      <div class="form-row">
         <b-form-fieldset
           label="배포상태"
-          class="label-lg"
           :horizontal="true">
           <multiselect
             v-model="process"
@@ -93,9 +93,7 @@
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
-
-      </div>-->
-
+      </div>
       <div class="form-row">
         <b-form-fieldset
           label="기간"
@@ -145,6 +143,11 @@
         @row-clicked="details"
       >
         <template slot="serviceTypeName" slot-scope="row">
+          <span class="badge badge-pill badge-success" v-for="val in row.value">
+            {{ val }}
+          </span>
+        </template>
+        <template slot="popName" slot-scope="row">
           <span class="badge badge-pill badge-success" v-for="val in row.value">
             {{ val }}
           </span>
@@ -202,7 +205,7 @@
   import moment from 'moment'
 
   export default {
-    name: 'referrers',
+    name: 'edgeList',
     data (){
       return {
         fields: {
@@ -210,12 +213,11 @@
           ip: {label: 'IP', 'class': 'text-left'},
           hostName: {label: 'Host Name', 'class': 'text-left'},
           edgeRelayName: {label: '구분'},
-          serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
-          //edgeDomainName: {label: 'Domain'},
+          serviceTypeName: {label: 'ServiceType-Protocol', 'class': 'text-left'},
           popName: {label: 'PoP'},
           createDateTime: {label: '등록일시'},
-          modifyDateTime: {label: '수정일시'}//,
-          //edgeUseYn: {label: '사용여부'}
+          modifyDateTime: {label: '수정일시'},
+          processStateCodeName: {label: '배포상태'}
         },
         items: [],
         pageInfo: {
@@ -238,7 +240,8 @@
           //edgeCoreConfigApplyYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
-          searchDateTo: null
+          searchDateTo: null,
+          processState: null
         },
         createList: {
           fields: {
@@ -297,10 +300,10 @@
       },
       serviceTypeCode: {
         get () {
-          return this.code.serviceTypeCode.find(obj => obj.code === this.searchItem.serviceTypeCode) || null;
+          return this.code.serviceTypeCode.find(obj => obj.serviceTypeAndProtocolCode === this.searchItem.serviceTypeCode) || null;
         },
         set (newValue) {
-          this.searchItem.serviceTypeCode = newValue !== null ? newValue.code : null;
+          this.searchItem.serviceTypeCode = newValue !== null ? newValue.serviceTypeAndProtocolCode : null;
         }
       },
       popId: {
@@ -313,10 +316,10 @@
       },
       process: {
         get () {
-          return this.code.process.find(obj => obj.code === this.searchItem.edgeCoreConfigApplyYn) || null;
+          return this.code.process.find(obj => obj.code === this.searchItem.processState) || null;
         },
         set (newValue) {
-          this.searchItem.edgeCoreConfigApplyYn = newValue !== null ? newValue.code : null;
+          this.searchItem.processState = newValue !== null ? newValue.code : null;
         }
       }
     },
@@ -326,27 +329,34 @@
       this.fetchList();
 
       // Service Type Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'SERVICE_TYPE' }
-        })
+      this.$https.get('/edges/serviceTypeAndProtocol')
         .then((res) => {
-          this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
-            return code.split('_')[2].length === 2
-          });
-        });
+          this.isLoad.serviceTypeCode = false
+          this.code.serviceTypeCode = res.data.items
+        })
+
+      // Process State List
       this.$https.get('/system/commonCode', {
           q: { groupCode: 'PROCESS_STATE' }
         })
         .then((res) => {
           this.isLoad.process = false;
           this.code.process = res.data.items;
+          this.code.process.push({
+            code: "PROCESS_STATE_TEMP",
+            codeName: "대기"
+          })
         });
+
       // PoP List
       this.$https.get('/pops')
         .then((res) => {
           this.isLoad.popId = false;
           this.code.popId = res.data.items;
+          this.code.popId.push({
+              popId: '미선택',
+              popName: '미선택'
+          })
         });
     },
 
@@ -378,6 +388,7 @@
             // Setting Service Type Name
             this.items = res.data.items.map(obj => {
               obj.serviceTypeName = (obj.serviceTypeName) ? obj.serviceTypeName.split(',') : [];
+              obj.popName = (obj.popName) ? obj.popName.split(',') : [];
               return obj
             });
             this.pageInfo = res.data.pageInfo;

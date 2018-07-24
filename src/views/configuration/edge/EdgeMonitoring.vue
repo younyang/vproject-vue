@@ -19,14 +19,24 @@
       <span class="form-text">{{this.items.edgeCount}}</span>
     </b-form>
 
+    <div class="row mt-2">
+      <div class="col-3">
+        <multiselect
+          v-model="filePath"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.filePath"
+          :loading="isLoad.filePath"
+          track-by="path"
+          label="title"
+          placeholder="Select File Path"
+        ></multiselect>
+      </div>
+    </div>
 
-    <div class="row mt-4">
+    <div class="row mt-3">
       <!-- List -->
       <div class="col-3">
-        <div class="monitor-search">
-          <b-form-input type="text" v-model="searchItem.filePath" placeholder="Enter File Path">
-          </b-form-input>
-        </div>
         <div class="monitor-search">
           <b-form-input type="text" v-model="searchItem.searchKeyword" placeholder="Enter Search text">
           </b-form-input>
@@ -69,7 +79,7 @@
       	</table>
 
         <div class="page-btn">
-          <b-button type="button" variant="primary" @click="onSubmit">저장</b-button>
+          <b-button type="button" variant="primary" @click="onSubmit">보기</b-button>
         </div>
       </div>
 
@@ -90,6 +100,13 @@
 </template>
 
 <script>
+  /*
+  TODO: 수정 필요
+    1. 컨텐츠 리스트
+    2. Edge ip
+
+    정책 및 기획 확인 후 추가 작업 예정
+  */
   import shaka from 'shaka-player'
   export default {
     name: 'edgeMonitoring',
@@ -105,20 +122,21 @@
         items: {
           popId : null,
           edgeCount : 0,
-          edgeList : []
+          edgeList : [],
+          filePath: null
         },
         queryParams: {},
         searchItem: {
           searchKeyword: null,
-          popId: null,
-          filePath: '/vod-test-bucket/55/master.m3u8' // TODO: 추후 초기화
-          //filePath: ''
+          popId: null
         },
         code: {
-          popId: []
+          popId: [],
+          filePath: []
         },
         isLoad: {
-          popId: true
+          popId: true,
+          filePath: true
         },
         videoProtocol: 'https://',
         licenseUrl: 'https://drm.kr.btv.into.guru/drm/v0.1/license/widevine'
@@ -132,6 +150,14 @@
         set (newValue) {
           this.items.popId = newValue !== null ? newValue.popId : null;
         }
+      },
+      filePath: {
+        get () {
+          return this.code.filePath.find(obj => obj.path === this.items.filePath) || null;
+        },
+        set (newValue) {
+          this.items.filePath = newValue !== null ? newValue.path : null;
+        }
       }
     },
 
@@ -143,6 +169,18 @@
           this.code.popId = res.data.items;
         });
 
+      // file path List
+      this.isLoad.filePath = false;
+      this.code.filePath = [
+        {
+            title: '토이스토리3',
+            path: '/vod-test-bucket/55/master.m3u8'
+        },{
+            title: '킬러의 보디가드',
+            path: '/vod-test-bucket/M_341278_[프리미어]킬러의-보디가드[UHD]_0/M_341278_[프리미어]킬러의-보디가드[UHD]_0_[TV-UHD]_171020_TV[SD-S]/master.m3u8'
+        }
+      ]
+      // shaka initialize
       shaka.polyfill.installAll()
       if (!shaka.Player.isBrowserSupported()) {
         console.error('Browser not supported!')
@@ -151,8 +189,8 @@
     methods: {
       onSubmit (){
         this.items.edgeList = [];
-        var searchFilePath = this.searchItem.filePath
-        if(this.selected.length > 0 && searchFilePath){
+        if (this.selected.length > 0 && this.filePath) {
+          var searchFilePath = this.filePath.path
           const edgeIds = this.selected;
           this.$https.put(`/edges/monitoring`, { edgeIds })
             .then((res) => {
@@ -171,11 +209,6 @@
                       }
                     }
                   })
-                  /*
-                  contents url :
-                  https://1.255.146.27/vod-test-bucket/55/master.m3u8
-                  https://1.255.146.27/vod-test-bucket/M_341278_[프리미어]킬러의-보디가드[UHD]_0/M_341278_[프리미어]킬러의-보디가드[UHD]_0_[TV-UHD]_171020_TV[SD-S]/master.m3u8
-                  */
                   player.load(this.videoProtocol + video.dataset.ip + '/' + searchFilePath).then(function () {
                     // This runs if the asynchronous load is successful.
                     console.log('The video has now been loaded!')
@@ -186,6 +219,8 @@
             .catch((error) => {
               console.log(error);
             });
+        } else {
+          alert('Edge와 컨텐츠를 선택 해주세요.');
         }
         //console.log(this.selected.length);
         //console.log(this.selected);

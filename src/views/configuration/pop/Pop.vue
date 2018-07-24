@@ -15,7 +15,8 @@
             :searchable="false"
             :options="code.searchType"
           ></multiselect>
-          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword" placeholder="Enter Search text"></b-form-input>
+          <b-form-input type="text" class="keyword" v-model="searchItem.searchKeyword"
+                        placeholder=""></b-form-input>
         </b-form-fieldset>
 
         <b-form-fieldset
@@ -35,32 +36,39 @@
         </b-form-fieldset>
       </div>
 
+      <!--<div class="form-row">-->
+      <!--<b-form-fieldset-->
+      <!--label="배포상태"-->
+      <!--class="inline date"-->
+      <!--:horizontal="true">-->
+      <!--<multiselect-->
+      <!--v-model="distributeStateCode"-->
+      <!--:showLabels="false"-->
+      <!--:searchable="false"-->
+      <!--:options="code.distributeStateCode"-->
+      <!--:loading="isLoad.qualitySolutionTeamCode"-->
+      <!--label="codeName"-->
+      <!--track-by="code"-->
+      <!--placeholder="전체"-->
+      <!--&gt;</multiselect>-->
+      <!--</b-form-fieldset>-->
+      <!--</div>-->
+
       <div class="form-row">
         <b-form-fieldset
-          label="주소"
+          label="지역"
           class="inline"
           :horizontal="true">
           <multiselect
-            v-model="firstAddressCode"
+            v-model="geoCode"
             :showLabels="false"
-            :searchable="false"
-            :options="code.firstAddressCode"
-            :loading="isLoad.firstAddressCode"
-            @select="onFirstAddress"
-            label="addressCodeName"
-            track-by="addressCode"
-            placeholder="전체"
-          ></multiselect>
-          <multiselect
-            v-if="firstAddressCode"
-            v-model="secondAddressCode"
-            :showLabels="false"
-            :searchable="false"
-            :options="code.secondAddressCode"
-            :loading="isLoad.secondAddressCode"
-            label="addressCodeName"
-            track-by="addressCode"
-            placeholder="전체"
+            :options="code.geoCode"
+            :loading="isLoad.geoCode"
+            :class="{'invalid': !valid.geoCode }"
+            track-by="code"
+            label="codeName"
+            style="width:156px"
+            placeholder="선택"
           ></multiselect>
         </b-form-fieldset>
 
@@ -93,8 +101,11 @@
             :options="code.searchDateType"
           ></multiselect>
 
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateFrom"></b-form-input> ~
-          <b-form-input type="date" class="form-date" v-model="searchItem.searchDateTo"></b-form-input>
+          <b-form-input type="date" class="form-date"
+                        v-model="searchItem.searchDateFrom"></b-form-input>
+          ~
+          <b-form-input type="date" class="form-date"
+                        v-model="searchItem.searchDateTo"></b-form-input>
 
           <b-button class="btn-day" @click="onCalendar('today')">오늘</b-button>
           <b-button class="btn-day" @click="onCalendar(7, 'days')">7일</b-button>
@@ -104,8 +115,10 @@
         </b-form-fieldset>
       </div>
       <div class="search-btn">
-        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i class="icon-reload"></i></b-button>
-        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i class="icon-magnifier"></i></b-button>
+        <b-button type="reset" variant="outline-secondary" v-b-tooltip.hover title="초기화"><i
+          class="icon-reload"></i></b-button>
+        <b-button type="button" variant="primary" @click="onSearch" v-b-tooltip.hover title="검색"><i
+          class="icon-magnifier"></i></b-button>
       </div>
     </b-form>
 
@@ -127,6 +140,7 @@
         @row-clicked="details"
       >
         <template slot="popUseYn" slot-scope="row">{{row.value? '사용':'미사용'}}</template>
+
       </b-table>
     </section>
 
@@ -161,17 +175,18 @@
 
   export default {
     name: 'pops',
-    data (){
+    data() {
       return {
         fields: {
           popId: {label: 'ID'},
           popName: {label: 'Pop Name', 'class': 'text-left'},
           popHostName: {label: 'Host Name(Prefix)', 'class': 'text-left'},
-          popAddress: {label: '주소', 'class': 'text-left'},
+          geoCodeName: {label: '지역'},
           qualitySolutionTeamCodeName: {label: '품솔팀'},
           createDateTime: {label: '등록일시'},
           modifyDateTime: {label: '수정일시'},
-          popUseYn: {label: '사용여부'}
+          popUseYn: {label: '사용여부'},
+          // processStateCodeName: {label: '배포상태'},
         },
         items: [],
         pageInfo: {
@@ -188,8 +203,7 @@
           searchType: 'popName',
           searchKeyword: null,
           qualitySolutionTeamCode: null,
-          firstAddressCode: null,
-          secondAddressCode: null,
+          geoCode: null,
           popUseYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
@@ -200,98 +214,106 @@
           searchType: [{
             code: 'popName',
             codeName: 'Pop Name'
-          },{
+          }, {
             code: 'popHostName',
             codeName: 'Host Name'
-          },{
+          }, {
             code: 'popId',
             codeName: 'ID'
           }],
           searchDateType: [{
             code: 'createDate',
             codeName: '등록일'
-          },{
+          }, {
             code: 'modifyDate',
             codeName: '수정일'
           }],
           qualitySolutionTeamCode: [],
-          firstAddressCode: [],
-          secondAddressCode: []
+          geoCode: [],
+          // distributeStateCode: []
+
         },
         isLoad: {
           qualitySolutionTeamCode: false,
-          firstAddressCode: false,
-          secondAddressCode: false
+          geoCode: true,
+          // distributeStateCode: []
         }
       }
     },
 
     computed: {
       searchType: {
-        get () {
+        get() {
           return this.code.searchType.find(obj => obj.code === this.searchItem.searchType) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.searchItem.searchType = newValue !== null ? newValue.code : null;
         }
       },
       searchDateType: {
-        get () {
+        get() {
           return this.code.searchDateType.find(obj => obj.code === this.searchItem.searchDateType) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
       qualitySolutionTeamCode: {
-        get () {
+        get() {
           return this.code.qualitySolutionTeamCode.find(obj => obj.code === this.searchItem.qualitySolutionTeamCode) || null;
         },
-        set (newValue) {
+        set(newValue) {
           this.searchItem.qualitySolutionTeamCode = newValue !== null ? newValue.code : null;
         }
       },
-      firstAddressCode: {
-        get () {
-          return this.code.firstAddressCode.find(obj => obj.addressCode === this.searchItem.firstAddressCode) || null;
+      geoCode: {
+        get() {
+          return this.code.geoCode.find(obj => obj.code === this.searchItem.geoCode) || null;
         },
-        set (newValue) {
-          this.searchItem.firstAddressCode = newValue !== null ? newValue.addressCode : null;
-        }
+        set(newValue) {
+          this.searchItem.geoCode = newValue !== null
+            ? newValue.code : null;
+        },
       },
-      secondAddressCode: {
-        get () {
-          return this.code.secondAddressCode.find(obj => obj.addressCode === this.searchItem.secondAddressCode) || null;
-        },
-        set (newValue) {
-          this.searchItem.secondAddressCode = newValue !== null ? newValue.addressCode : null;
-        }
-      }
+      // distributeStateCode: {
+      //   get() {
+      //     return this.code.geoCode.find(obj => obj.code === this.items.geoCode) || null;
+      //   },
+      //   set(newValue) {
+      //     this.items.geoCode = newValue !== null
+      //       ? newValue.code : null;
+      //   }
+      // },
     },
 
-    created (){
+    created() {
       // Pop List
       this.fetchList();
 
-      // 주소 Code
-      this.fetchAddress();
-
       // 품솔팀 Code
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'QUALITY_TEAM' }
-        })
+        q: {groupCode: 'QUALITY_TEAM'}
+      })
         .then((res) => {
           this.isLoad.qualitySolutionTeamCode = false;
           this.code.qualitySolutionTeamCode = res.data.items;
         });
+
+      // region Code
+      this.$https.get('/system/commonCode', {
+        q: {groupCode: 'GEO'}
+      }).then((res) => {
+        this.isLoad.geoCode = false;
+        this.code.geoCode = res.data.items;
+      });
     },
 
     methods: {
-      details (item) {
-        this.$router.push({ name: 'Pop 상세', params: { id: item.popId }})
+      details(item) {
+        this.$router.push({name: 'Pop 상세', params: {id: item.popId}})
       },
 
-      fetchList (params = {}){
+      fetchList(params = {}) {
         const defaultParams = {
           page: this.pageInfo.page,
           size: this.pageInfo.size,
@@ -305,27 +327,12 @@
           });
       },
 
-      fetchAddress (param =''){
-        this.$https.get('/pops/address', {
-            firstDepth: param
-          })
-          .then((res) => {
-            if (param === ''){
-              this.isLoad.firstAddressCode = false;
-              this.code.firstAddressCode = res.data.items;
-            } else {
-              this.isLoad.secondAddressCode = false;
-              this.code.secondAddressCode = res.data.items;
-            }
-          });
-      },
-
-      onCalendar (day, type){
+      onCalendar(day, type) {
         this.searchItem.searchDateTo = moment().format('YYYY-MM-DD')
 
-        if (day === 'today'){
+        if (day === 'today') {
           this.searchItem.searchDateFrom = moment().format('YYYY-MM-DD')
-        } else if (day === 'reset'){
+        } else if (day === 'reset') {
           this.searchItem.searchDateFrom = null;
           this.searchItem.searchDateTo = null;
         } else {
@@ -333,23 +340,23 @@
         }
       },
 
-      onSearch (){
+      onSearch() {
         this.queryParams = {};
 
         Object.keys(this.searchItem).forEach(key => {
-          if (this.searchItem[key] !== null && this.searchItem[key] !== ''){
+          if (this.searchItem[key] !== null && this.searchItem[key] !== '') {
             this.queryParams[key] = (key === 'popUseYn')
               ? (this.searchItem[key] === '사용')
               : this.searchItem[key];
           }
         });
 
-        this.fetchList({ page: 1 });
+        this.fetchList({page: 1});
       },
 
-      onReset (){
+      onReset() {
         Object.keys(this.searchItem).forEach((key) => {
-          if (key === 'searchType'){
+          if (key === 'searchType') {
             this.searchItem[key] = 'popName';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
@@ -361,19 +368,24 @@
         this.fetchList();
       },
 
-      onRowSelect (size){
-        this.fetchList({ page: 1, size });
+      // validation
+      valid() {
+        return {
+          qualitySolutionTeamCode: this.items.qualitySolutionTeamCode !== null,
+          dataCenterCode: this.items.dataCenterCode !== null,
+          geoCode: this.items.geoCode !== null
+        }
       },
 
-      onPagination (page){
-        this.fetchList({ page });
+      onRowSelect(size) {
+        this.fetchList({page: 1, size});
       },
 
-      onFirstAddress (obj){
-        this.fetchAddress(obj.addressCode)
+      onPagination(page) {
+        this.fetchList({page});
       },
 
-      excelDownload(){
+      excelDownload() {
         const queryParams = JSON.stringify(this.queryParams);
         const q = encodeURI(queryParams);
         return window.location.href = '/api/excel/pops/download?q=' + q;

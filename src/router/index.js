@@ -50,6 +50,30 @@ export default new Router({
             render (c) { return c('router-view') }
           },
           children: [
+            { path: 'serviceType',
+              name: 'ServiceType 관리',
+              component: lazyLoading('services/service/ServiceType')
+            },
+            {
+              path: 'serviceType/create',
+              name: 'ServiceType 등록',
+              component: lazyLoading('services/service/ServiceTypeCreate')
+            },
+            {
+              path: 'serviceType/:id',
+              name: 'ServiceType 상세',
+              redirect: '/service/servicetype/:id/default',
+              component: {
+                render (c) { return c('router-view') }
+              },
+              children: [
+                { path: 'default',
+                  title: '기본정보',
+                  props: true,
+                  component: lazyLoading('services/service/ServiceTypeDetailBase')
+                },
+              ]
+            },
             { path: 'service',
               name: 'Service 관리',
               component: lazyLoading('services/service/Service')
@@ -150,11 +174,6 @@ export default new Router({
                       title: 'Core Config',
                       props: true,
                       component: lazyLoading('configuration/edge/EdgeDetailCoreConfig')
-                    },
-                    { path: 'service',
-                      title: 'Service',
-                      props: true,
-                      component: lazyLoading('configuration/edge/EdgeDetailService')
                     }
                   ]
                 },
@@ -183,6 +202,11 @@ export default new Router({
                   path: 'cacheDeletions',
                   name: 'Cache Deletions',
                   component: lazyLoading('configuration/edge/CacheDeletions')
+                },
+                {
+                  path: 'diff',
+                  name: 'Diff Test',
+                  component: lazyLoading('configuration/edge/Diff')
                 }
               ]
             },
@@ -221,9 +245,14 @@ export default new Router({
                   component: lazyLoading('configuration/referrer/IpRestriction')
                 },
                 {
-                  path: 'geoIp',
-                  name: 'GEO IP',
-                  component: lazyLoading('configuration/referrer/GEOip')
+                  path: 'geoIpMiss',
+                  name: 'GeoIP Miss',
+                  component: lazyLoading('configuration/referrer/GeoIpMiss')
+                },
+                {
+                  path: 'geoIpHit',
+                  name: 'GeoIP Hit',
+                  component: lazyLoading('configuration/referrer/GeoIpHit')
                 },
                 {
                   path: 'onetime',
@@ -445,6 +474,11 @@ export default new Router({
                   component: lazyLoading('settings/notification/Notification')
                 },
                 {
+                  path: 'notification/create',
+                  name: 'Notification 등록',
+                  component: lazyLoading('settings/notification/NotificationCreate')
+                },
+                {
                   path: 'notification/:id',
                   name: 'Notification 상세',
                   props: true,
@@ -462,6 +496,22 @@ export default new Router({
                   component: lazyLoading('settings/notification/SendDetail')
                 },
               ]
+            },
+            {
+              path: 'widget',
+              name: 'Widget 관리',
+              component: lazyLoading('settings/widget/Widget')
+            },
+            {
+              path: 'widget/create',
+              name: 'Widget 등록',
+              component: lazyLoading('settings/widget/WidgetCreate')
+            },
+            {
+              path: 'widget/:id',
+              name: 'Widget 상세',
+              props: true,
+              component: lazyLoading('settings/widget/WidgetDetail')
             }
           ]
         },

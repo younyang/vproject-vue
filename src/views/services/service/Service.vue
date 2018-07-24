@@ -2,6 +2,7 @@
   <div class="animated fadeIn">
     <b-form class="searchBox" @reset="onReset">
       <div class="form-row">
+
         <b-form-fieldset
           label="검색어"
           class="inline"
@@ -20,14 +21,24 @@
 
         <b-form-fieldset
           label="Service Type"
-          class="label-lg"
+          class="inline label-lg"
           :horizontal="true">
           <multiselect
-            v-model="serviceTypeCode"
+            v-model="serviceTypeId"
             :showLabels="false"
             :searchable="false"
-            :options="code.serviceTypeCode"
-            :loading="isLoad.serviceTypeCode"
+            :options="code.serviceTypeId"
+            :loading="isLoad.serviceTypeId"
+            label="serviceTypeName"
+            track-by="serviceTypeId"
+            placeholder="전체"
+          ></multiselect>
+          <multiselect
+            v-model="domainPurposeCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.domainPurposeCode"
+            :loading="isLoad.domainPurposeCode"
             label="codeName"
             track-by="code"
             placeholder="전체"
@@ -71,6 +82,22 @@
             :showLabels="false"
             :searchable="false"
             :options="['사용', '미사용']"
+            placeholder="전체"
+          ></multiselect>
+        </b-form-fieldset>
+
+        <b-form-fieldset
+          label="배포상태"
+          class="label-lg"
+          :horizontal="true">
+          <multiselect
+            v-model="processStateCode"
+            :showLabels="false"
+            :searchable="false"
+            :options="code.processStateCode"
+            :loading="isLoad.processStateCode"
+            label="codeName"
+            track-by="code"
             placeholder="전체"
           ></multiselect>
         </b-form-fieldset>
@@ -174,12 +201,14 @@
           serviceId: {label: 'ID'},
           serviceName: {label: 'Service Name', 'class': 'text-left'},
           serviceTypeName: {label: 'Service Type', 'class': 'text-left'},
+          domainPurposeCodeName: {label: 'Member Type', 'class': 'text-left'},
           companyName: {label: 'Company'},
           cnameUseYn: {label: 'CNAME'},
           sslCertUseYn: {label: 'SSL 인증서'},
           createDateTime: {label: '등록일시'},
           modifyDateTime: {label: '수정일시'},
-          serviceUseYn: {label: '사용여부'}
+          serviceUseYn: {label: '사용여부'},
+          processStateCodeName: {label: '배포상태'},
         },
         items: [],
         pageInfo: {
@@ -195,13 +224,15 @@
         searchItem: {
           searchType: 'service',
           searchKeyword: null,
-          serviceTypeCode: null,
+          serviceTypeId: null,
+          domainPurposeCode: null,
           cnameUseYn: null,
           sslCertUseYn: null,
           serviceUseYn: null,
           searchDateType: 'createDate',
           searchDateFrom: null,
-          searchDateTo: null
+          searchDateTo: null,
+          processStateCode:null
         },
         code: {
           searchType: [{
@@ -218,10 +249,14 @@
             code: 'modifyDate',
             codeName: '수정일'
           }],
-          serviceTypeCode: []
+          serviceTypeId: [],
+          domainPurposeCode: [],
+          processStateCode: [],
         },
         isLoad: {
-          serviceTypeCode: false
+          serviceTypeId: false,
+          domainPurposeCode: false,
+          processStateCode: false,
         }
       }
     },
@@ -243,12 +278,28 @@
           this.searchItem.searchDateType = newValue !== null ? newValue.code : null;
         }
       },
-      serviceTypeCode: {
+      serviceTypeId: {
         get () {
-          return this.code.serviceTypeCode.find(obj => obj.code === this.searchItem.serviceTypeCode) || null;
+          return this.code.serviceTypeId.find(obj => obj.serviceTypeId === this.searchItem.serviceTypeId) || null;
         },
         set (newValue) {
-          this.searchItem.serviceTypeCode = newValue !== null ? newValue.code : null;
+          this.searchItem.serviceTypeId = newValue !== null ? newValue.serviceTypeId : null;
+        }
+      },
+      domainPurposeCode: {
+        get () {
+          return this.code.domainPurposeCode.find(obj => obj.code === this.searchItem.domainPurposeCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.domainPurposeCode = newValue !== null ? newValue.code : null;
+        }
+      },
+      processStateCode: {
+        get () {
+          return this.code.processStateCode.find(obj => obj.code === this.searchItem.processStateCode) || null;
+        },
+        set (newValue) {
+          this.searchItem.processStateCode = newValue !== null ? newValue.code : null;
         }
       },
     },
@@ -256,12 +307,28 @@
     created (){
       this.fetchList();
 
+      this.$https.get('/serviceTypeFilterList', {})
+        .then((res) => {
+          this.isLoad.serviceTypeId = false;
+          this.code.serviceTypeId = res.data.items;
+        });
+
       this.$https.get('/system/commonCode', {
-          q: { groupCode: 'SERVICE_TYPE' }
+         q: { groupCode: 'DOMAIN_PUPOSE' }
+       })
+       .then((res) => {
+         this.isLoad.domainPurposeCode = false;
+         this.code.domainPurposeCode = res.data.items.filter(({code}) => {
+           return code.split('_')[2].length === 2
+         });
+       });
+
+       this.$https.get('/system/commonCode', {
+          q: { groupCode: 'PROCESS_STATE' }
         })
         .then((res) => {
-          this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items.filter(({code}) => {
+          this.isLoad.processStateCode = false;
+          this.code.processStateCode = res.data.items.filter(({code}) => {
             return code.split('_')[2].length === 2
           });
         });
@@ -320,10 +387,13 @@
 
       onReset (){
         Object.keys(this.searchItem).forEach((key) => {
+
           if (key === 'searchType'){
             this.searchItem[key] = 'service';
           } else if (key === 'searchDateType') {
             this.searchItem[key] = 'createDate';
+          } else if (key === 'serviceTypeId') {
+            this.searchItem[key] = null;
           } else {
             this.searchItem[key] = null;
           }

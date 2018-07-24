@@ -23,7 +23,7 @@
         ></b-form-input>
       </b-form-fieldset>
 
-      <!-- PoP 선택 -->
+      <!-- PoP 선택
       <b-form-fieldset
         label="PoP 선택<i class='require'>*</i>"
         :invalid-feedback="$valid.msg.select"
@@ -40,6 +40,7 @@
           placeholder="Select PoP"
         ></multiselect>
       </b-form-fieldset>
+      -->
 
       <!-- 구분 -->
       <b-form-fieldset
@@ -58,15 +59,15 @@
         :invalid-feedback="$valid.msg.select"
         :horizontal="true">
         <template slot="label">
-          Service Type<i class="require">*</i>
+          Service Type / Protocol<i class="require">*</i>
         </template>
 
         <multiselect
           v-model="serviceTypeCode"
           class="multiple"
           :class="{'invalid': !valid.serviceTypeCode }"
-          track-by="code"
-          label="codeName"
+          track-by="serviceTypeAndProtocolCode"
+          label="serviceTypeName"
           :multiple="true"
           :showLabels="false"
           :options="code.serviceTypeCode"
@@ -75,6 +76,77 @@
           @close="onSelectAfter"
           placeholder="Select service type"
         ></multiselect>
+      </b-form-fieldset>
+
+      <!-- 지역 -->
+      <b-form-fieldset
+        label="지역<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <multiselect
+          v-model="geoCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.geoCode"
+          :loading="isLoad.geoCode"
+          :class="{'invalid': !valid.geoCode }"
+          track-by="code"
+          label="codeName"
+          style="width:156px"
+          placeholder="선택"
+        ></multiselect>
+      </b-form-fieldset>
+
+      <!-- 주소 -->
+      <b-form-fieldset
+        label="주소<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.select"
+        :horizontal="true">
+        <multiselect
+          v-model="popCtprvnCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popCtprvnCode"
+          :loading="isLoad.popCtprvnCode"
+          :class="{'invalid': !valid.popCtprvnCode }"
+          @select="onFirstAddress"
+          track-by="addressCode"
+          label="addressCodeName"
+          class="inline"
+          style="width:156px"
+          placeholder="선택"
+        ></multiselect>
+
+        <multiselect
+          v-if="popCtprvnCode"
+          v-model="popSigCode"
+          :showLabels="false"
+          :searchable="false"
+          :options="code.popSigCode"
+          :loading="isLoad.popSigCode"
+          :class="{'invalid': !valid.popSigCode }"
+          track-by="addressCode"
+          label="addressCodeName"
+          placeholder="선택"
+          class="inline"
+          style="width: 160px"
+        ></multiselect>
+      </b-form-fieldset>
+
+      <!-- Bandwidth -->
+      <b-form-fieldset
+        label="Bandwidth<i class='require'>*</i>"
+        :invalid-feedback="$valid.msg.require"
+        :horizontal="true">
+        <cleave
+          v-model="items.bandwidth"
+          :value.sync="items.bandwidth"
+          style="width: 156px;"
+          class="form-control"
+          :options="{ numeral: true, numeralPositiveOnly: true, numeralDecimalScale: 0 }"
+          required
+        ></cleave>
+        &nbsp Gbps
       </b-form-fieldset>
 
       <!-- Domain
@@ -130,7 +202,7 @@
 <script>
   import cSwitch from '@/components/Switch'
   export default {
-    name: 'referrers',
+    name: 'edgeCreate',
     components: {
       cSwitch
     },
@@ -143,15 +215,25 @@
           //edgeDomainName : null,
           edgeRelayYn : false,
           edgeUseYn : true,
-          serviceTypeCode: []
+          serviceTypeCode: [],
+          geoCode: null,
+          popCtprvnCode : null,
+          popSigCode : null,
+          bandwidth : 0
         },
         code: {
+          popCtprvnCode: [],
+          popSigCode: [],
           popId: [],
-          serviceTypeCode: []
+          serviceTypeCode: [],
+          geoCode: []
         },
         isLoad: {
+          popCtprvnCode: true,
+          popSigCode: true,
           popId: true,
-          serviceTypeCode: true
+          serviceTypeCode: true,
+          geoCode: true
         },
 
         inValidForm: false
@@ -159,6 +241,22 @@
     },
 
     computed: {
+      popCtprvnCode: {
+        get () {
+          return this.code.popCtprvnCode.find(obj => obj.addressCode === this.items.popCtprvnCode) || null;
+        },
+        set (newValue) {
+          this.items.popCtprvnCode = newValue !== null ? newValue.addressCode : null;
+        }
+      },
+      popSigCode: {
+        get () {
+          return this.code.popSigCode.find(obj => obj.addressCode === this.items.popSigCode) || null;
+        },
+        set (newValue) {
+          this.items.popSigCode = newValue !== null ? newValue.addressCode : null;
+        }
+      },
       popId: {
         get () {
           return this.code.popId.find(obj => obj.popId === this.items.popId) || null;
@@ -167,15 +265,23 @@
           this.items.popId = newValue !== null ? newValue.popId : null;
         }
       },
+      geoCode: {
+        get () {
+          return this.code.geoCode.find(obj => obj.code === this.items.geoCode) || null;
+        },
+        set (newValue) {
+          this.items.geoCode = newValue !== null ? newValue.code : null;
+        }
+      },
       serviceTypeCode: {
         get () {
           return this.items.serviceTypeCode.length > 0
-            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.code === val))
+            ? this.items.serviceTypeCode.map(val => this.code.serviceTypeCode.find(obj => obj.serviceTypeAndProtocolCode === val))
             : [];
         },
         set (newValue) {
           this.items.serviceTypeCode = newValue.length > 0
-            ? newValue.map(obj => obj.code)
+            ? newValue.map(obj => obj.serviceTypeAndProtocolCode)
             : [];
         }
       },
@@ -189,7 +295,10 @@
       valid (){
         return {
           popId: this.items.popId !== null,
-          serviceTypeCode: this.items.serviceTypeCode.length
+          geoCode: this.items.geoCode !== null,
+          serviceTypeCode: this.items.serviceTypeCode.length,
+          popCtprvnCode: this.items.popCtprvnCode !== null,
+          popSigCode: this.items.popSigCode !== null
         }
       },
 
@@ -202,27 +311,33 @@
     },
 
     created (){
+
       if (this.$route.query.q === undefined){
         alert('잘못된 접근입니다')
         this.$router.push({ name: 'Edge 관리' })
       }
+
+      // 주소 Code
+      this.fetchAddress();
 
       const edgeId = JSON.parse(this.$route.query.q).id;
 
       this.$https.get(`/edges/${edgeId}`)
         .then((res) => {
           const serviceTypeCode = res.data.items.serviceTypeCode !== null ? res.data.items.serviceTypeCode : [];
-          this.items = {...res.data.items, serviceTypeCode }
+          res.data.items.bandwidth = 0
+          res.data.items.popCtprvnCode = null
+          res.data.items.popSigCode = null
+          res.data.items.geoCode = null
+          this.items = {...res.data.items, serviceTypeCode}
         });
 
       // Service Type Code
-      this.$https.get('/system/commonCode', {
-          q: { groupCode: 'SERVICE_TYPE' }
-        })
+      this.$https.get('/edges/serviceTypeAndProtocol')
         .then((res) => {
-          this.isLoad.serviceTypeCode = false;
-          this.code.serviceTypeCode = res.data.items;
-        });
+          this.isLoad.serviceTypeCode = false
+          this.code.serviceTypeCode = res.data.items
+        })
 
       // PoP List
       this.$https.get('/pops')
@@ -230,29 +345,40 @@
           this.isLoad.popId = false;
           this.code.popId = res.data.items;
         });
+
+      // GEO List
+      this.$https.get('/system/commonCode', {
+          q: { groupCode: 'GEO' }
+        })
+        .then((res) => {
+          this.isLoad.geoCode = false;
+          this.code.geoCode = res.data.items;
+        });
     },
 
     methods: {
       onSubmit (){
         this.items.edgeRelayYn = (this.items.edgeRelayName === 'Relay');
         this.items.edgeUseYn = true;
-        const { edgeId, popId, edgeRelayYn, edgeUseYn, serviceTypeCode } = this.items;
-        const validate = this.$valid.all({ popId, serviceTypeCode });
+        const { edgeId, popCtprvnCode, popSigCode, bandwidth, edgeRelayYn, edgeUseYn, serviceTypeCode, geoCode } = this.items;
+        const validate = this.$valid.all({ serviceTypeCode, popCtprvnCode, popSigCode, bandwidth, geoCode });
         this.inValidForm = !validate;
 
         // POST
-        this.$https.post('/edges', {
-            edgeId, popId, edgeRelayYn, edgeUseYn, serviceTypeCode
-          })
-          .then(() => {
-            this.$router.push({
-              name: 'Edge 상세',
-              params: { id: this.items.edgeId }
+        if (validate){
+          this.$https.post('/edges', {
+              edgeId, popCtprvnCode, popSigCode, bandwidth, edgeRelayYn, edgeUseYn, serviceTypeCode, geoCode
             })
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+            .then(() => {
+              this.$router.push({
+                name: 'Edge 상세',
+                params: { id: this.items.edgeId }
+              })
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       },
 
       onChangeEdgeRelay (value){
@@ -269,12 +395,31 @@
           this.serviceTypeCode = [rtsp];
         }
       },
-
+      /*
       fetchDomain (){
         this.$https.get('/edges/domain')
           .then((res) => {
             this.items.edgeDomainName = res.data.items.domain;
           });
+      },
+      */
+      fetchAddress (param =''){
+        this.$https.get('/pops/address', {
+          firstDepth: param
+        })
+          .then((res) => {
+            if (param === ''){
+              this.isLoad.popCtprvnCode = false;
+              this.code.popCtprvnCode = res.data.items;
+            } else {
+              this.isLoad.popSigCode = false;
+              this.code.popSigCode = res.data.items;
+            }
+          });
+      },
+
+      onFirstAddress (obj){
+        this.fetchAddress(obj.addressCode)
       }
     }
   }

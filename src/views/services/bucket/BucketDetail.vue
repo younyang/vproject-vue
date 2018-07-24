@@ -538,7 +538,7 @@
           size: this.users.pageInfo.size,
           q: this.users.queryParams
         };
-        this.$https.get('/setting/operators', {...defaultParams, ...params})
+        this.$https.get('/setting/management/operators', {...defaultParams, ...params})
           .then((res) => {
             this.users.items = res.data.items;
             this.users.pageInfo = res.data.pageInfo;
