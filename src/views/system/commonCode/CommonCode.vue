@@ -56,7 +56,6 @@
         <ag-grid
           :fields="fields"
           :items="items"
-          :pageSize="pageSize"
           :onRowSelected="onRowSelected"
           :onRowSubmit="onRowSubmit"
         ></ag-grid>
@@ -85,6 +84,7 @@
             headerName: '그룹코드 명',
             field: 'groupCodeName',
             cellRendererFramework: 'EditInput',
+            cellClass: 'text-left'
           },
           {
             headerName: '사용여부',
@@ -96,6 +96,7 @@
             headerName: '설명',
             field: 'groupCodeDesc',
             cellRendererFramework: 'EditInput',
+            cellClass: 'text-left'
           },
           { headerName: '등록일', field: 'createDateTime' },
           { headerName: '수정일', field: 'modifyDateTime' },
@@ -106,10 +107,6 @@
           }
         ],
         items: [],
-
-        pageSize: 10,
-
-        pageOptions: [10, 20, 50, 100],
 
         queryParams: {},
 

@@ -1,7 +1,11 @@
 <template>
-  <div>
+  <div :style="`height: ${height}`">
     <ag-grid-vue
       class="ag-theme-balham"
+      headerHeight="40"
+      floatingFiltersHeight="40"
+      pivotHeaderHeight="40"
+      rowHeight="36"
       :gridReady="onReady"
       :gridOptions="gridOptions"
       :enableColResize="enableColResize"
@@ -9,13 +13,62 @@
       :rowSelection="rowSelection"
       :selectionChanged="rowSelected"
       :sortChanged="sortChange"
-      :pagination="pagination"
-      :paginationAutoPageSize="autoPageSize"
-      :paginationSetPageSize="pageSize"
       :columnDefs="fields"
       :rowData="rowData"
+      :pagination="pagination"
+      :paginationAutoPageSize="true"
+      :suppressPaginationPanel="true"
+      :suppressScrollOnNewData="true"
+      :onPaginationChanged="onPaginationChanged"
+
     >
     </ag-grid-vue>
+    <div class="grid-pagination" v-if="pagination">
+      <b-button
+        type="button"
+        variant="in-table-icon"
+        v-b-tooltip.hover
+        :title="`First Page`"
+        @click="onPageFirst"
+      ><i class="fa fa-angle-double-left"></i></b-button>
+      <b-button
+        type="button"
+        variant="in-table-icon"
+        v-b-tooltip.hover
+        :title="`Prev Page`"
+        @click="onPagePrev"
+      ><i class="fa fa-angle-left"></i></b-button>
+      <b-form-input
+        type="text"
+        :value="currentPage"
+        @keydown.native="onPageInput"
+      ></b-form-input>
+      <span class="dash"> / </span>
+      <span class="totalCount">{{ totalPage }}</span>
+      <b-button
+        type="button"
+        variant="in-table-icon"
+        v-b-tooltip.hover
+        :title="`Next Page`"
+        @click="onPageNext"
+      ><i class="fa fa-angle-right"></i></b-button>
+      <b-button
+        type="button"
+        variant="in-table-icon"
+        v-b-tooltip.hover
+        :title="`Last Page`"
+        @click="onPageLast"
+      ><i class="fa fa-angle-double-right"></i></b-button>
+      <multiselect
+        :value="pageSize"
+        :allowEmpty="false"
+        :showLabels="false"
+        :searchable="false"
+        :options="pageOptions"
+        @input="onPageSize"
+      ></multiselect>
+      <span class="text">items per page</span>
+    </div>
   </div>
 </template>
 
@@ -60,10 +113,6 @@ export default {
     autoPageSize: {
       type: Boolean,
       default: true
-    },
-    pageSize: {
-      type: Number,
-      default: 10
     },
     fields: {
       type: Array,
@@ -167,11 +216,22 @@ export default {
           isEdit: false,
           ...obj
         }));
+    },
+
+    currentPage (){
+      return this.gridApi ? this.gridApi.paginationGetCurrentPage() + 1 : 1
+    },
+
+    totalPage (){
+      return this.gridApi ? this.gridApi.paginationGetTotalPages() : 1
     }
   },
 
   data (){
     return {
+      height: '100%',
+      pageSize: 10,
+      pageOptions: [10, 20, 50, 100],
       gridApi: null,
       gridOptions: null
     }
@@ -191,6 +251,9 @@ export default {
     onReady (params){
       this.gridApi = params.api;
       this.gridApi.sizeColumnsToFit();
+      if (this.pagination){
+        this.onPageSize(this.pageSize, true);
+      }
     },
 
     rowSelected (){
@@ -199,6 +262,47 @@ export default {
         this.onRowSelected(selectedRow)
       }
     },
+
+    onPaginationChanged (){
+      console.log('onPaginationChanged')
+    },
+
+    onPageSize (value, isInit = false){
+      this.height = (window.navigator.msSaveBlob) ?
+        `${(value) * 36 + 58}px` : // IE height
+        `${(value) * 36 + 42}px`;  // Other browser height
+      this.gridApi.paginationSetPageSize(value);
+      if (!isInit){
+        this.pageSize = value;
+      }
+    },
+
+    onPageInput (event){
+      const beforePage = this.currentPage;
+      if (event.key === 'Enter'){
+        const value = Number(event.target.value);
+        const goPage = (isNaN(value)) ? beforePage : (value > 0) ? value : 1;
+        this.gridApi.paginationGoToPage(goPage - 1);
+      }
+    },
+
+    onPageFirst () {
+      this.gridApi.paginationGoToFirstPage();
+    },
+
+    onPageLast () {
+      this.gridApi.paginationGoToLastPage();
+    },
+
+    onPageNext () {
+      this.gridApi.paginationGoToNextPage();
+    },
+
+    onPagePrev () {
+      this.gridApi.paginationGoToPreviousPage();
+    },
+
+
 
     sortChange (){
 /*
