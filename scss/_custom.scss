@@ -926,6 +926,10 @@ section.board {
       border: 0;
     }
 
+    &.scroll .ag-root {
+      border-bottom: 1px solid $line-color;
+    }
+
     .ag-header-row {
       border-bottom: 0;
     }
@@ -1033,6 +1037,8 @@ section.board {
   .grid-pagination {
     font-size: 12px;
     padding: 10px 0;
+    margin-top: -3px;
+    border-top: 1px solid $border-color;
     border-bottom: 1px solid $border-color;
 
     > span {
@@ -1373,6 +1379,37 @@ section.board {
       display: inline-block;
       margin: 0;
     }
+  }
+}
+
+
+.addCodeBox {
+  border-radius: 5px;
+  border: 1px solid #cdd8dd;
+  background: #fff;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+
+  .col-form-legend {
+    font-size: 12px;
+    padding-bottom: 3px;
+  }
+  input.form-control {
+    height: 24px;
+    min-height: 24px;
+    font-size: 12px;
+  }
+  .invalid-feedback {
+    font-size: 11px;
+  }
+
+  > .form-row > .form-group {
+    margin-bottom: 3px;
+  }
+
+  .add-btn {
+    text-align: right;
+    padding-top: 20px;
   }
 }
 

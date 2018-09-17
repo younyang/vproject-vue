@@ -1,28 +1,32 @@
 <template>
-  <div :style="`height: ${height}`">
-    <ag-grid-vue
-      class="ag-theme-balham"
-      headerHeight="40"
-      floatingFiltersHeight="40"
-      pivotHeaderHeight="40"
-      rowHeight="36"
-      :gridReady="onReady"
-      :gridOptions="gridOptions"
-      :enableColResize="enableColResize"
-      :enableSorting="enableSorting"
-      :rowSelection="rowSelection"
-      :selectionChanged="rowSelected"
-      :sortChanged="sortChange"
-      :columnDefs="fields"
-      :rowData="rowData"
-      :pagination="pagination"
-      :paginationAutoPageSize="true"
-      :suppressPaginationPanel="true"
-      :suppressScrollOnNewData="true"
-      :onPaginationChanged="onPaginationChanged"
-
-    >
-    </ag-grid-vue>
+  <div>
+    <div :style="`height: ${height}`">
+      <ag-grid-vue
+        class="ag-theme-balham"
+        headerHeight="40"
+        floatingFiltersHeight="40"
+        pivotHeaderHeight="40"
+        rowHeight="36"
+        :class="{'scroll': !pagination }"
+        :gridReady="onReady"
+        :gridOptions="gridOptions"
+        :enableColResize="enableColResize"
+        :enableSorting="enableSorting"
+        :rowSelection="rowSelection"
+        :selectionChanged="rowSelected"
+        :sortChanged="sortChange"
+        :columnDefs="fields"
+        :rowData="rowData"
+        :pagination="pagination"
+        :paginationAutoPageSize="true"
+        :suppressPaginationPanel="true"
+        :suppressScrollOnNewData="true"
+        :rowDragManaged="rowDragManaged"
+        :animateRows="animateRows"
+        :rowDragEnd="onRowDragEnd"
+      >
+      </ag-grid-vue>
+    </div>
     <div class="grid-pagination" v-if="pagination">
       <b-button
         type="button"
@@ -106,6 +110,10 @@ export default {
       type: Function,
       default: () => {}
     },
+    onRowDragEnd: {
+      type: Function,
+      default: () => {}
+    },
     pagination: {
       type: Boolean,
       default: true
@@ -113,6 +121,10 @@ export default {
     autoPageSize: {
       type: Boolean,
       default: true
+    },
+    dragging : {
+      type: Boolean,
+      default: false
     },
     fields: {
       type: Array,
@@ -123,6 +135,10 @@ export default {
       type: Array,
       require: true,
       default: []
+    },
+    fixHeight: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -149,7 +165,7 @@ export default {
 </div>`,
       methods: {
         onChange (value){
-          console.log(value)
+          this.params.setValue(value);
         }
       }
     },
@@ -198,7 +214,6 @@ export default {
         },
 
         onSubmit (){
-          this.params.data.isEdit = false;
           this.params.context.componentParent.onRowSubmit(this.params.data);
         },
 
@@ -229,9 +244,11 @@ export default {
 
   data (){
     return {
-      height: '100%',
+      height: '320px',
       pageSize: 10,
       pageOptions: [10, 20, 50, 100],
+      rowDragManaged: false,
+      animateRows: false,
       gridApi: null,
       gridOptions: null
     }
@@ -243,6 +260,13 @@ export default {
       context: {
         componentParent: this
       }
+    };
+    if (this.dragging){
+      this.rowDragManaged = true;
+      this.animateRows = true;
+    }
+    if (this.fixHeight > 0){
+      this.height = `${this.fixHeight}px`;
     }
   },
 
